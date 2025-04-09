@@ -37,10 +37,10 @@ def show_upload_and_run():
         <h4 style="margin-top: 0;">What data do I need?</h4>
         <p>For best results, your data should include:</p>
         <ul>
-            <li><strong>Date column:</strong> Weekly or monthly time periods</li>
+            <li><strong>Date column:</strong> Weekly Data ( It's better to have 3 years of Data)</li>
             <li><strong>Revenue/Sales column:</strong> What you're trying to measure</li>
-            <li><strong>Marketing channels:</strong> Spend and/or metrics for each channel</li>
-            <li><strong>Control variables:</strong> Factors like seasonality, pricing, etc. (optional)</li>
+            <li><strong>Marketing channels:</strong> Spend and metrics (like Impression) for each channel</li>
+            <li><strong>Control variables:</strong> Factors like seasonality, pricing, etc. (optional but it's better to have)</li>
         </ul>
         <p>Excel or CSV files are accepted.</p>
         </div>
@@ -448,10 +448,8 @@ def show_upload_and_run():
                     st.markdown("### Download Your Model")
                     st.markdown("""
                     <div style="background-color: #f0f7ff; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
-                    <p><strong>Important:</strong> Download your model file to save your results. You'll need this file if you want to:
+                    <p><strong>⚠️ Important:</strong> Download your model file to save your results. You'll need this file if you want to:
                     <ul>
-                        <li>Continue your analysis later</li>
-                        <li>Share your model with colleagues</li>
                         <li>Avoid having to retrain the model</li>
                     </ul>
                     </p>
@@ -472,9 +470,15 @@ def show_upload_and_run():
                     - Visualize your model results
                     """)
                     
-                    if st.button("Continue to Insights", use_container_width=True):
-                        st.session_state.page = 'step2'
-                        st.experimental_rerun()  # Use experimental_rerun() for compatibility
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        if st.button("⬅️ Back to Home", use_container_width=True):
+                            st.session_state.page = 'home'
+                            st.experimental_rerun()
+                    with col2:
+                        if st.button("Continue to Insights ➡️", use_container_width=True):
+                            st.session_state.page = 'step2'
+                            st.rerun()
                 
                 except Exception as e:
                     st.error(f"An error occurred during model execution: {str(e)}")
@@ -524,4 +528,4 @@ def show_upload_and_run():
             with col2:
                 if st.button("Continue to Insights ➡️", use_container_width=True):
                     st.session_state.page = 'step2'
-                    st.experimental_rerun()
+                    st.rerun()
