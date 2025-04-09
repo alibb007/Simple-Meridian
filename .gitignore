@@ -1,4 +1,4 @@
-.config.toml
+./config.toml
 
 # Optionally, ignore other common files
 *.pyc
