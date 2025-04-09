@@ -1,0 +1,7 @@
+.config.toml
+
+# Optionally, ignore other common files
+*.pyc
+__pycache__/
+.env
+*.env
