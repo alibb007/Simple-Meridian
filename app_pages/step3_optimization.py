@@ -31,6 +31,23 @@ try:
 except ImportError:
     MERIDIAN_AVAILABLE = False
 
+def format_in_million_or_billion(value):
+    """
+    Converts a raw currency value into a string formatted in millions or billions.
+    If the value (in millions) is 1000 or more, it is converted to billions.
+    """
+    try:
+        numeric_value = float(value)
+    except (ValueError, TypeError):
+        numeric_value = 0.0
+
+    value_m = numeric_value / 1_000_000.0  # Convert to millions
+    if abs(value_m) >= 1000:
+        # Convert millions to billions if value in millions is >= 1000
+        return f"{value_m / 1000:.3f}B"  
+    else:
+        return f"{value_m:.1f}M"      
+    
 def load_model_file(file_content):
     """Load model from file"""
     with tempfile.NamedTemporaryFile(delete=False, suffix='.pkl') as tmp_file:
@@ -533,14 +550,18 @@ def display_optimization_results(optimization_results):
             
             # ========== SCENARIO METRICS (PART 2) ========== #
             # Grab integer/more readable forms for top-line display
-            budget_value = int(round(non_optimized_data.attrs['budget'] / 1_000_000))
-            roi_value = float(non_optimized_data.attrs['total_roi'])
-            opt_roi_value = float(optimized_data.attrs['total_roi'])
-            roi_diff = opt_roi_value - roi_value
-            inc_rev_value = int(round(non_optimized_data.attrs['total_incremental_outcome'] / 1_000_000))
-            opt_inc_rev_value = int(round(optimized_data.attrs['total_incremental_outcome'] / 1_000_000))
-            inc_rev_diff = (optimized_data.attrs['total_incremental_outcome'] 
-                            - non_optimized_data.attrs['total_incremental_outcome']) / 1_000_000
+            budget_value = format_in_million_or_billion(non_optimized_data.attrs['budget'])
+            opt_budget_value = format_in_million_or_billion(optimized_data.attrs['budget'])
+
+            inc_rev_value = format_in_million_or_billion(non_optimized_data.attrs['total_incremental_outcome'])
+            opt_inc_rev_value = format_in_million_or_billion(optimized_data.attrs['total_incremental_outcome'])
+
+            # For the difference, first compute it, then format:
+            raw_inc_rev_diff = (
+                optimized_data.attrs['total_incremental_outcome'] 
+                - non_optimized_data.attrs['total_incremental_outcome']
+            )
+            inc_rev_diff = format_in_million_or_billion(raw_inc_rev_diff)
         
             
             st.markdown(f"""
@@ -567,17 +588,19 @@ def display_optimization_results(optimization_results):
                     <div style="display: flex; justify-content: space-around; align-items: center;">
                         <div style="width: 40%;">
                             <p style="font-size: 1rem; color: #666; margin: 0;">Non-optimized</p>
-                            <p style="font-size: 2rem; font-weight: bold; margin: 5px 0 0;">${budget_value}M</p>
+                            <!-- Use ${budget_value} as-is -->
+                            <p style="font-size: 2rem; font-weight: bold; margin: 5px 0 0;">${budget_value}</p>
                         </div>
                         <div style="width: 20%; text-align: center;">
                             <p style="font-size: 2rem; color: #888; margin: 0;">→</p>
                         </div>
                         <div style="width: 40%;">
                             <p style="font-size: 1rem; color: #666; margin: 0;">Optimized</p>
-                            <p style="font-size: 2rem; font-weight: bold; margin: 5px 0 0;">${budget_value}M</p>
+                            <!-- Use ${opt_budget_value} here, no extra 'M' -->
+                            <p style="font-size: 2rem; font-weight: bold; margin: 5px 0 0;">${opt_budget_value}</p>
                         </div>
                     </div>
-                    <p style="font-size: 3rem;; font-weight: bold; color: #722ed1; margin-top: 10px;">$0 change</p>
+                    <p style="font-size: 3rem; font-weight: bold; color: #722ed1; margin-top: 10px;">$0 change</p>
                 </div>
                 """, unsafe_allow_html=True)
 
@@ -593,21 +616,25 @@ def display_optimization_results(optimization_results):
                     <div style="display: flex; justify-content: space-around; align-items: center;">
                         <div style="width: 40%;">
                             <p style="font-size: 1rem; color: #666; margin: 0;">Non-optimized</p>
-                            <p style="font-size: 2rem; font-weight: bold; margin: 5px 0 0;">${inc_rev_value}M</p>
+                            <p style="font-size: 2rem; font-weight: bold; margin: 5px 0 0;">${inc_rev_value}</p>
                         </div>
                         <div style="width: 20%; text-align: center;">
                             <p style="font-size: 2rem; color: #888; margin: 0;">→</p>
                         </div>
                         <div style="width: 40%;">
                             <p style="font-size: 1rem; color: #666; margin: 0;">Optimized</p>
-                            <p style="font-size: 2rem; font-weight: bold; margin: 5px 0 0;">${opt_inc_rev_value}M</p>
+                            <p style="font-size: 2rem; font-weight: bold; margin: 5px 0 0;">${opt_inc_rev_value}</p>
                         </div>
                     </div>
-                    <p style="font-size: 3rem;; font-weight: bold; color: #52c41a; margin-top: 10px;">+${inc_rev_diff:.1f}M</p>
+                    <!-- No extra 'M' here either; just show whatever inc_rev_diff is -->
+                    <p style="font-size: 3rem; font-weight: bold; color: #52c41a; margin-top: 10px;">+{inc_rev_diff}</p>
                 </div>
                 """, unsafe_allow_html=True)
 
             with col3:
+                roi_value = float(non_optimized_data.attrs.get('total_roi', 0))
+                opt_roi_value = float(optimized_data.attrs.get('total_roi', 0))
+                roi_diff = opt_roi_value - roi_value
                 st.markdown(f"""
                 <div style="
                     background: linear-gradient(135deg, #ffffff, #e6f7ff);
@@ -984,16 +1011,30 @@ def display_optimization_results(optimization_results):
                         arrow = "→"
                     
                     # Create recommendation card
+                    
                     rec_card = f"""
                     <div style="border-left: 5px solid {color}; padding: 15px; margin-bottom: 15px; background-color: #f8f9fa; border-radius: 4px;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <h4 style="margin: 0;">{change['channel']}</h4>
-                            <span style="font-weight: bold; color: {color}; font-size: 1.2rem;">{arrow} {abs(change['diff_pct']):.1f}%</span>
+                            <span style="font-weight: bold; color: {color}; font-size: 1.2rem;">{arrow}</span>
                         </div>
                         <p style="margin: 10px 0 5px 0;"><strong>{recommendation}</strong></p>
-                        <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; position: relative;">
                             <span>Current: ${change['current']:,.0f}</span>
-                            <span>→</span>
+                            <!-- Container for arrow + difference above it -->
+                           <span style="position: relative; margin: 0 12px;">
+                            <div style="
+                                position: absolute;
+                                top: -18px;
+                                left: 50%;
+                                transform: translateX(-50%);
+                                font-size: 1.0rem;
+                                color: {color};
+                                font-weight: bold;">
+                                ${change['diff']:,.0f}
+                            </div>
+                            →
+                        </span>
                             <span>Optimized: ${change['optimized']:,.0f}</span>
                         </div>
                     </div>
