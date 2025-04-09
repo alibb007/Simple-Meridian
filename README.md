@@ -71,7 +71,7 @@ Simple Meridian is a no-code application that makes powerful marketing analytics
 
 ```bash
 # Clone the repository
-git clone https://github.com/alibb007/simple-meridian.git
+git clone **https://github.com/alibb007/simple-meridian.git**
 cd Simple-Meridian
 
 # Create virtual environment
