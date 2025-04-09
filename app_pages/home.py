@@ -13,7 +13,7 @@ def show_home():
         st.image(logo_path, width=200)
     with col2:
         st.title("Simple Meridian")
-        st.subheader("Marketing Impact Analysis Made Simple")
+     
     
     st.markdown("---")
     
@@ -31,7 +31,7 @@ def show_home():
     * **Shows** which channels give the best return on investment
     * **Recommends** the optimal budget allocation
     
-    ### 🚀 Just Three Simple Steps:
+    ###  In Just Three Simple Steps:
     """, unsafe_allow_html=True)
     
     # Workflow steps - simplified to 3 steps
@@ -40,7 +40,7 @@ def show_home():
     workflow_steps = [
         ("1. Upload & Run", "Upload your marketing data and let the system analyze it", "📊"),
         ("2. Insights", "See which channels are working and why", "💡"),
-        ("3. Optimization", "Get recommendations on how to improve your budget allocation", "📈"),
+        ("3. Optimization", "Get recommendations on how to improve your budget allocation", "💰"),
     ]
     
     for i, (col, (title, desc, icon)) in enumerate(zip(workflow_cols, workflow_steps)):
@@ -54,9 +54,11 @@ def show_home():
             """, unsafe_allow_html=True)
             
             # Add connecting arrows between steps (except for the last one)
-            if i < len(workflow_steps) - 1:
-                st.markdown("""
-                <div style="text-align: center; margin-top: 80px; font-size: 24px;">➡️</div>
+            if i < len(workflow_steps) :
+                # Use the arrow icon by default, but for the last connection use 💸
+                arrow_icon = "💸" if i == len(workflow_steps) - 1 else "➡️"
+                st.markdown(f"""
+                <div style="text-align: center; margin-top: 80px; font-size: 24px;">{arrow_icon}</div>
                 """, unsafe_allow_html=True)
     
     st.markdown("---")
@@ -85,15 +87,14 @@ def show_home():
     """)
     
     # Available Datasets section header
-    st.markdown("""
-    ## Try with Sample Data
-    """)
+    st.markdown('<h2>Try with Sample Data</h2>', unsafe_allow_html=True)
+
     
     # Dataset options - only keep simple dataset
     datasets = [
         {
             "key": "simple",
-            "title": "Simple Dataset",
+            "title": "Simple Synthetic Dataset",
             "desc": "Basic example for quick testing",
             "icon": "📋",
             "filename": "simple_dataset.csv"
@@ -113,10 +114,9 @@ def show_home():
                 <div style="flex: 1;">
                     <div style="font-weight: 500; margin: 0; font-size: 18px;">{datasets[0]['title']}</div>
                     <div style="color: #666; font-size: 14px; margin: 5px 0;">{datasets[0]['desc']}</div>
-                    
                 </div>
             </div>
-            """, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
             
             # Load button
             if st.button(f"Try {datasets[0]['title']}", key=f"load_{datasets[0]['key']}", use_container_width=True):
