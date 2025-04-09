@@ -3,7 +3,7 @@
 <div align="center">
   <img src="./pic/app.png" alt="Application Screenshot" width="90%">
   <p>
-    <a href="#features">Features</a> •
+    <a href="#Overview">Overview</a> •
     <a href="#how-it-works">How It Works</a> •
     <a href="#getting-started">Getting Started</a> •
     <a href="#data-requirements">Data Requirements</a> •
