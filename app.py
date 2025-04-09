@@ -106,9 +106,9 @@ def main():
         
         # Simplified step buttons
         step_buttons = [
-            ("1. Upload & Run Model", "step1"),
-            ("2. Insights", "step2"),
-            ("3. Optimization", "step3"),
+            ("1️⃣ Upload & Run Model", "step1"),
+            ("2️⃣ Insights", "step2"),
+            ("3️⃣ Optimization", "step3"),
         ]
         
         # Create step buttons
