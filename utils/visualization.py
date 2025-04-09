@@ -72,7 +72,7 @@ def create_media_contribution_visualization(mmm):
         st.warning("Meridian libraries are not available. Cannot create media contribution visualization.")
         return
     
-    # Add explanatory card
+    # explanatory card
     st.markdown("""
     <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
     <h3 style="margin-top: 0;">Understanding Contribution Analysis</h3>

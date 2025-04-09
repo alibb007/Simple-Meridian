@@ -81,9 +81,9 @@ def load_sample_dataset(dataset_name):
 # Import page modules
 sys.path.append(os.path.dirname(__file__))
 from app_pages.home import show_home
-from app_pages.step1_upload_and_run import show_upload_and_run  # Renamed from step1_initialization
-from app_pages.step2_insights import show_insights            # Renamed from step4_insights
-from app_pages.step3_optimization import show_optimization    # Renamed from step5_optimization
+from app_pages.step1_upload_and_run import show_upload_and_run 
+from app_pages.step2_insights import show_insights           
+from app_pages.step3_optimization import show_optimization  
 
 # Main function
 def main():

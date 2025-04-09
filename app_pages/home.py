@@ -17,7 +17,6 @@ def show_home():
     
     st.markdown("---")
     
-    # App description with hyperlink for Meridian
     st.markdown("""
     ## Measure Your Marketing Impact Without Any Coding
     

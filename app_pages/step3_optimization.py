@@ -307,8 +307,6 @@ def display_export_results_tab(optimization_results, non_optimized_data, optimiz
     end_date = st.session_state.report_end_date
     st.info(f"Reports include optimization results from {start_date} to {end_date}")
     
-    # DIRECTLY GENERATE BOTH REPORTS WITHOUT BUTTONS
-    # We generate both reports immediately without waiting for button clicks
     
     # Create a layout for the download links
     st.markdown("### Download Your Reports")
@@ -556,7 +554,7 @@ def display_optimization_results(optimization_results):
             inc_rev_value = format_in_million_or_billion(non_optimized_data.attrs['total_incremental_outcome'])
             opt_inc_rev_value = format_in_million_or_billion(optimized_data.attrs['total_incremental_outcome'])
 
-            # For the difference, first compute it, then format:
+            
             raw_inc_rev_diff = (
                 optimized_data.attrs['total_incremental_outcome'] 
                 - non_optimized_data.attrs['total_incremental_outcome']
@@ -573,7 +571,6 @@ def display_optimization_results(optimization_results):
             
             # Create a more visually attractive optimization scenario section
            
-
             col1, col2, col3 = st.columns(3)
 
             with col1:
@@ -751,7 +748,7 @@ def display_optimization_results(optimization_results):
         with optimization_tabs[1]:
             st.subheader("Channel Budget Allocation")
             
-            # INSIGHT: Add insight for budget allocation
+            # INSIGHT
             allocation_insight = """
             <div style="background-color: #f0f9eb; padding: 15px; border-radius: 5px; margin-bottom: 20px; border-left: 5px solid #52c41a;">
             <h4 style="margin-top: 0;">💡 Insight</h4>
@@ -966,7 +963,7 @@ def display_optimization_results(optimization_results):
                 st.markdown(recommendations_insight, unsafe_allow_html=True)
                 
                 # Create specific recommendations for each channel
-                # First, get the top 3 channels with biggest absolute % changes
+            
                 channel_changes = []
                 for i, channel in enumerate(channels):
                     current = historical_spend[i]
@@ -984,7 +981,7 @@ def display_optimization_results(optimization_results):
                     })
                 
                 # Sort by absolute percentage change
-                channel_changes.sort(key=lambda x: x['abs_diff_pct'], reverse=True)
+                channel_changes.sort(key=lambda x: x['abs_diff_pct'], reverse=False)
                 
                 # Display recommendations in a visually appealing way
                 st.subheader("Channel Recommendations")

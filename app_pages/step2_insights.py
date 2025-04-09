@@ -234,7 +234,7 @@ def show_insights():
        
         
         
-        # Export Insights Tab - Updated with quick time selection buttons
+        # Export Insights Tab
         elif selected_tab == "Export Insights":
             st.subheader("Export Insights")
             
