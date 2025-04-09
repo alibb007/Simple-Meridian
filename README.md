@@ -71,17 +71,22 @@ Simple Meridian is a no-code application that makes powerful marketing analytics
 
 ```bash
 # Clone the repository
-https://github.com/alibb007/Simple-Meridian.git
+git clone https://github.com/alibb007/Simple-Meridian.git
 cd Simple-Meridian
 
-# Create virtual environment
+# Create a virtual environment
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Activate the virtual environment
+# On macOS/Linux:
+source venv/bin/activate
+# On Windows:
+# venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Launch the app
+# Launch the Streamlit app
 streamlit run app.py
 ```
 
