@@ -20,7 +20,7 @@ try:
     from meridian.analysis import visualizer
     MERIDIAN_AVAILABLE = True
 except ImportError:
-    MERIDIAN_AVAILABLE = False  # Will proceed without Meridian functionality if not installed
+    MERIDIAN_AVAILABLE = False  
 
 def show_upload_and_run():
     """Display the upload data and run model page"""
@@ -399,7 +399,7 @@ def show_upload_and_run():
                     # Run the model with fixed parameters
                     start_time = datetime.now()
                     mmm.sample_posterior(
-                        n_chains=4,  # Using 4 chains as requested
+                        n_chains=4,  
                         n_adapt=500,
                         n_burnin=500,
                         n_keep=500
