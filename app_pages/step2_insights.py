@@ -66,14 +66,14 @@ def load_model_file(file_content):
 def show_insights():
     """Display the insights page with visualizations and analysis"""
     
-    st.title("Step 4: Insights & Visualization")
+    st.title("Step 2: Insights & Visualization")
     
     # Check if Meridian is installed
     if not MERIDIAN_AVAILABLE:
         st.error("⚠️ Meridian libraries are not installed. Some visualizations may not be available.")
         
     # Provide option to upload model pickle file
-    st.header("4.1 Load Meridian Model")
+    st.header("2.1 Load Meridian Model")
     
     st.markdown("""
     <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
