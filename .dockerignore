@@ -9,5 +9,9 @@ __pycache__
 *.env
 .streamlit/secrets.toml
 *.binpb
+!data/sample_model.binpb
 *.pkl
 pic/app.png
+pic/home.png
+pic/budget-plan.png
+.claude

@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="pic/brand-mark.png" alt="" width="72">
+<img src="pic/Logo.png" alt="Simple Meridian logo" width="84">
 
 # Simple Meridian
 
@@ -13,6 +13,8 @@ Upload weekly spend and sales, and get channel ROI, response curves and a budget
 [![Docker](https://img.shields.io/badge/docker-ready-2E6B55?logo=docker&logoColor=white)](#run-with-docker)
 [![License: MIT](https://img.shields.io/badge/license-MIT-5A6872)](LICENSE)
 
+**Updated 27 Oct 2026.** First released April 2025 on Meridian 1.0.6, now on Meridian 2.1.0. See the [version history](#version-history).
+
 <img src="pic/home.png" alt="Simple Meridian home page" width="92%">
 
 </div>
@@ -21,7 +23,9 @@ Upload weekly spend and sales, and get channel ROI, response curves and a budget
 
 ## What it does
 
-Marketing mix modeling (MMM) estimates how much revenue each channel produced, using only weekly totals. No user tracking or cookies are involved. [Meridian](https://github.com/google/meridian) is Google's Bayesian MMM. It handles carryover (an ad keeps working for weeks after it runs) and saturation (each extra dollar buys less than the one before). Running it normally takes a notebook and a fair amount of Python. This app handles data loading, sampling, analysis and reports through a point-and-click interface.
+Marketing mix modeling (MMM) estimates how much revenue each channel produced, using only weekly totals. No user tracking or cookies are involved. [Meridian](https://github.com/google/meridian) is Google's Bayesian MMM. It handles carryover (an ad keeps working for weeks after it runs) and saturation (each extra dollar buys less than the one before). Running it normally takes a notebook and a fair amount of Python.
+
+I built Simple Meridian so anyone can run a quick test, see how Meridian works, and find out what it can tell them about their marketing, without writing code. The app handles data loading, sampling, analysis and reports through a point-and-click interface.
 
 | Step | What you do | What you get |
 |---|---|---|
@@ -53,7 +57,7 @@ docker build -t simple-meridian .
 docker run --rm -p 8501:8501 simple-meridian
 ```
 
-Then open <http://localhost:8501>. The image is about 4 GB because Meridian depends on TensorFlow and JAX, so the first build takes a few minutes.
+Then open <http://localhost:8501>. The image is about 2.6 GB (down from 3.8 GB) because Meridian depends on TensorFlow and JAX, so the first build takes a few minutes.
 
 ### Run with Python
 
@@ -68,7 +72,11 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-Click **Try the sample data** on the home page to see the full flow on a three-year synthetic dataset with six channels.
+The home page gives you three ways to start:
+
+- **See the demo results**: a model already fitted on the sample data. Results open in a few seconds.
+- **Fit the sample data yourself**: the same three-year, six-channel synthetic dataset, fitted on your machine in about a minute.
+- **Use your own data**: upload a CSV or Excel file.
 
 ## Data format
 
@@ -94,11 +102,11 @@ Meridian estimates the model with MCMC sampling. More samples take longer and gi
 
 | Preset | Chains | Adapt / burn-in / keep | Typical time* | Use it for |
 |---|---|---|---|---|
-| Quick check | 2 | 300 / 300 / 250 | ~1 min | Checking your setup |
-| Standard | 4 | 500 / 500 / 500 | a few min | Numbers you plan to act on |
-| Thorough | 4 | 1000 / 1000 / 1000 | 10+ min | Final reads, borderline convergence |
+| Quick check | 2 | 300 / 300 / 250 | ~30 s | Checking your setup |
+| Standard | 4 | 500 / 500 / 500 | ~35 s | Numbers you plan to act on |
+| Thorough | 4 | 1000 / 1000 / 1000 | longer (not benchmarked) | Final reads, borderline convergence |
 
-\* Six channels and 156 weeks on a recent laptop CPU. Time grows with the number of channels and weeks.
+\* Measured with the sample data (six channels, 156 weeks) on an Apple M-series laptop: 26 s and 35 s. Most of that is a one-off JAX compile, so Standard costs little more than Quick check. Time grows with the number of channels and weeks. Meridian's JAX backend fitted the sample about 2.8× faster than its TensorFlow backend (26 s vs. 74 s), so the app uses JAX.
 
 Under **Advanced** you can set the maximum carryover (default 8 weeks) and the random seed. The same seed with the same data gives the same result.
 
@@ -124,20 +132,32 @@ utils/
   mmm.py                       all Meridian calls; returns plain pandas tables
   charts.py                    Plotly charts
   ui.py                        theme, CSS, sidebar navigation, small components
+scripts/build_demo.py          refits the demo model and precomputes its charts
 .streamlit/config.toml         theme
 data/simple_dataset.csv        sample data
+data/sample_model.binpb        demo model (Standard preset)
+data/demo/                     precomputed demo results, so the demo opens instantly
 ```
+
+After upgrading `google-meridian`, run `python scripts/build_demo.py --refit` so the demo model matches the new version.
 
 `utils/mmm.py` is the only file that imports Meridian. If a future Meridian release changes its API, that is the one file to update.
 
-## What changed in this version
+## Version history
+
+**27 Oct 2026, Meridian 2.1.0**
 
 - Upgraded from `google-meridian` 1.0.6 to **2.1.0** (TensorFlow 2.21, JAX backend). Ported the app to the 2.x API: `DataFrameDataLoader`, `start_date`/`end_date` in the optimizer, and the new report signatures.
-- Models are now saved as `.binpb` with Meridian's serializer, replacing the deprecated pickle format.
-- Redesigned the interface: navigation sidebar, icons, and one color per channel across every chart. Channels are set up as spend + exposure pairs, data is checked before fitting, sampling has presets, and all charts are interactive with uncertainty ranges.
-- Model and optimization results are kept in session state, so they stay on screen while you use other controls.
-- Removed calls to `st.experimental_rerun`, which current Streamlit no longer has.
-- Docker image runs on Python 3.12 as a non-root user, with a health check.
+- Added a demo: a pre-fitted model with precomputed charts, so you can see the results without fitting anything.
+- Faster: Meridian loads in the background instead of on the first page load (page import went from 7.1 s to 0.5 s), optimizer results are cached, and the JAX backend is pinned.
+- Models are saved as `.binpb` with Meridian's serializer, replacing the deprecated pickle format.
+- Redesigned the interface: a home page with three starting points, a navigation sidebar, icons, pill tabs, and one color per channel across every chart. Step 1 now has numbered sections and a "Ready to fit" checklist; data is checked before fitting.
+- Budget plan supports a new total budget as well as the same budget, with per-channel limits.
+- Docker image went from 3.82 GB to 2.62 GB by dropping C++ headers, test suites, libclang and debug symbols. It runs on Python 3.12 as a non-root user, with a health check.
+
+**April 2025, Meridian 1.0.6**
+
+- First release: upload data, map columns, fit Meridian, view its charts, and run the budget optimizer.
 
 ## Troubleshooting
 

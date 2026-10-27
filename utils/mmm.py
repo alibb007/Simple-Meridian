@@ -9,9 +9,12 @@ from __future__ import annotations
 import os
 import re
 import tempfile
+import threading
 import time
 import warnings
 from dataclasses import dataclass, field
+from importlib import metadata
+from types import SimpleNamespace
 
 import numpy as np
 import pandas as pd
@@ -23,21 +26,40 @@ warnings.filterwarnings("ignore", category=UserWarning, module=r"(meridian|arviz
 os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "2")
 
 try:
-    import meridian
-    from meridian.analysis import analyzer, optimizer, summarizer
-    from meridian.data import load
-    from meridian.model import model, spec
-
-    MERIDIAN_VERSION = meridian.__version__
-except ImportError:  # pragma: no cover - surfaced in the UI
+    MERIDIAN_VERSION = metadata.version("google-meridian")
+except metadata.PackageNotFoundError:  # surfaced in the UI
     MERIDIAN_VERSION = None
 
-try:
-    from meridian.schema.serde import meridian_serde
+# Importing Meridian pulls in TensorFlow and JAX and takes ~7 s, so it is
+# loaded on first use (and warmed up in a background thread at server start)
+# instead of at import time. Pages that don't model render immediately.
+_lib = None
+_lib_lock = threading.Lock()
 
-    SERDE_AVAILABLE = True
-except ImportError:
-    SERDE_AVAILABLE = False
+
+def lib() -> SimpleNamespace:
+    global _lib
+    with _lib_lock:
+        if _lib is None:
+            from meridian.analysis import analyzer, optimizer, summarizer
+            from meridian.data import load
+            from meridian.model import model, spec
+            try:
+                from meridian.schema.serde import meridian_serde
+            except ImportError:
+                meridian_serde = None
+            _lib = SimpleNamespace(analyzer=analyzer, optimizer=optimizer, summarizer=summarizer,
+                                   load=load, model=model, spec=spec, serde=meridian_serde)
+    return _lib
+
+
+def warm_up(after=None):
+    """Import Meridian in a background thread, then run `after` (if given)."""
+    def run():
+        lib()
+        if after is not None:
+            after()
+    threading.Thread(target=run, name="meridian-warmup", daemon=True).start()
 
 
 # Sampling presets. "Standard" matches the settings the app has always used.
@@ -46,10 +68,12 @@ PRESETS = {
     "Standard": dict(n_chains=4, n_adapt=500, n_burnin=500, n_keep=500, n_prior=500),
     "Thorough": dict(n_chains=4, n_adapt=1000, n_burnin=1000, n_keep=1000, n_prior=500),
 }
+# Measured on an Apple M-series laptop with the sample data (156 weeks, 6
+# channels): Quick 26 s, Standard 35 s. Most of it is a one-off JAX compile.
 PRESET_NOTES = {
-    "Quick check": "About 1 minute on a laptop. Good for checking your setup.",
-    "Standard": "A few minutes. Use this for numbers you plan to act on.",
-    "Thorough": "10+ minutes. Tighter intervals and more reliable convergence.",
+    "Quick check": "About 30 seconds. Good for checking your setup.",
+    "Standard": "About a minute. Use this for numbers you plan to act on.",
+    "Thorough": "A few minutes. Tighter intervals and more reliable convergence.",
 }
 
 
@@ -226,9 +250,9 @@ def build_input_data(df: pd.DataFrame, cfg: ModelConfig):
     if cfg.kpi_type == "non_revenue" and cfg.revenue_per_kpi_col:
         coords["revenue_per_kpi"] = cfg.revenue_per_kpi_col
 
-    loader = load.DataFrameDataLoader(
+    loader = lib().load.DataFrameDataLoader(
         df=frame,
-        coord_to_columns=load.CoordToColumns(**coords),
+        coord_to_columns=lib().load.CoordToColumns(**coords),
         kpi_type=cfg.kpi_type,
         media_to_channel=media_map,
         media_spend_to_channel=spend_map,
@@ -243,7 +267,7 @@ def fit(input_data, cfg: ModelConfig, on_stage=None):
     started = time.time()
 
     stage("Building model")
-    mmm = model.Meridian(input_data=input_data, model_spec=spec.ModelSpec(max_lag=cfg.max_lag))
+    mmm = lib().model.Meridian(input_data=input_data, model_spec=lib().spec.ModelSpec(max_lag=cfg.max_lag))
 
     stage("Sampling prior")
     mmm.sample_prior(p["n_prior"], seed=cfg.seed)
@@ -261,13 +285,13 @@ def fit(input_data, cfg: ModelConfig, on_stage=None):
 def model_to_bytes(mmm) -> tuple[bytes, str]:
     """Serialize with Meridian's protobuf format (falls back to joblib pickle)."""
     with tempfile.TemporaryDirectory() as tmp:
-        if SERDE_AVAILABLE:
+        if lib().serde is not None:
             path = os.path.join(tmp, "model.binpb")
-            meridian_serde.save_meridian(mmm, path)
+            lib().serde.save_meridian(mmm, path)
             ext = "binpb"
         else:
             path = os.path.join(tmp, "model.pkl")
-            model.save_mmm(mmm, path)
+            lib().model.save_mmm(mmm, path)
             ext = "pkl"
         with open(path, "rb") as f:
             return f.read(), ext
@@ -280,10 +304,10 @@ def model_from_bytes(data: bytes, filename: str):
         with open(path, "wb") as f:
             f.write(data)
         if ext in (".binpb", ".txtpb", ".textproto"):
-            if not SERDE_AVAILABLE:
+            if lib().serde is None:
                 raise RuntimeError("Install google-meridian[schema] to open .binpb model files.")
-            return meridian_serde.load_meridian(path)
-        return model.load_mmm(path)
+            return lib().serde.load_meridian(path)
+        return lib().model.load_mmm(path)
 
 
 # --------------------------------------------------------------------------- #
@@ -294,7 +318,7 @@ def time_periods(mmm) -> list[str]:
 
 
 def channel_summary(mmm, confidence_level: float = 0.9) -> pd.DataFrame:
-    sm = analyzer.Analyzer(mmm).summary_metrics(confidence_level=confidence_level, use_kpi=False)
+    sm = lib().analyzer.Analyzer(mmm).summary_metrics(confidence_level=confidence_level, use_kpi=False)
     post = sm.sel(distribution="posterior")
     rows = []
     for ch in sm.channel.values:
@@ -321,7 +345,7 @@ def channel_summary(mmm, confidence_level: float = 0.9) -> pd.DataFrame:
 
 
 def fit_quality(mmm) -> dict:
-    a = analyzer.Analyzer(mmm)
+    a = lib().analyzer.Analyzer(mmm)
     acc = a.predictive_accuracy()["value"]
     vals = {str(m): float(acc.sel(metric=m).values.ravel()[0]) for m in acc.metric.values}
     rhat = a.get_rhat()
@@ -332,7 +356,7 @@ def fit_quality(mmm) -> dict:
 
 
 def fit_series(mmm, confidence_level: float = 0.9) -> pd.DataFrame:
-    d = analyzer.Analyzer(mmm).expected_vs_actual_data(confidence_level=confidence_level, aggregate_geos=True)
+    d = lib().analyzer.Analyzer(mmm).expected_vs_actual_data(confidence_level=confidence_level, aggregate_geos=True)
     exp, base = d.expected, d.baseline
     return pd.DataFrame({
         "time": pd.to_datetime([str(t) for t in d.time.values]),
@@ -350,7 +374,7 @@ def baseline_total(mmm) -> float:
 
 
 def response_curves(mmm, confidence_level: float = 0.9) -> pd.DataFrame:
-    rc = analyzer.Analyzer(mmm).response_curves(
+    rc = lib().analyzer.Analyzer(mmm).response_curves(
         spend_multipliers=list(np.round(np.arange(0, 2.01, 0.05), 2)),
         confidence_level=confidence_level,
         use_kpi=False,
@@ -376,7 +400,7 @@ def _curves_frame(rc) -> pd.DataFrame:
 
 def model_report_html(mmm, start_date: str, end_date: str) -> str:
     with tempfile.TemporaryDirectory() as tmp:
-        summarizer.Summarizer(mmm).output_model_results_summary(
+        lib().summarizer.Summarizer(mmm).output_model_results_summary(
             "report.html", tmp, start_date=start_date, end_date=end_date
         )
         with open(os.path.join(tmp, "report.html"), encoding="utf-8") as f:
@@ -389,7 +413,7 @@ def model_report_html(mmm, start_date: str, end_date: str) -> str:
 def optimize(mmm, start_date: str, end_date: str, budget: float | None, constraint_pct: float):
     """Fixed-budget optimization. `budget=None` keeps the historical budget."""
     c = constraint_pct / 100.0
-    return optimizer.BudgetOptimizer(mmm).optimize(
+    return lib().optimizer.BudgetOptimizer(mmm).optimize(
         start_date=start_date,
         end_date=end_date,
         fixed_budget=True,

@@ -1,7 +1,10 @@
 """Shared look and feel: CSS, brand mark, sidebar navigation, small components."""
 from __future__ import annotations
 
+import base64
+import functools
 import html
+import os
 
 import streamlit as st
 
@@ -42,19 +45,19 @@ STEPS = [
 ]
 
 
-def logo(size: int = 32) -> str:
-    """Globe with a highlighted meridian, on a gradient tile."""
-    return f"""
-<svg viewBox="0 0 40 40" width="{size}" height="{size}" aria-hidden="true">
-  <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
-    <stop offset="0" stop-color="#3B82F6"/><stop offset=".55" stop-color="#6D4AE8"/><stop offset="1" stop-color="#14B8A6"/>
-  </linearGradient></defs>
-  <rect width="40" height="40" rx="10" fill="url(#lg)"/>
-  <circle cx="20" cy="20" r="11" fill="none" stroke="#fff" stroke-width="2" opacity=".95"/>
-  <ellipse cx="20" cy="20" rx="4.6" ry="11" fill="none" stroke="#fff" stroke-width="1.4" opacity=".6"/>
-  <line x1="9" y1="20" x2="31" y2="20" stroke="#fff" stroke-width="1.4" opacity=".6"/>
-  <line x1="20" y1="6" x2="20" y2="34" stroke="#FFD166" stroke-width="2.6" stroke-linecap="round"/>
-</svg>"""
+_LOGO_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "pic", "Logo.png")
+
+
+@functools.lru_cache(maxsize=1)
+def _logo_b64() -> str:
+    with open(_LOGO_PATH, "rb") as f:
+        return base64.b64encode(f.read()).decode()
+
+
+def logo(size: int = 36) -> str:
+    """Simple Meridian logo on a white tile (reads on the navy sidebar too)."""
+    return (f'<span class="sm-logo" style="width:{size}px;height:{size}px">'
+            f'<img src="data:image/png;base64,{_logo_b64()}" alt="Simple Meridian logo"></span>')
 
 
 def icon(name: str, size: int = 20, color: str | None = None) -> str:
@@ -84,7 +87,9 @@ html, body, [data-testid="stAppViewContainer"], .stMarkdown, p, li, label, input
 }}
 [data-testid="stAppViewContainer"] {{ background: var(--bg); }}
 [data-testid="stHeader"] {{ background: transparent; }}
-[data-testid="stMainBlockContainer"] {{ max-width: 1200px; padding-top: 2rem; padding-bottom: 3rem; }}
+[data-testid="stMainBlockContainer"] {{ max-width: 1360px; padding-top: 1.6rem; padding-bottom: 2.5rem; }}
+.sm-logo {{ display:inline-flex; align-items:center; justify-content:center; background:#fff; border-radius: 10px; flex:none; box-shadow: 0 1px 2px rgba(0,0,0,.15); }}
+.sm-logo img {{ width: 82%; height: 82%; object-fit: contain; }}
 h1, h2, h3, h4 {{ font-family: var(--display) !important; color: var(--ink); letter-spacing: -0.01em; }}
 h1 {{ font-weight: 800 !important; font-size: 2.3rem !important; line-height: 1.1 !important; }}
 h2 {{ font-weight: 700 !important; font-size: 1.45rem !important; }}
@@ -147,15 +152,37 @@ h3 {{ font-weight: 700 !important; font-size: 1.12rem !important; }}
 .sm-legend span {{ display:inline-flex; align-items:center; gap:.4rem; }}
 .sm-legend i {{ width:10px; height:10px; border-radius:3px; display:inline-block; }}
 
+/* ---------- Version banner ---------- */
+.sm-version {{ display:flex; flex-wrap:wrap; align-items:center; gap:.5rem .9rem; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; padding: .6rem .9rem; margin-bottom: 1rem; box-shadow: var(--shadow); font-size: .9rem; color: var(--muted); }}
+.sm-version .tag {{ background: linear-gradient(135deg, #0E9F6E, #14B8A6); color: #fff; font-weight: 700; font-size: .75rem;
+  border-radius: 99px; padding: .15rem .6rem; }}
+.sm-version b {{ color: var(--ink); }}
+.sm-version .sep {{ width: 1px; height: 18px; background: var(--border); }}
+
+/* ---------- Start cards (a button inside a bordered card) ---------- */
+[class*="st-key-start-"] {{ background: var(--surface); border: 1px solid var(--border) !important; border-radius: 18px !important;
+  padding: 1.2rem 1.25rem 1.1rem !important; box-shadow: var(--shadow); height: 100%; transition: box-shadow .15s, transform .15s; }}
+[class*="st-key-start-"]:hover {{ box-shadow: var(--shadow-lg); transform: translateY(-1px); }}
+[class*="st-key-start-"] h4 {{ margin: .7rem 0 .25rem !important; font-size: 1.1rem !important; }}
+[class*="st-key-start-"] p {{ color: var(--muted); font-size: .93rem; margin: 0 0 .4rem; }}
+.sm-meta {{ display:flex; flex-wrap:wrap; gap:.35rem; margin: .2rem 0 .6rem; }}
+.sm-meta span {{ font-size: .75rem; font-weight: 600; padding: .15rem .55rem; border-radius: 99px; background: #F2F4F7; color: #344054; }}
+.sm-meta span.hot {{ background: #E6F6EE; color: #067647; }}
+
+.st-key-runcard {{ position: sticky; top: 4rem; background: var(--surface); box-shadow: var(--shadow-lg); border-radius: 18px !important; }}
+[data-testid="stVerticalBlockBorderWrapper"], [data-testid="stLayoutWrapper"] > [data-testid="stVerticalBlock"][class*="st-key-"] {{ border-radius: 16px; }}
+
 /* ---------- Hero ---------- */
 .st-key-hero {{
   background: radial-gradient(1200px 400px at 85% -10%, rgba(109,74,232,.55), transparent 60%),
               radial-gradient(800px 380px at 10% 120%, rgba(20,184,166,.35), transparent 60%),
               linear-gradient(135deg, {NAVY} 0%, #15306B 100%);
-  border-radius: 22px; padding: 2.4rem 2.4rem 2rem !important; box-shadow: var(--shadow-lg);
+  border-radius: 22px; padding: 2rem 2.2rem 1.8rem !important; box-shadow: var(--shadow-lg);
 }}
 .st-key-hero h1, .st-key-hero p, .st-key-hero li {{ color: #fff !important; }}
-.st-key-hero h1 {{ font-size: 2.65rem !important; }}
+.st-key-hero h1 {{ font-size: 2.5rem !important; }}
+.st-key-hero .sm-sign {{ display:flex; align-items:center; gap:.6rem; color:#C9D4EC; font-size:.88rem; margin:.2rem 0 1rem; }}
 .st-key-hero .sm-lede {{ color: #C9D4EC !important; }}
 .st-key-hero .sm-kicker {{ color: #FFD166; }}
 .st-key-hero .sm-pill {{ background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.16); color: #DCE3F1; }}
@@ -169,10 +196,19 @@ h3 {{ font-weight: 700 !important; font-size: 1.12rem !important; }}
 [data-testid="stBaseButton-primary"] {{ background: var(--primary) !important; border-color: var(--primary) !important; box-shadow: 0 1px 2px rgba(36,89,232,.3); }}
 [data-testid="stBaseButton-primary"]:hover {{ background: #1C47C4 !important; }}
 [data-testid="stBaseButton-primary"] p, [data-testid="stBaseButton-primary"] span {{ color: #fff !important; }}
-[data-baseweb="tab-list"] {{ gap: .3rem; }}
-[data-baseweb="tab"] {{ font-weight: 600; padding: .55rem 1rem !important; border-radius: 10px 10px 0 0; }}
-[data-baseweb="tab"][aria-selected="true"] {{ color: var(--primary) !important; }}
-[data-baseweb="tab-highlight"] {{ background-color: var(--primary) !important; height: 3px !important; }}
+/* Tabs as a segmented pill bar; the active tab is filled. */
+[data-testid="stTabs"] [role="tablist"] {{ gap: .3rem; background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+  padding: .3rem; box-shadow: var(--shadow); width: fit-content; max-width: 100%; flex-wrap: wrap; height: auto; }}
+[data-testid="stTabs"] [role="tablist"]::before, [data-testid="stTabs"] [role="tablist"]::after,
+[data-testid="stTab"]::before, [data-testid="stTab"]::after {{ display: none !important; }}
+[data-testid="stTab"] {{ font-weight: 600; padding: .5rem 1rem !important; border-radius: 10px !important; color: var(--muted) !important;
+  background: transparent; border: 0 !important; box-shadow: none !important; height: auto !important; transition: background .15s, color .15s; }}
+[data-testid="stTab"] p, [data-testid="stTab"] span {{ color: inherit !important; font-weight: 600; }}
+[data-testid="stTab"]:hover {{ background: #EEF3FF; color: var(--primary) !important; }}
+[data-testid="stTab"][aria-selected="true"] {{ background: linear-gradient(135deg, #2459E8, #5B4BDB) !important; color: #fff !important;
+  box-shadow: 0 4px 12px -4px rgba(36,89,232,.55) !important; }}
+[data-testid="stTab"]:focus-visible {{ outline: 2px solid #8AB4FF; outline-offset: 2px; }}
+[data-testid="stTabPanel"] {{ padding-top: 1rem; }}
 [data-testid="stFileUploaderDropzone"] {{ background: var(--surface); border: 2px dashed #C6D2EA; border-radius: 16px; padding: 1.6rem; }}
 [data-testid="stExpander"] details {{ background: var(--surface); border-radius: 14px; border-color: var(--border); box-shadow: var(--shadow); }}
 [data-testid="stPlotlyChart"] {{ background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: .6rem .4rem .2rem; box-shadow: var(--shadow); }}
@@ -205,6 +241,23 @@ def page_header(step: int, title: str, lede: str | None = None, icon_name: str =
     )
     if lede:
         st.markdown(f'<p class="sm-lede">{lede}</p>', unsafe_allow_html=True)
+
+
+def version_banner():
+    st.markdown(
+        f'<div class="sm-version"><span class="tag">{icon("new_releases", 14)} Updated 27 Oct 2026</span>'
+        '<span>First release <b>April 2025</b> on Google Meridian 1.0.6</span><span class="sep"></span>'
+        '<span>Now on <b>Meridian 2.1.0</b> with a new design, a ready-made demo model, data checks, '
+        'budget scenarios and Docker support</span></div>',
+        unsafe_allow_html=True,
+    )
+
+
+def start_card_header(icon_name: str, accent: str, title: str, body: str, meta: list[str], hot: str | None = None):
+    chips = (f'<span class="hot">{html.escape(hot)}</span>' if hot else "") + "".join(
+        f"<span>{html.escape(m)}</span>" for m in meta)
+    st.markdown(f'{badge(icon_name, accent, 44)}<h4>{html.escape(title)}</h4><p>{body}</p>'
+                f'<div class="sm-meta">{chips}</div>', unsafe_allow_html=True)
 
 
 def callout(text: str, icon_name: str = "lightbulb"):
@@ -261,8 +314,8 @@ def step_state(page: str) -> str:
 
 def sidebar(meridian_version: str | None):
     with st.sidebar:
-        st.markdown(f'<div class="sm-brand">{logo(38)}<div><b>Simple Meridian</b>'
-                    f'<span>Marketing mix modeling</span></div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="sm-brand">{logo(40)}<div><b>Simple Meridian</b>'
+                    f'<span>Google Meridian, made simple</span></div></div>', unsafe_allow_html=True)
         with st.container(key=f"nav-{'here' if st.session_state.get('page') == 'home' else 'todo'}-home"):
             if st.button("Overview", key="btn_home", icon=":material/space_dashboard:", width="stretch"):
                 go_to("home")

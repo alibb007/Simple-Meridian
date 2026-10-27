@@ -1,6 +1,8 @@
 """Helpers shared by the step pages: data loading, model state, cached analysis."""
 from __future__ import annotations
 
+import functools
+import json
 import os
 import time
 import uuid
@@ -13,10 +15,55 @@ from utils import ui
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SAMPLE_PATH = os.path.join(ROOT, "data", "simple_dataset.csv")
+# Fitted on the sample data with the Standard preset (4 chains x 1500 steps).
+DEMO_MODEL_PATH = os.path.join(ROOT, "data", "sample_model.binpb")
+DEMO_DIR = os.path.join(ROOT, "data", "demo")
 
 
 def load_sample():
     set_data(pd.read_csv(SAMPLE_PATH), "simple_dataset.csv")
+
+
+@functools.lru_cache(maxsize=1)
+def demo_model():
+    """Loaded once per process; app.py preloads it in the background."""
+    with open(DEMO_MODEL_PATH, "rb") as f:
+        return M.model_from_bytes(f.read(), DEMO_MODEL_PATH)
+
+
+def demo_available() -> bool:
+    return os.path.exists(DEMO_MODEL_PATH)
+
+
+DEMO = "demo"  # placeholder in session state until the real demo model is needed
+
+
+def load_demo():
+    """Sample data plus the pre-fitted sample model: insights with no waiting.
+
+    The charts come from precomputed files, so the Meridian object (which
+    needs TensorFlow/JAX loaded) is only fetched when something needs it.
+    """
+    load_sample()
+    # A fixed key lets every visitor share one cache of the demo's analysis.
+    set_model(DEMO, "demo model", {"preset": "Standard (pre-fitted)"},
+              key=f"demo-{os.path.getmtime(DEMO_MODEL_PATH):.0f}")
+
+
+def get_model():
+    """The current Meridian model object (loads the demo model on first use)."""
+    m = st.session_state.get("mmm")
+    if isinstance(m, str) and m == DEMO:
+        with st.spinner("Loading the demo model…"):
+            m = demo_model()
+    return m
+
+
+@st.cache_data(show_spinner=False, max_entries=8)
+def cached_periods(_mmm, model_key: str) -> list[str]:
+    if _is_demo(model_key):
+        return pd.read_csv(os.path.join(DEMO_DIR, "fit_series.csv"))["time"].astype(str).str[:10].tolist()
+    return M.time_periods(_mmm)
 
 
 def set_data(df: pd.DataFrame, name: str):
@@ -32,9 +79,9 @@ def read_upload(file) -> pd.DataFrame:
     return pd.read_excel(file)
 
 
-def set_model(mmm, source: str, extra: dict | None = None):
+def set_model(mmm, source: str, extra: dict | None = None, key: str | None = None):
     st.session_state.mmm = mmm
-    st.session_state.model_key = uuid.uuid4().hex
+    st.session_state.model_key = key or uuid.uuid4().hex
     st.session_state.optimization = None
     info = {"source": source, "loaded_at": time.time()}
     try:
@@ -50,29 +97,46 @@ def has_model() -> bool:
 
 
 # Analyzer calls take a few seconds each. Cache them per model; the leading
-# underscore tells Streamlit not to hash the Meridian object itself.
+# underscore tells Streamlit not to hash the Meridian object itself. The demo
+# model's results are precomputed by scripts/build_demo.py and read from disk.
+def _is_demo(model_key: str) -> bool:
+    return str(model_key).startswith("demo-") and os.path.isdir(DEMO_DIR)
+
+
 @st.cache_data(show_spinner=False, max_entries=8)
 def cached_summary(_mmm, model_key: str) -> pd.DataFrame:
+    if _is_demo(model_key):
+        return pd.read_csv(os.path.join(DEMO_DIR, "summary.csv"))
     return M.channel_summary(_mmm)
 
 
 @st.cache_data(show_spinner=False, max_entries=8)
 def cached_quality(_mmm, model_key: str) -> dict:
+    if _is_demo(model_key):
+        with open(os.path.join(DEMO_DIR, "quality.json")) as f:
+            return json.load(f)
     return M.fit_quality(_mmm)
 
 
 @st.cache_data(show_spinner=False, max_entries=8)
 def cached_fit_series(_mmm, model_key: str) -> pd.DataFrame:
+    if _is_demo(model_key):
+        return pd.read_csv(os.path.join(DEMO_DIR, "fit_series.csv"), parse_dates=["time"])
     return M.fit_series(_mmm)
 
 
 @st.cache_data(show_spinner=False, max_entries=8)
 def cached_curves(_mmm, model_key: str) -> pd.DataFrame:
+    if _is_demo(model_key):
+        return pd.read_csv(os.path.join(DEMO_DIR, "curves.csv"))
     return M.response_curves(_mmm)
 
 
 @st.cache_data(show_spinner=False, max_entries=8)
 def cached_model_bytes(_mmm, model_key: str) -> tuple[bytes, str]:
+    if _is_demo(model_key):
+        with open(DEMO_MODEL_PATH, "rb") as f:
+            return f.read(), "binpb"
     return M.model_to_bytes(_mmm)
 
 

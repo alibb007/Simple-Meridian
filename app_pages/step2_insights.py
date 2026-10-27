@@ -1,7 +1,8 @@
 import streamlit as st
 
 from app_pages.common import (
-    cached_curves, cached_fit_series, cached_quality, cached_summary, model_download_button, require_model,
+    cached_curves, cached_fit_series, cached_periods, cached_quality, cached_summary, get_model,
+    model_download_button, require_model,
 )
 from utils import charts
 from utils import mmm as M
@@ -136,13 +137,13 @@ def _summary_table(summary):
 def _report(mmm):
     st.markdown("### Meridian HTML report")
     st.caption("Google's standard Meridian summary (fit, contribution, ROI, response curves) in one shareable file.")
-    periods = M.time_periods(mmm)
+    periods = cached_periods(mmm, st.session_state.model_key)
     start, end = st.select_slider("Period", options=periods, value=(periods[0], periods[-1]), key="report_range")
     with st.container(horizontal=True):
         if st.button("Build report", type="primary", icon=":material/description:"):
             with st.spinner("Building report…"):
                 try:
-                    st.session_state.model_report = (start, end, M.model_report_html(mmm, start, end))
+                    st.session_state.model_report = (start, end, M.model_report_html(get_model(), start, end))
                 except Exception as e:
                     st.error(f"Report failed: {e}")
         rep = st.session_state.get("model_report")

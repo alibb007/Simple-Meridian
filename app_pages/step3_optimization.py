@@ -3,7 +3,7 @@ import io
 import pandas as pd
 import streamlit as st
 
-from app_pages.common import cached_summary, require_model
+from app_pages.common import cached_periods, cached_summary, get_model, require_model
 from utils import charts
 from utils import mmm as M
 from utils import ui
@@ -22,7 +22,7 @@ def show_optimization():
         return
 
     mmm = st.session_state.mmm
-    periods = M.time_periods(mmm)
+    periods = cached_periods(mmm, st.session_state.model_key)
     default_start = periods[max(0, len(periods) - 52)]
 
     with st.form("opt_form", border=False):
@@ -38,7 +38,7 @@ def show_optimization():
             mode = st.radio("Budget", ["Same total as before", "Set a new total"], key="opt_mode")
             budget = None
             if mode == "Set a new total":
-                hist = _historical_budget(mmm, start, end)
+                hist = _historical_budget(get_model(), start, end)
                 budget = st.number_input("New total budget ($)", min_value=0.0, value=float(round(hist, -3)),
                                          step=max(1000.0, round(hist * 0.05, -3)), format="%.0f", key="opt_budget")
         submitted = st.form_submit_button("Optimize budget", type="primary", icon=":material/tune:")
@@ -46,16 +46,9 @@ def show_optimization():
     if submitted:
         with st.spinner("Optimizing… usually under a minute"):
             try:
-                hist = _historical_budget(mmm, start, end)
-                res = M.optimize(mmm, start, end, budget, limit)
+                cached = _optimize(st.session_state.model_key, start, end, budget, limit)
                 st.session_state.optimization = {
-                    "res": res,
-                    "table": M.optimization_table(res),
-                    "totals": M.optimization_totals(res),
-                    "curves": None,
-                    "report": None,
-                    "params": (start, end, budget, limit),
-                    "historical_budget": hist,
+                    **cached, "curves": None, "report": None, "params": (start, end, budget, limit),
                 }
             except Exception as e:
                 st.error(f"Optimization failed: {e}")
@@ -68,10 +61,22 @@ def show_optimization():
     _results(opt)
 
 
+@st.cache_resource(show_spinner=False, max_entries=16)
+def _optimize(model_key: str, start: str, end: str, budget, limit: int) -> dict:
+    """Shared across sessions: the same model + settings always give the same plan."""
+    model = get_model()
+    res = M.optimize(model, start, end, budget, limit)
+    return {
+        "res": res,
+        "table": M.optimization_table(res),
+        "totals": M.optimization_totals(res),
+        "historical_budget": _historical_budget(model, start, end),
+    }
+
+
 def _historical_budget(mmm, start, end) -> float:
     try:
-        from meridian.analysis import analyzer
-        spend = analyzer.Analyzer(mmm).get_historical_spend(selected_times=[p for p in M.time_periods(mmm) if start <= p <= end])
+        spend = M.lib().analyzer.Analyzer(mmm).get_historical_spend(selected_times=[p for p in M.time_periods(mmm) if start <= p <= end])
         return float(spend.values.sum())
     except Exception:
         summary = cached_summary(mmm, st.session_state.model_key)

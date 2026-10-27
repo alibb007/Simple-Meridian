@@ -3,17 +3,18 @@ import streamlit as st
 
 st.set_page_config(
     page_title="Simple Meridian",
-    page_icon="pic/favicon.png",
+    page_icon="pic/Logo.png",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
+from app_pages.common import demo_available, demo_model  # noqa: E402
 from app_pages.home import show_home  # noqa: E402
 from app_pages.step1_upload_and_run import show_upload_and_run  # noqa: E402
 from app_pages.step2_insights import show_insights  # noqa: E402
 from app_pages.step3_optimization import show_optimization  # noqa: E402
 from utils import ui  # noqa: E402
-from utils.mmm import MERIDIAN_VERSION  # noqa: E402
+from utils.mmm import MERIDIAN_VERSION, warm_up  # noqa: E402
 
 DEFAULTS = {
     "page": "home",
@@ -27,6 +28,17 @@ DEFAULTS = {
 }
 for key, value in DEFAULTS.items():
     st.session_state.setdefault(key, value)
+
+
+
+@st.cache_resource(show_spinner=False)
+def _warm_up_once() -> bool:
+    """Once per server process: import Meridian and load the demo model in the background."""
+    warm_up(after=demo_model if demo_available() else None)
+    return True
+
+
+_warm_up_once()
 
 PAGES = {
     "home": show_home,

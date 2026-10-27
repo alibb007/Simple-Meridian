@@ -12,6 +12,7 @@ venv/
 
 # Model files and reports produced while using the app
 *.binpb
+!data/sample_model.binpb
 *.pkl
 meridian_data_temp.csv
 
