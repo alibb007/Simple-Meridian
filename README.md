@@ -1,160 +1,155 @@
+<div align="center">
+
+<img src="pic/brand-mark.png" alt="" width="72">
+
 # Simple Meridian
 
-<div align="center">
-  <img src="./pic/app.png" alt="Application Screenshot" width="90%">
-  <p>
-    <a href="#Overview">Overview</a> •
-    <a href="#how-it-works">How It Works</a> •
-    <a href="#getting-started">Getting Started</a> •
-    <a href="#data-requirements">Data Requirements</a> •
-    <a href="#built-with">Built With</a>
-  </p>
+**A no-code app for Google Meridian, the open-source marketing mix model.**
+Upload weekly spend and sales, and get channel ROI, response curves and a budget plan without writing code.
+
+[![Google Meridian 2.1.0](https://img.shields.io/badge/google--meridian-2.1.0-2A78D6)](https://pypi.org/project/google-meridian/)
+[![Python 3.12](https://img.shields.io/badge/python-3.12-15202B?logo=python&logoColor=white)](https://www.python.org/)
+[![Streamlit 1.66](https://img.shields.io/badge/streamlit-1.66-D23F2A?logo=streamlit&logoColor=white)](https://streamlit.io/)
+[![Docker](https://img.shields.io/badge/docker-ready-2E6B55?logo=docker&logoColor=white)](#run-with-docker)
+[![License: MIT](https://img.shields.io/badge/license-MIT-5A6872)](LICENSE)
+
+<img src="pic/home.png" alt="Simple Meridian home page" width="92%">
+
 </div>
-
-## Overview
-
-<div align="center">
-  <img src="https://camo.githubusercontent.com/2722992d519a722218f896d5f5231d49f337aaff4514e78bd59ac935334e916a/68747470733a2f2f692e696d6775722e636f6d2f77617856496d762e706e67" alt="Colorful Separator">
-</div>
-The Meridian Zero Code App revolutionizes how data scientists and marketers work with Google's powerful Marketing Mix Modeling (MMM) framework. This elegant Streamlit interface eliminates the need to write a single line of code while delivering professional-grade analytics capabilities.
-
-Simple Meridian is a no-code application that makes powerful marketing analytics accessible to everyone. With just a few clicks, you can analyze your marketing effectiveness, understand which channels drive results, and optimize your budget allocation for maximum ROI.
-
-<div align="center">
-  <img src="https://camo.githubusercontent.com/2722992d519a722218f896d5f5231d49f337aaff4514e78bd59ac935334e916a/68747470733a2f2f692e696d6775722e636f6d2f77617856496d762e706e67" alt="Colorful Separator">
-</div>
-
-## Key Features
-
-- **Zero Coding Required** — Upload your data and click through our intuitive interface
-- **Automatic Data Analysis** — Built on Google's Meridian framework for reliable results
-- **Channel Effectiveness** — See exactly which marketing channels drive the most value
-- **Budget Optimization** — Get AI-powered recommendations to maximize your ROI
-- **Interactive Visualizations** — Explore your data through beautiful charts and graphs
-- **Shareable Reports** — Export professional reports to share with your team
-
-## How It Works
-
-<div align="center">
-  <table>
-    <tr>
-      <td align="center">
-        <div style="background-color: #4285f4; color: white; width: 36px; height: 36px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 10px;">1</div><br>
-        <b>Upload & Run</b><br>
-        <i class="fas fa-upload fa-3x" style="color: #4285f4;"></i><br>
-        Upload your marketing data and run the analysis with a single click
-      </td>
-      <td align="center">
-        <div style="background-color: #4285f4; color: white; width: 36px; height: 36px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 10px;">2</div><br>
-        <b>Explore Insights</b><br>
-        <i class="fas fa-search fa-3x" style="color: #4285f4;"></i><br>
-        View interactive visualizations showing which channels perform best
-      </td>
-      <td align="center">
-        <div style="background-color: #4285f4; color: white; width: 36px; height: 36px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 10px;">3</div><br>
-        <b>Optimize Budget</b><br>
-        <i class="fas fa-chart-line fa-3x" style="color: #4285f4;"></i><br>
-        Get recommendations for ideal budget allocation across channels
-      </td>
-    </tr>
-  </table>
-</div>
-
-### Prerequisites
-
-- Python 3.11+
-- Streamlit 1.28.0+
-- Google Meridian 1.0.6+
-- Other dependencies listed in `requirements.txt`
-
-### Installation
-
-```bash
-git clone git@github.com:alibb007/Simple-Meridian.git
-cd Simple-Meridian
-
-# Create a virtual environment
-python -m venv venv
-
-# Activate the virtual environment (macOS/Linux):
-source venv/bin/activate
-# On Windows, use:
-# venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Launch the Streamlit app
-streamlit run app.py
-```
-
-### Docker Installation
-
-```bash
-# Build the Docker image
-docker build -t simple-meridian .
-
-# Run the container
-docker run -p 8501:8501 simple-meridian
-```
-
-## Data Requirements
-
-For best results, your data should include:
-
-- **Time Series Data** : Weekly or monthly periods (at least 6 months of data)
-- **Target KPI** : Sales, revenue, or conversions you want to analyze
-- **Marketing Channels** : Spend amounts and/or metrics (impressions, clicks, etc.)
-- **Control Variables** (optional): Seasonality, pricing, promotions, etc.
-
-A sample dataset is included to help you get started quickly.
-
-## What is Marketing Mix Modeling?
-
-Marketing Mix Modeling (MMM) is a powerful analysis technique that helps you understand how your marketing activities affect your business results.
-
-Simple Meridian answers critical questions like:
-
-- **Which channels drive the most sales?** Identify your top performers
-- **What's the ROI for each activity?** Measure the return on every dollar spent
-- **How should I allocate my budget?** Optimize spending across channels
-- **What if I shift budget between channels?** Forecast the impact of changes
-
-Simple Meridian uses Google's advanced MMM technology with an interface that anyone can use—no coding required!
-
-## Built With
-
-<div align="center">
-  <img src="https://img.shields.io/badge/Python-3.11-blue.svg?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.11">
-  <img src="https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=Streamlit&logoColor=white" alt="Streamlit">
-  <img src="https://img.shields.io/badge/Google_Meridian-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="Google Meridian">
-  <img src="https://img.shields.io/badge/TensorFlow-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white" alt="TensorFlow">
-  <img src="https://img.shields.io/badge/Data_Science-FFCA28?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgY2xhc3M9ImZlYXRoZXIgZmVhdGhlci1kYXRhYmFzZSI+PHBhdGggZD0iTTEyIDJMMTIgNk0xMiAyTDkgMyBNMTIgMkwxNSAzIE0xMiA2TDkgMy40MTQyMSBNMTIgNkwxNSAzLjQxNDIxIE0xNSAzLjQxNDIxTDE4IDUiLz48ZWxsaXBzZSBjeD0iMTIiIGN5PSI2IiByeD0iOCIgcnk9IjIiLz48cGF0aCBkPSJNNCAxMEwxMCAyME0xNCAyMEwyMCAyME0xMiAxMlYyMiIvPjxlbGxpcHNlIGN4PSIxMiIgY3k9IjE2IiByeD0iOCIgcnk9IjIiLz48L3N2Zz4=" alt="Data Science">
-</div>
-<div align="center" style="margin-top: 10px;">
-  <img src="https://img.shields.io/badge/pandas-150458?style=for-the-badge&logo=pandas&logoColor=white" alt="Pandas">
-  <img src="https://img.shields.io/badge/NumPy-013243?style=for-the-badge&logo=numpy&logoColor=white" alt="NumPy">
-  <img src="https://img.shields.io/badge/Plotly-3F4F75?style=for-the-badge&logo=plotly&logoColor=white" alt="Plotly">
-  <img src="https://img.shields.io/badge/scikit--learn-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white" alt="scikit-learn">
-</div>
-<div align="center" style="margin-top: 10px;">
-  <img src="https://img.shields.io/badge/LICENSE-MIT-yellow.svg" alt="MIT License">
-  <img src="https://img.shields.io/badge/DOCKER-AVAILABLE-blue?logo=docker" alt="Docker Available">
-</div>
-<div align="center">
-  <img src="https://camo.githubusercontent.com/2722992d519a722218f896d5f5231d49f337aaff4514e78bd59ac935334e916a/68747470733a2f2f692e696d6775722e636f6d2f77617856496d762e706e67" alt="Colorful Separator">
-</div>
-<div align="center">
-  <h3>Ali Barfi Bafghi</h3>
-  <p>Data Scientist & Marketing Analytics Expert</p>
-<a href="https://github.com/alibb007"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"></a>
-<a href="https://www.linkedin.com/in/alibarfibafghi/"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn"></a>
-<a href="mailto:ali.barfib@gmail.com"><img src="https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email"></a>
-
-## </div>
 
 ---
 
-<div align="center">
-  <p><i>Simple Meridian uses the open-source Google Meridian library. All rights and trademarks remain with Google.</i></p>
-</div>
+## What it does
+
+Marketing mix modeling (MMM) estimates how much revenue each channel produced, using only weekly totals. No user tracking or cookies are involved. [Meridian](https://github.com/google/meridian) is Google's Bayesian MMM. It handles carryover (an ad keeps working for weeks after it runs) and saturation (each extra dollar buys less than the one before). Running it normally takes a notebook and a fair amount of Python. This app handles data loading, sampling, analysis and reports through a point-and-click interface.
+
+| Step | What you do | What you get |
+|---|---|---|
+| **1 · Data & model** | Upload a CSV or Excel file. Confirm the date, outcome and channel columns (they are detected automatically). Pick a sampling preset. | A fitted Meridian model, fit quality (R², MAPE, R-hat), and a model file you can download and reopen later. |
+| **2 · Insights** | Look through the tabs. | ROI with 90% credible intervals, average vs. marginal ROI, baseline vs. media revenue, share of spend vs. share of revenue, response curves, actual vs. predicted, and Meridian's HTML report. |
+| **3 · Budget plan** | Pick a period, a per-channel limit (±30% by default), and keep the budget or set a new total. | The spend split with the most incremental revenue, where it lands on each response curve, and CSV, Excel and HTML exports. |
+
+Everything runs on your machine. Your data is not sent anywhere.
+
+<table>
+  <tr>
+    <td width="50%"><img src="pic/app.png" alt="Insights: ROI by channel with 90% credible intervals"></td>
+    <td width="50%"><img src="pic/budget-plan.png" alt="Budget plan: actual vs. optimized budget mix"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Insights: ROI by channel, with uncertainty</sub></td>
+    <td align="center"><sub>Budget plan: actual vs. optimized budget mix</sub></td>
+  </tr>
+</table>
+
+## Quick start
+
+### Run with Docker
+
+```bash
+git clone https://github.com/alibb007/Simple-Meridian.git
+cd Simple-Meridian
+docker build -t simple-meridian .
+docker run --rm -p 8501:8501 simple-meridian
+```
+
+Then open <http://localhost:8501>. The image is about 4 GB because Meridian depends on TensorFlow and JAX, so the first build takes a few minutes.
+
+### Run with Python
+
+Python 3.11 or newer is required. 3.12 is what the app is tested on.
+
+```bash
+git clone https://github.com/alibb007/Simple-Meridian.git
+cd Simple-Meridian
+python3.12 -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+streamlit run app.py
+```
+
+Click **Try the sample data** on the home page to see the full flow on a three-year synthetic dataset with six channels.
+
+## Data format
+
+One row per week, one column per measure:
+
+| week | tv_spend | tv_impressions | search_spend | search_clicks | price_index | sales |
+|---|---|---|---|---|---|---|
+| 2024-01-07 | 81200 | 9100000 | 22400 | 41000 | 1.02 | 612400 |
+| 2024-01-14 | 77950 | 8700000 | 23100 | 43900 | 1.02 | 598100 |
+
+- **Dates**: weekly, evenly spaced, with no gaps or repeats. Any common date format works. Two to three years of data gives much more stable estimates than one.
+- **Outcome**: revenue, or conversions. For conversions you can add a revenue-per-conversion column so ROI comes out in currency.
+- **Channels**: spend for every paid channel, plus impressions, clicks or GRPs for the same channel. Columns named `<channel>_spend` and `<channel>_impression(s)` are paired automatically. If a channel only has spend, use the spend column for both.
+- **Controls** (optional): price, promotions, seasonality, competitor activity, market trends. Anything that moves sales but is not paid media.
+
+The app checks the data before fitting. Gaps, repeated dates, empty cells, negative spend and constant controls are reported in plain language.
+
+A sample file is in [`data/simple_dataset.csv`](data/simple_dataset.csv).
+
+## Sampling presets
+
+Meridian estimates the model with MCMC sampling. More samples take longer and give tighter, more reliable estimates.
+
+| Preset | Chains | Adapt / burn-in / keep | Typical time* | Use it for |
+|---|---|---|---|---|
+| Quick check | 2 | 300 / 300 / 250 | ~1 min | Checking your setup |
+| Standard | 4 | 500 / 500 / 500 | a few min | Numbers you plan to act on |
+| Thorough | 4 | 1000 / 1000 / 1000 | 10+ min | Final reads, borderline convergence |
+
+\* Six channels and 156 weeks on a recent laptop CPU. Time grows with the number of channels and weeks.
+
+Under **Advanced** you can set the maximum carryover (default 8 weeks) and the random seed. The same seed with the same data gives the same result.
+
+If max R-hat on the **Model fit** tab is above 1.2, the chains have not agreed yet. Fit again with a longer preset before trusting the numbers.
+
+## Saving and reopening models
+
+**Download model file** saves the model in Meridian's protobuf format (`.binpb`, via `meridian.schema.serde`). Open it again from step 1, 2 or 3 to skip re-fitting. Open it with the same `google-meridian` version that saved it.
+
+`.pkl` files from older versions of this app (Meridian 1.0.x) can still be opened, but they usually fail under Meridian 2.x. Re-fit those models. Pickle files can run code when opened, so only open ones you made yourself.
+
+## Project layout
+
+```
+app.py                         entry point: page setup, sidebar, routing
+app_pages/
+  home.py                      overview page
+  step1_upload_and_run.py      upload, column mapping, validation, fitting
+  step2_insights.py            ROI, contribution, response curves, fit, report
+  step3_optimization.py        budget optimizer and exports
+  common.py                    shared state, caching, model upload/download
+utils/
+  mmm.py                       all Meridian calls; returns plain pandas tables
+  charts.py                    Plotly charts
+  ui.py                        theme, CSS, sidebar navigation, small components
+.streamlit/config.toml         theme
+data/simple_dataset.csv        sample data
+```
+
+`utils/mmm.py` is the only file that imports Meridian. If a future Meridian release changes its API, that is the one file to update.
+
+## What changed in this version
+
+- Upgraded from `google-meridian` 1.0.6 to **2.1.0** (TensorFlow 2.21, JAX backend). Ported the app to the 2.x API: `DataFrameDataLoader`, `start_date`/`end_date` in the optimizer, and the new report signatures.
+- Models are now saved as `.binpb` with Meridian's serializer, replacing the deprecated pickle format.
+- Redesigned the interface: navigation sidebar, icons, and one color per channel across every chart. Channels are set up as spend + exposure pairs, data is checked before fitting, sampling has presets, and all charts are interactive with uncertainty ranges.
+- Model and optimization results are kept in session state, so they stay on screen while you use other controls.
+- Removed calls to `st.experimental_rerun`, which current Streamlit no longer has.
+- Docker image runs on Python 3.12 as a non-root user, with a health check.
+
+## Troubleshooting
+
+- **The fit is slow.** Start with **Quick check**. Fewer channels and fewer weeks also help. Docker Desktop on macOS gets fewer CPUs than the host by default; raise the limit under Settings → Resources.
+- **"Dates are not evenly spaced."** Meridian needs one row per period with no gaps. Fill missing weeks with zeros for spend and the real outcome value.
+- **ROI intervals are very wide.** The data cannot separate that channel from the others, often because its spend barely changes or moves in step with another channel. Longer history or more spend variation helps.
+- **Port 8501 is taken.** Use `docker run -p 8502:8501 simple-meridian` and open <http://localhost:8502>.
+
+## Credits
+
+Built by **Ali Barfi Bafghi** · [GitHub](https://github.com/alibb007) · [LinkedIn](https://www.linkedin.com/in/alibarfibafghi/) · [Email](mailto:ali.barfib@gmail.com)
+
+Simple Meridian is an independent project. It uses the open-source [Google Meridian](https://github.com/google/meridian) library (Apache 2.0) and is not affiliated with or endorsed by Google. Meridian is a trademark of Google LLC.
+
+Released under the [MIT License](LICENSE).

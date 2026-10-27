@@ -1,0 +1,27 @@
+[theme]
+base = "light"
+primaryColor = "#2459E8"
+backgroundColor = "#F4F6FB"
+secondaryBackgroundColor = "#EEF1F7"
+textColor = "#101828"
+linkColor = "#2459E8"
+borderColor = "#E2E7F0"
+baseRadius = "10px"
+font = "'Red Hat Text', 'Segoe UI', system-ui, sans-serif"
+headingFont = "'Red Hat Display', 'Segoe UI', system-ui, sans-serif"
+
+[theme.sidebar]
+backgroundColor = "#0B1B3F"
+secondaryBackgroundColor = "#1A2F61"
+textColor = "#DCE3F1"
+borderColor = "#22386B"
+
+[server]
+maxUploadSize = 200
+headless = true
+
+[browser]
+gatherUsageStats = false
+
+[client]
+toolbarMode = "minimal"

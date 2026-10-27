@@ -1,5 +1,18 @@
-config.toml
-*.pyc
+# Python
 __pycache__/
+*.pyc
+.venv/
+venv/
+
+# Secrets and local settings (the theme in .streamlit/config.toml is tracked)
 .env
 *.env
+.streamlit/secrets.toml
+/config.toml
+
+# Model files and reports produced while using the app
+*.binpb
+*.pkl
+meridian_data_temp.csv
+
+.DS_Store
