@@ -203,7 +203,7 @@
       'rel="noopener noreferrer">first release of Simple Meridian</a> in April 2025 on Meridian 1.0.6: upload, fit, charts and a budget ' +
       "optimizer. Today it runs Meridian 2.1.0 and adds GeoX lift tests, this guided tour and a new design.</p></div>",
     story: '<div class="storypage"><div class="kick">The story</div>' +
-      '<iframe class="motion" data-src="assets/story.html" title="Animated story: a shop works out where its ad budget should go"></iframe>' +
+      '<iframe class="motion" data-src="assets/story.html?v=e0e5a36fef" title="Animated story: a shop works out where its ad budget should go"></iframe>' +
       '<div class="starts"><button class="btn pill pill-gold" id="t-start2" type="button">Start the Simple Meridian guided tour</button>' +
       '<button class="btn pill pill-light" id="t-home" type="button">Back to the start</button></div></div>',
     upload: '<div class="kick">Step 1 of 3</div><h3>Data &amp; model</h3>' +
@@ -422,7 +422,7 @@
   function loadCharts() {
     if (!chartsReady) {
       chartsReady = ["vendor/vega@6.2.0.min.js", "vendor/vega-lite@6.4.1.min.js", "vendor/vega-embed@7.0.2.min.js",
-                     "vendor/vega-interpreter@2.2.1.js", "charts.js"].reduce(function (p, f) {
+                     "vendor/vega-interpreter@2.2.1.js", "charts.js?v=61000e872f"].reduce(function (p, f) {
         return p.then(function () { return loadScript("assets/" + f); });
       }, Promise.resolve());
     }
