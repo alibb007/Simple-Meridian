@@ -558,6 +558,17 @@
     else fallback();
   });
 
+  // GoatCounter (loaded async from index.html) counts each screen once per visit, so the step counts
+  // show how far people get. Nothing is sent if the script is blocked or has not loaded yet.
+  function track(path, title) {
+    var gc = window.goatcounter;
+    if (gc && gc.count) gc.count({ path: path, title: title, event: true });
+  }
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest && e.target.closest('a[href^="http"]');
+    if (a) track("out/" + a.hostname + a.pathname.replace(/\/$/, "") + a.hash, (a.innerText || a.textContent).replace(/\s+/g, " ").trim());
+  });
+
   function chapterEnd(k) { for (var j = k + 1; j < STEPS.length; j++) if (STEPS[j].chapter !== STEPS[k].chapter) return j; return STEPS.length; }
   function go(j, scrollToo) {
     var from = i;
@@ -576,6 +587,8 @@
     });
     [].forEach.call(nav.querySelectorAll(".sub"), function (x) { x.classList.toggle("on", +x.dataset.k === i); });
     if (history.replaceState) history.replaceState(null, "", i === -2 ? "#story" : intro ? location.pathname + location.search : "#step-" + (i + 1));
+    if (i === -2) track("story", "Story");
+    else if (!intro) track("tour/step-" + (i + 1), s.chapter + ": " + s.title);
     if (intro) {
       main.style.paddingTop = main.style.paddingBottom = "";
       if (scrollToo) window.scrollTo(0, 0);

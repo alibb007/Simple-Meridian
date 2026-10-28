@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Simple Meridian guided tour</title>
 <meta name="description" content="A guided tour of Google Meridian, the open-source marketing mix model, on a made-up company's results. Plays in your browser, nothing to install.">
-<!-- Static page: no cookies, no trackers, no third-party requests. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; frame-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
-<meta name="referrer" content="no-referrer">
+<!-- Static page, no cookies. GoatCounter (pinned count.v5.js with SRI) counts visits; nothing else leaves the page. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: https://simplemeridian.goatcounter.com; style-src 'self' 'unsafe-inline'; script-src 'self' https://gc.zgo.at; frame-src 'self'; connect-src 'self' https://simplemeridian.goatcounter.com; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="strict-origin">
 <link rel="icon" href="assets/logo.png">
 <link rel="stylesheet" href="assets/site.css?v=f38759df04">
 </head>
@@ -27,7 +27,7 @@
       <a href="https://developers.google.com/meridian" target="_blank" rel="noopener noreferrer">Google Meridian</a>
       <a href="https://developers.google.com/meridian/geox" target="_blank" rel="noopener noreferrer">Meridian GeoX</a>
       <a href="https://github.com/alibb007/Simple-Meridian" target="_blank" rel="noopener noreferrer">Source code</a>
-      <p>Made-up data. Runs in your browser, sets no cookies and sends nothing. Not affiliated with Google; Meridian is a trademark of Google LLC.</p>
+      <p>Made-up data. Runs in your browser and sets no cookies. GoatCounter counts visits without storing anything that identifies you. Not affiliated with Google; Meridian is a trademark of Google LLC.</p>
       <a class="me" href="https://www.linkedin.com/in/alibarfibafghi/" target="_blank" rel="noopener noreferrer">
         <img src="assets/ali.png" alt="" width="36" height="36"><span><small>Built by</small><b>Ali Barfi Bafghi</b></span></a>
     </div>
@@ -51,6 +51,8 @@
   </div>
 </div>
 <script src="assets/demo.js?v=3a6dc16475"></script>
-<script src="assets/site.js?v=5b1e7bbf58"></script>
+<script data-goatcounter="https://simplemeridian.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js"
+        crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+<script src="assets/site.js?v=8254f972d4"></script>
 </body>
 </html>
