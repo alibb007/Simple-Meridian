@@ -1,13 +1,13 @@
 """Run the GeoX sample exactly as the app's GeoX page does by default and save the numbers
 the live demo's tour shows (data/demo/geox.json).
 
-    .venv/bin/python scripts/build_geox_demo.py
+    .venv/bin/python scripts/demo/build_geox_demo.py
 """
 import json
 import os
 import sys
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, ROOT)
 from utils import geox as G  # noqa: E402
 

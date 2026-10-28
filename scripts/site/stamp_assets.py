@@ -1,13 +1,13 @@
 """Add a content hash (?v=...) to the site's own file links, so a browser that cached an older
 copy (GitHub Pages sends max-age=600) loads the new one right after a publish.
 
-    python3 docs/stamp_assets.py     # run before copying docs/ to the demo repository
+    python3 scripts/site/stamp_assets.py     # run before copying docs/ to the demo repository
 """
 import hashlib
 import os
 import re
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "docs")
 A = os.path.join(HERE, "assets")
 
 

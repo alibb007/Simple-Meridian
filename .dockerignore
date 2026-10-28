@@ -11,9 +11,8 @@ __pycache__
 *.binpb
 !data/sample_model.binpb
 *.pkl
-pic/app.png
-pic/home.png
-pic/budget-plan.png
+assets/screenshots
+assets/readme
 .claude
 docs
 start.sh

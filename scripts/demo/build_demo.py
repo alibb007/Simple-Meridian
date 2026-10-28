@@ -2,7 +2,7 @@
 
 Run after changing the sample data or upgrading google-meridian:
 
-    python scripts/build_demo.py
+    python scripts/demo/build_demo.py
 
 Writes data/sample_model.binpb (Standard preset) and data/demo/*.csv|json,
 which the app reads instead of recomputing when the demo is opened.
@@ -12,13 +12,13 @@ import os
 import sys
 import time
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 import pandas as pd  # noqa: E402
 
 from utils import mmm as M  # noqa: E402
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DATA = os.path.join(ROOT, "data")
 OUT = os.path.join(DATA, "demo")
 

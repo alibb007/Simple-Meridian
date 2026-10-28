@@ -52,8 +52,8 @@ EXTRA = [
 ]
 
 
-_PIC = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "pic")
-_LOGO_PATH = os.path.join(_PIC, "Logo.png")
+_PIC = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "assets")
+_LOGO_PATH = os.path.join(_PIC, "logo.png")
 _AVATAR_PATH = os.path.join(_PIC, "ali.png")
 
 

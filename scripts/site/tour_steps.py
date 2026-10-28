@@ -1,4 +1,4 @@
-"""Guided tour text for the live demo site (docs/). Read by docs/build_demo_json.py.
+"""Guided tour text for the live demo site (docs/). Read by scripts/site/build_site_data.py.
 
 The Streamlit app has no tour of its own; it links to the site instead. Step
 anchors match the data-t regions of the simulated screens in docs/assets/site.js.
@@ -11,7 +11,7 @@ import sys
 
 import pandas as pd
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, ROOT)
 
 _DEMO_DIR = os.path.join(ROOT, "data", "demo")
@@ -32,7 +32,7 @@ def _demo_facts() -> dict:
 
 
 def _geox_facts() -> dict:
-    """The GeoX sample's real results (scripts/build_geox_demo.py)."""
+    """The GeoX sample's real results (scripts/demo/build_geox_demo.py)."""
     with open(os.path.join(_DEMO_DIR, "geox.json")) as fh:
         x = json.load(fh)
     return {"n_geos": x["n_geos"], "n_test": len(x["treatment"]), "n_control": len(x["control"]),

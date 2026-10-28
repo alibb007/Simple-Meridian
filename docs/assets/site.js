@@ -1,5 +1,5 @@
 /* Simple Meridian live demo: the guided tour is the whole page. Simulated app screens, a spotlight and a caption.
-   All data comes from assets/demo.js (built by docs/build_demo_json.py from data/demo/). */
+   All data comes from assets/demo.js (built by scripts/site/build_site_data.py from data/demo/). */
 (function () {
   "use strict";
   var D = window.SM_DEMO;
@@ -99,7 +99,7 @@
     return s + "</svg>";
   }
 
-  // ---------------- GeoX sample (real results from scripts/build_geox_demo.py) ----------------
+  // ---------------- GeoX sample (real results from scripts/demo/build_geox_demo.py) ----------------
   var GX = D.geox, gxTest = {}; GX.treatment.forEach(function (g) { gxTest[g] = 1; });
   function regionGrid() {
     var names = Object.keys(GX.geo_size).sort(), s = '<svg viewBox="0 0 400 210" role="img" aria-label="40 regions: ' + GX.treatment.length + ' test, ' + GX.control.length + ' control">';
@@ -306,7 +306,7 @@
   // true = show the PNG screenshots in assets/charts/ instead of the interactive charts.
   var CHART_IMAGES = false;
 
-  // ---------------- Tour steps (text comes from docs/tour_steps.py) ----------------
+  // ---------------- Tour steps (text comes from scripts/site/tour_steps.py) ----------------
   // The welcome page is not a step: it has its own start button.
   var STEPS = (D.tour || []).filter(function (s) { return s.chapter !== "Welcome"; }).map(function (s) {
     var st = { chapter: s.chapter, title: s.title, body: s.body, screen: s.page, target: s.anchor };

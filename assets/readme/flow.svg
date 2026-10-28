@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 250" width="960" height="250" role="img" aria-labelledby="t d">
+  <title id="t">How Simple Meridian works</title>
+  <desc id="d">Five steps that light up in turn: upload weekly data, run Google Meridian, read the return per dollar, plan the budget, and check it with a GeoX lift test.</desc>
+  <style>
+    text { font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif; fill: #0B1B3F; }
+    .n { font-size: 13px; font-weight: 800; fill: #FFFFFF; }
+    .h { font-size: 16px; font-weight: 800; }
+    .s { font-size: 12.5px; fill: #475467; }
+    .card { fill: #FFFFFF; stroke: #0B1B3F; stroke-width: 2.5; }
+    .step { animation: glow 12.5s infinite; transform-box: fill-box; transform-origin: center; }
+    .s1 { animation-delay: 0s; } .s2 { animation-delay: 2.5s; } .s3 { animation-delay: 5s; } .s4 { animation-delay: 7.5s; } .s5 { animation-delay: 10s; }
+    @keyframes glow {
+      0%, 22%, 100% { transform: translateY(0); }
+      4%, 16% { transform: translateY(-6px); }
+    }
+    .ring { fill: none; stroke: #FFD166; stroke-width: 6; opacity: 0; animation: ring 12.5s infinite; }
+    .r1 { animation-delay: 0s; } .r2 { animation-delay: 2.5s; } .r3 { animation-delay: 5s; } .r4 { animation-delay: 7.5s; } .r5 { animation-delay: 10s; }
+    @keyframes ring { 0%, 22%, 100% { opacity: 0; } 4%, 16% { opacity: 1; } }
+    .dot { fill: #FFD166; stroke: #0B1B3F; stroke-width: 2; animation: travel 12.5s infinite cubic-bezier(.4, 0, .2, 1); }
+    @keyframes travel {
+      0%, 16% { transform: translateX(0); }
+      20%, 36% { transform: translateX(186px); }
+      40%, 56% { transform: translateX(372px); }
+      60%, 76% { transform: translateX(558px); }
+      80%, 96% { transform: translateX(744px); }
+      100% { transform: translateX(0); }
+    }
+    .bar { transform-box: fill-box; transform-origin: bottom; animation: grow 12.5s infinite; animation-delay: 5s; }
+    @keyframes grow { 0% { transform: scaleY(.15); } 6%, 90% { transform: scaleY(1); } 100% { transform: scaleY(.15); } }
+    @media (prefers-reduced-motion: reduce) { .step, .ring, .dot, .bar { animation: none; } .ring { opacity: 0; } }
+  </style>
+
+  <rect x="1" y="1" width="958" height="248" rx="22" fill="#FFF8EC" stroke="#0B1B3F" stroke-width="2"/>
+  <line x1="110" y1="68" x2="854" y2="68" stroke="#0B1B3F" stroke-width="3" stroke-dasharray="2 9" stroke-linecap="round"/>
+  <circle class="dot" cx="110" cy="68" r="8"/>
+
+  <!-- 1 Upload -->
+  <g class="step s1">
+    <rect class="ring r1" x="30" y="92" width="160" height="134" rx="18"/>
+    <rect class="card" x="30" y="92" width="160" height="134" rx="18"/>
+    <circle cx="110" cy="68" r="15" fill="#2A78D6" stroke="#0B1B3F" stroke-width="2.5"/><text class="n" x="110" y="73" text-anchor="middle">1</text>
+    <rect x="92" y="106" width="36" height="44" rx="5" fill="#E8F1FC" stroke="#2A78D6" stroke-width="2.5"/>
+    <path d="M99 120h22M99 129h22M99 138h14" stroke="#2A78D6" stroke-width="2.5" stroke-linecap="round"/>
+    <text class="h" x="110" y="176" text-anchor="middle">Upload</text>
+    <text class="s" x="110" y="196" text-anchor="middle">weekly spend and</text>
+    <text class="s" x="110" y="212" text-anchor="middle">sales, CSV or Excel</text>
+  </g>
+
+  <!-- 2 Run Meridian -->
+  <g class="step s2">
+    <rect class="ring r2" x="216" y="92" width="160" height="134" rx="18"/>
+    <rect class="card" x="216" y="92" width="160" height="134" rx="18"/>
+    <circle cx="296" cy="68" r="15" fill="#EB6834" stroke="#0B1B3F" stroke-width="2.5"/><text class="n" x="296" y="73" text-anchor="middle">2</text>
+    <circle cx="296" cy="128" r="22" fill="#FDEBE3" stroke="#EB6834" stroke-width="2.5"/>
+    <path d="M288 117l18 11-18 11z" fill="#EB6834"/>
+    <text class="h" x="296" y="176" text-anchor="middle">Run Meridian</text>
+    <text class="s" x="296" y="196" text-anchor="middle">one button, about</text>
+    <text class="s" x="296" y="212" text-anchor="middle">30 s on the sample</text>
+  </g>
+
+  <!-- 3 Insights -->
+  <g class="step s3">
+    <rect class="ring r3" x="402" y="92" width="160" height="134" rx="18"/>
+    <rect class="card" x="402" y="92" width="160" height="134" rx="18"/>
+    <circle cx="482" cy="68" r="15" fill="#008300" stroke="#0B1B3F" stroke-width="2.5"/><text class="n" x="482" y="73" text-anchor="middle">3</text>
+    <rect class="bar" x="458" y="110" width="12" height="40" rx="3" fill="#008300"/>
+    <rect class="bar" x="476" y="124" width="12" height="26" rx="3" fill="#EB6834"/>
+    <rect class="bar" x="494" y="136" width="12" height="14" rx="3" fill="#2A78D6"/>
+    <line x1="452" y1="151" x2="512" y2="151" stroke="#0B1B3F" stroke-width="2.5" stroke-linecap="round"/>
+    <text class="h" x="482" y="176" text-anchor="middle">Read the insights</text>
+    <text class="s" x="482" y="196" text-anchor="middle">return per $1 for</text>
+    <text class="s" x="482" y="212" text-anchor="middle">every channel</text>
+  </g>
+
+  <!-- 4 Budget plan -->
+  <g class="step s4">
+    <rect class="ring r4" x="588" y="92" width="160" height="134" rx="18"/>
+    <rect class="card" x="588" y="92" width="160" height="134" rx="18"/>
+    <circle cx="668" cy="68" r="15" fill="#E87BA4" stroke="#0B1B3F" stroke-width="2.5"/><text class="n" x="668" y="73" text-anchor="middle">4</text>
+    <circle cx="668" cy="128" r="22" fill="#FCE9F0" stroke="#E87BA4" stroke-width="2.5"/>
+    <path d="M668 128V106A22 22 0 0 1 689 134z" fill="#E87BA4"/>
+    <text class="h" x="668" y="176" text-anchor="middle">Plan the budget</text>
+    <text class="s" x="668" y="196" text-anchor="middle">same total, a split</text>
+    <text class="s" x="668" y="212" text-anchor="middle">that sells more</text>
+  </g>
+
+  <!-- 5 GeoX -->
+  <g class="step s5">
+    <rect class="ring r5" x="774" y="92" width="160" height="134" rx="18"/>
+    <rect class="card" x="774" y="92" width="160" height="134" rx="18"/>
+    <circle cx="854" cy="68" r="15" fill="#7A5AF8" stroke="#0B1B3F" stroke-width="2.5"/><text class="n" x="854" y="73" text-anchor="middle">5</text>
+    <g fill="#7A5AF8"><rect x="830" y="108" width="14" height="12" rx="3"/><rect x="864" y="108" width="14" height="12" rx="3"/><rect x="847" y="124" width="14" height="12" rx="3"/><rect x="830" y="140" width="14" height="12" rx="3"/></g>
+    <g fill="#E4DDFE"><rect x="847" y="108" width="14" height="12" rx="3"/><rect x="830" y="124" width="14" height="12" rx="3"/><rect x="864" y="124" width="14" height="12" rx="3"/><rect x="847" y="140" width="14" height="12" rx="3"/><rect x="864" y="140" width="14" height="12" rx="3"/></g>
+    <text class="h" x="854" y="176" text-anchor="middle">Prove it with GeoX</text>
+    <text class="s" x="854" y="196" text-anchor="middle">ads on in some regions,</text>
+    <text class="s" x="854" y="212" text-anchor="middle">off in others</text>
+  </g>
+</svg>

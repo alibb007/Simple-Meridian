@@ -1,9 +1,9 @@
 """Pack the precomputed demo results (data/demo/) into docs/assets/demo.json.
 
-Run from the repo root after `python scripts/build_demo.py`, with the app's
-virtualenv (the tour text is imported from docs/tour_steps.py so it never drifts):
+Run from the repo root after `python scripts/demo/build_demo.py`, with the app's
+virtualenv (the tour text is imported from scripts/site/tour_steps.py so it never drifts):
 
-    .venv/bin/python docs/build_demo_json.py
+    .venv/bin/python scripts/site/build_site_data.py
 """
 import csv
 import json
@@ -11,7 +11,7 @@ import os
 import struct
 import sys
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DEMO = os.path.join(ROOT, "data", "demo")
 OUT = os.path.join(ROOT, "docs", "assets", "demo.json")
 
@@ -40,7 +40,7 @@ with open(os.path.join(DEMO, "plan.json")) as f:
     plan_totals = json.load(f)
 with open(os.path.join(DEMO, "quality.json")) as f:
     quality = json.load(f)
-with open(os.path.join(DEMO, "geox.json")) as f:  # scripts/build_geox_demo.py
+with open(os.path.join(DEMO, "geox.json")) as f:  # scripts/demo/build_geox_demo.py
     geox = json.load(f)
 
 with open(os.path.join(ROOT, "data", "simple_dataset.csv"), newline="") as f:
@@ -49,7 +49,7 @@ with open(os.path.join(ROOT, "data", "simple_dataset.csv"), newline="") as f:
                "Sales": round(float(r["Sales"]))} for _, r in zip(range(6), csv.DictReader(f))]
 
 # Guided tour: the app's own steps (titles and text) and the chart screenshots.
-sys.path.insert(0, os.path.join(ROOT, "docs"))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import tour_steps as tour  # noqa: E402
 
 CHARTS = os.path.join(ROOT, "docs", "assets", "charts")

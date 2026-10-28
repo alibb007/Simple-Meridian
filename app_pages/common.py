@@ -98,7 +98,7 @@ def has_model() -> bool:
 
 # Analyzer calls take a few seconds each. Cache them per model; the leading
 # underscore tells Streamlit not to hash the Meridian object itself. The demo
-# model's results are precomputed by scripts/build_demo.py and read from disk.
+# model's results are precomputed by scripts/demo/build_demo.py and read from disk.
 def _is_demo(model_key: str) -> bool:
     return str(model_key).startswith("demo-") and os.path.isdir(DEMO_DIR)
 

@@ -3,7 +3,7 @@ import streamlit as st
 
 st.set_page_config(
     page_title="Simple Meridian",
-    page_icon="pic/Logo.png",
+    page_icon="assets/logo.png",
     layout="wide",
     initial_sidebar_state="expanded",
 )
