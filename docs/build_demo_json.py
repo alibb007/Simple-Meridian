@@ -63,7 +63,7 @@ tour_steps = []
 for st in tour.steps():
     step = {"chapter": st["chapter"], "page": st["page"], "title": st["title"], "body": st["body"],
             "anchor": st.get("anchor", "")}
-    if st["page"] == "report":
+    if st["page"] == "report":  # the PNG screenshots in docs/assets/charts/ are kept as a fallback
         cid = st["anchor"][3:]  # "mr-<id>"
         w, h = png_size(os.path.join(CHARTS, cid + ".png"))
         step.update(chart=cid, w=w, h=h)
@@ -79,3 +79,13 @@ js = OUT[:-5] + ".js"
 with open(js, "w") as f:
     f.write("window.SM_DEMO = " + json.dumps(data, separators=(",", ":")) + ";\n")
 print("wrote", OUT, os.path.getsize(OUT), "bytes and", js, os.path.getsize(js), "bytes")
+
+# Meridian's own charts as Vega-Lite specs, for the interactive chart steps (loaded only when needed).
+specs = {}
+for name in ("report_charts.json", "plan_charts.json"):
+    with open(os.path.join(DEMO, name)) as f:
+        specs.update(json.load(f))
+charts_js = os.path.join(ROOT, "docs", "assets", "charts.js")
+with open(charts_js, "w") as f:
+    f.write("window.SM_CHARTS = " + json.dumps(specs, separators=(",", ":")) + ";\n")
+print("wrote", charts_js, os.path.getsize(charts_js), "bytes")

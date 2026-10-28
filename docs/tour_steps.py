@@ -5,6 +5,7 @@ anchors match the data-t regions of the simulated screens in docs/assets/site.js
 """
 from __future__ import annotations
 
+import json
 import os
 import sys
 
@@ -21,10 +22,13 @@ def _demo_facts() -> dict:
     try:
         s = pd.read_csv(os.path.join(_DEMO_DIR, "summary.csv"))
         ch = s[~s.is_total].sort_values("roi", ascending=False)
+        with open(os.path.join(_DEMO_DIR, "quality.json")) as fh:
+            q = json.load(fh)
         return {"best": ch.iloc[0].channel, "best_roi": ch.iloc[0].roi,
-                "worst": ch.iloc[-1].channel, "worst_roi": ch.iloc[-1].roi, "n": len(ch)}
+                "worst": ch.iloc[-1].channel, "worst_roi": ch.iloc[-1].roi, "n": len(ch),
+                "r2": q["r2"], "mape": q["mape"]}
     except Exception:
-        return {"best": "Email", "best_roi": 10.6, "worst": "Display", "worst_roi": 1.6, "n": 6}
+        return {"best": "Email", "best_roi": 10.6, "worst": "Display", "worst_roi": 1.6, "n": 6, "r2": 0.97, "mape": 0.038}
 
 
 def steps() -> list[dict]:
@@ -39,8 +43,13 @@ def steps() -> list[dict]:
                   "it with statistics. This tour shows you the answers for a made-up company that advertises on "
                   f"{f['n']} channels. You only click Next; there is nothing to type.", anchor="home-hero"),
 
+        dict(chapter="Step 1 · Data & model", page="upload", icon="upload_file", title="Upload your data",
+             body="Everything starts here. Upload a CSV or Excel file with one row per week: the date, your sales "
+                  "and what you spent on each channel. No file yet? Load the sample data, or open the demo results "
+                  "to look around first.",
+             anchor="s1-upload"),
         dict(chapter="Step 1 · Data & model", page="step1", icon="table_view", title="Your data",
-             body="Everything starts with one table, one row per week. It says how much the company spent on each "
+             body="This is the file you uploaded, one row per week. It says how much the company spent on each "
                   "channel (TV, Radio, Search…) and how much it sold that week. In the app, <b>Preview the "
                   "table</b> opens the rows.",
              anchor="s1-data"),
@@ -58,11 +67,14 @@ def steps() -> list[dict]:
              body="Discounts, price changes or the season also push sales up and down. Pick those columns here, so "
                   "the model doesn't give your ads credit for a sale that a discount caused.",
              anchor="s1-controls"),
-        dict(chapter="Step 1 · Data & model", page="step1", icon="task_alt", title="Fit the model, then check it",
-             body="In the app, <b>Fit model</b> makes Meridian learn from the table; <b>Quick check</b> "
-                  "takes about 30 seconds. The demo is already fitted, so this box shows the result. <b>0.97</b> "
-                  "means the model explains 97% of the week-to-week ups and downs. <b>Converged</b> means it "
-                  "finished learning properly.",
+        dict(chapter="Step 1 · Data & model", page="step1", icon="rocket_launch", title="Run the model",
+             body="Once every column is set, choose how long Meridian should spend learning and press <b>Run "
+                  "model</b>. <b>Quick check</b> takes about 30 seconds and <b>Standard</b> about a minute.",
+             anchor="s1-run"),
+        dict(chapter="Step 1 · Data & model", page="ready", icon="task_alt", title="Model ready: how good is it?",
+             body=f"When the run finishes, this page grades the model. <b>{f['r2']:.2f}</b> means it explains "
+                  f"{f['r2'] * 100:.0f}% of the week-to-week ups and downs. <b>{f['mape'] * 100:.1f}%</b> is how "
+                  "far off it is in an average week. <b>Converged</b> means it finished learning properly.",
              anchor="s1-ready"),
 
         dict(chapter="Step 2 · Insights", page="step2", icon="bar_chart", title="What each $1 brought back",

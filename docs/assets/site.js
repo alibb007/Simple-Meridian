@@ -134,19 +134,31 @@
   var sel = function (label, value) { return '<div class="field"><span>' + label + "</span><em>" + value + " ▾</em></div>"; };
 
   var SCREENS = {
-    home: '<div class="intro">' +
+    home: '<div class="version"><span class="tag">Updated 27 Oct 2026</span>' +
+      "<span>First release <b>April 2025</b> on Google Meridian 1.0.6</span>" +
+      '<span>Now on <b>Meridian 2.1.0</b>, with <b>GeoX (Lift test)</b><span class="new">NEW</span></span></div>' +
+      '<div class="intro">' +
       '<div class="kicker">Guided tour · Google Meridian, made simple</div>' +
       "<h1>Find out which ads really bring in your sales</h1>" +
       '<p class="lede">Meridian is Google\'s free tool for working out what each ad channel earns and where the next dollar ' +
       "should go. This tour shows it on a made-up company that advertises on " + channels.length + " channels. You click Next; " +
       "there is nothing to type.</p>" +
-      '<iframe class="motion" src="assets/how-it-works.html" title="Animation: how Meridian turns ad spend and sales into a better budget"></iframe>' +
+      '<iframe class="motion" src="assets/story.html" title="Animated story: a shop works out where its ad budget should go"></iframe>' +
       '<div class="start"><button class="btn btn-gold btn-big" id="t-start" type="button">' +
       '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>Start the guided tour</button>' +
       '<span class="startnote">STEPS_COUNT steps · use Next and Back, or the arrow keys</span></div>' +
       '<div class="sign"><img class="avatar" src="assets/ali.png" alt="" width="36" height="36">' +
       "<span>Built by <b>Ali Barfi Bafghi</b> so anyone can try Meridian without writing code. First release April 2025 on " +
       "Meridian 1.0.6, updated 27 Oct 2026 to Meridian 2.1.0.</span></div></div>",
+    upload: '<div class="kick">Step 1 of 3</div><h3>Data &amp; model</h3>' +
+      '<div class="startcards" data-t="s1-upload">' +
+      '<div class="box startcard hot"><span class="hotchip">Start here</span><div class="boxh">Upload your file</div>' +
+      "<p>CSV or Excel. Date, outcome and channel columns are detected for you.</p>" +
+      '<div class="drop">⇪ Drop a file here, or <u>browse</u><small>50MB per file · CSV, XLSX, XLS</small></div></div>' +
+      '<div class="box startcard"><div class="boxh">Or use the sample</div><p>Three years of made-up weekly data for six channels.</p>' +
+      '<span class="fakebtn ghostbtn">Load sample data</span></div>' +
+      '<div class="box startcard"><div class="boxh">Just look around</div><p>Skip the run: open a model already fitted on the sample.</p>' +
+      '<span class="fakebtn ghostbtn">Open demo results</span></div></div>',
     step1: '<div class="kick">Step 1 of 3</div><h3>Data &amp; model</h3>' +
       '<div class="box" data-t="s1-data"><div class="boxh">Your data</div>' +
       '<div class="pills"><span>simple_dataset.csv</span><span>156 weeks</span><span>02 Jan 2022 → 22 Dec 2024</span></div>' +
@@ -158,11 +170,16 @@
       '<div class="box" data-t="s1-channels"><div class="boxh">2 · Your ad channels</div><div class="chgrid">' + channelCards() + "</div></div>" +
       '<div class="box" data-t="s1-controls"><div class="boxh">3 · Other things that move sales</div>' +
       '<div class="chips"><span>Industry_Trend ✕</span><span>Discount ✕</span></div></div>' +
-      '<div class="box" data-t="s1-ready"><div class="boxh">Model ready</div><div class="tiles">' +
-      '<div class="tile"><div class="k">Fit (R²)</div><div class="v">' + Q.r2.toFixed(2) + '</div><div class="d">weekly variation explained</div></div>' +
+      '<div class="box" data-t="s1-run"><div class="boxh">4 · Run the model</div>' +
+      '<div class="checks"><span>✓ Date and outcome set</span><span>✓ ' + channels.length + ' channels</span><span>✓ 2 control columns</span></div>' +
+      '<div class="radio">How long should Meridian learn? ◉ Quick check (about 30 s) ○ Standard (about 1 min) ○ Thorough</div>' +
+      '<span class="fakebtn bigbtn">▶ Run model</span></div>',
+    ready: '<div class="kick">Step 1 of 3 · after the run</div><h3>Model ready</h3>' +
+      '<div class="box" data-t="s1-ready"><div class="boxh">How good is the model?</div><div class="tiles">' +
+      '<div class="tile"><div class="k">Fit (R²)</div><div class="v">' + Q.r2.toFixed(2) + '</div><div class="d">weekly ups and downs explained</div></div>' +
       '<div class="tile"><div class="k">Error (MAPE)</div><div class="v">' + (Q.mape * 100).toFixed(1) + '%</div><div class="d">average miss per week</div></div>' +
-      '<div class="tile"><div class="k">Convergence</div><div class="v">' + Q.max_rhat.toFixed(2) + '</div><div class="d up">converged</div></div></div>' +
-      '<div class="row"><span class="fakebtn">Fit model</span><span class="radio">◉ Quick check ○ Standard ○ Thorough</span></div></div>',
+      '<div class="tile"><div class="k">Convergence (R-hat)</div><div class="v">' + Q.max_rhat.toFixed(2) + '</div><div class="d up">converged</div></div></div>' +
+      '<div class="row"><span class="fakebtn">Next: see the insights →</span><span class="fakebtn ghostbtn">Download the model</span></div></div>',
     step2: '<div class="kick">Step 2 of 3</div><h3>Insights</h3>' + insightsTiles + tabs(0) + '<div class="chart" data-t="s2-roi">' + roiChart() + "</div>",
     step3: '<div class="kick">Step 3 of 3</div><h3>Budget plan</h3>' +
       '<div class="box" data-t="s3-settings"><div class="boxh">Plan settings</div>' +
@@ -198,6 +215,9 @@
       "</div></div>",
   };
 
+  // true = show the PNG screenshots in assets/charts/ instead of the interactive charts.
+  var CHART_IMAGES = false;
+
   // ---------------- Tour steps (text comes from docs/tour_steps.py) ----------------
   // The welcome page is not a step: it has its own start button.
   var STEPS = (D.tour || []).filter(function (s) { return s.chapter !== "Welcome"; }).map(function (s) {
@@ -206,8 +226,11 @@
       st.screen = "mr-" + s.chart; st.target = "mr-" + s.chart;
       if (!SCREENS[st.screen]) {
         SCREENS[st.screen] = '<div class="kick">' + (s.chapter === "Budget plan charts" ? "Budget plan · charts" : "Insights · Meridian's own charts") + "</div>" +
-          '<div class="shot" data-t="mr-' + s.chart + '"><img src="assets/charts/' + s.chart + '.png" width="' + s.w +
-          '" height="' + s.h + '" alt="' + esc(s.title) + ' (chart from the Simple Meridian app)"></div>';
+          (CHART_IMAGES
+            ? '<div class="shot" data-t="mr-' + s.chart + '"><img src="assets/charts/' + s.chart + '.png" width="' + s.w +
+              '" height="' + s.h + '" alt="' + esc(s.title) + ' (chart from the Simple Meridian app)"></div>'
+            : '<div class="shot vchart" data-t="mr-' + s.chart + '" data-chart="' + s.chart + '" role="img" aria-label="' + esc(s.title) +
+              ' (interactive chart drawn by Meridian)"><div class="vload">Drawing the chart…</div></div>');
       }
     }
     if (s.chapter === "Your turn") {
@@ -230,6 +253,15 @@
   var againBtn = document.getElementById("t-again"), nav = document.getElementById("chapters");
   var small = window.matchMedia("(max-width: 860px)"), wide = window.matchMedia("(min-width: 1200px)"), SIDE = 380;
   var i = -1, basePad = null;  // i = -1 is the welcome page
+  var fold = document.getElementById("fold");
+  function setFolded(f) {
+    app.classList.toggle("folded", f);
+    fold.setAttribute("aria-expanded", String(!f));
+    fold.setAttribute("aria-label", f ? "Show the chapter list" : "Hide the chapter list");
+    try { localStorage.setItem("sm-folded", f ? "1" : "0"); } catch (e) {}
+  }
+  fold.addEventListener("click", function () { setFolded(!app.classList.contains("folded")); });
+  try { if (localStorage.getItem("sm-folded") === "1") setFolded(true); } catch (e) {}
 
   Object.keys(SCREENS).forEach(function (k) {
     var div = document.createElement("div");
@@ -245,6 +277,45 @@
     b.addEventListener("click", function () { go(k, true); });
     nav.appendChild(b);
   });
+
+  // Vega libraries and Meridian's chart specs load on first use (same origin, no eval: the AST interpreter runs expressions).
+  var chartsReady = null;
+  function loadScript(src) {
+    return new Promise(function (ok, fail) {
+      var t = document.createElement("script"); t.src = src; t.onload = ok; t.onerror = function () { fail(new Error(src)); };
+      document.head.appendChild(t);
+    });
+  }
+  function loadCharts() {
+    if (!chartsReady) {
+      chartsReady = ["vendor/vega@6.2.0.min.js", "vendor/vega-lite@6.4.1.min.js", "vendor/vega-embed@7.0.2.min.js",
+                     "vendor/vega-interpreter@2.2.1.js", "charts.js"].reduce(function (p, f) {
+        return p.then(function () { return loadScript("assets/" + f); });
+      }, Promise.resolve());
+    }
+    return chartsReady;
+  }
+  function drawCharts(scr) {
+    var boxes = scr ? scr.querySelectorAll(".vchart:not(.drawn)") : [];
+    if (!boxes.length) return;
+    loadCharts().then(function () {
+      [].forEach.call(boxes, function (box) {
+        if (box.classList.contains("drawn")) return;
+        box.classList.add("drawn");
+        var spec = window.SM_CHARTS[box.dataset.chart];
+        if (spec && spec.table) {  // the fit-score table
+          var t = spec.table;
+          box.innerHTML = "<table><thead><tr>" + t.columns.map(function (c) { return "<th>" + esc(c) + "</th>"; }).join("") + "</tr></thead><tbody>" +
+            t.data.map(function (r) { return "<tr>" + r.map(function (v) { return "<td>" + esc(typeof v === "number" ? (+v.toFixed(3)) : v) + "</td>"; }).join("") + "</tr>"; }).join("") +
+            "</tbody></table>";
+          place(false); return;
+        }
+        vegaEmbed(box, spec, { actions: false, renderer: "svg", ast: true, expr: vegaInterpreter.expressionInterpreter })
+          .then(function () { place(false); })
+          .catch(function () { box.innerHTML = '<div class="vload">This chart could not be drawn.</div>'; });
+      });
+    }).catch(function () { [].forEach.call(boxes, function (b) { b.innerHTML = '<div class="vload">This chart could not be loaded.</div>'; }); });
+  }
 
   function setSpot(r, a, pad) {
     spot.style.left = (r.left - a.left - pad) + "px"; spot.style.top = (r.top - a.top - pad) + "px";
@@ -278,10 +349,12 @@
     main.style.paddingBottom = "";
     if (wide.matches) {  // wide screens: the caption is a column to the right of the part it explains
       a = app.getBoundingClientRect(); var mm = main.getBoundingClientRect();
-      if (scrollToo) { window.scrollBy({ top: t.getBoundingClientRect().top - 24, behavior: "auto" }); a = app.getBoundingClientRect(); }
+      if (scrollToo) { window.scrollBy({ top: t.getBoundingClientRect().top - 64, behavior: "auto" }); a = app.getBoundingClientRect(); }
       r = t.getBoundingClientRect();
       cap.style.width = SIDE + "px";
-      cap.style.left = (mm.right - a.left - SIDE - 28) + "px";
+      // Beside the part it explains, never past the window edge.
+      var maxLeft = Math.min(mm.right, document.documentElement.clientWidth) - a.left - SIDE - 28;
+      cap.style.left = Math.min(maxLeft, r.right - a.left + 28) + "px";
       cap.style.top = Math.max(r.top - a.top - pad, mm.top - a.top + 16) + "px";
       setSpot(r, a, pad);
       return;
@@ -311,6 +384,7 @@
     i = Math.max(-1, Math.min(STEPS.length - 1, j));
     var intro = i < 0, s = intro ? { screen: "home" } : STEPS[i];
     [].forEach.call(main.children, function (c) { c.classList.toggle("on", c.dataset.screen === s.screen); });
+    drawCharts(main.querySelector('.screen[data-screen="' + s.screen + '"]'));
     cap.hidden = spot.hidden = intro;
     app.classList.toggle("touring", !intro);
     var start = -1; CHAPTERS.forEach(function (k) { if (k <= i) start = k; });
@@ -348,7 +422,7 @@
     fitMotion();
     try { if ("ResizeObserver" in window) new ResizeObserver(fitMotion).observe(motion.contentDocument.body); } catch (e) {}
   });
-  document.getElementById("t-start").addEventListener("click", function () { go(0, true); });
+  document.getElementById("t-start").addEventListener("click", function () { go(0, true); if (!CHART_IMAGES) loadCharts(); });
   nextBtn.addEventListener("click", function () { go(i + 1, true); });
   document.getElementById("t-back").addEventListener("click", function () { go(i - 1, true); });
   skipBtn.addEventListener("click", function () { go(chapterEnd(i), true); });

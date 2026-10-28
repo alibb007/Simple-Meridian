@@ -38,7 +38,7 @@ def show_upload_and_run():
 # --------------------------------------------------------------------------- #
 def _progress(df):
     done = [df is not None, df is not None, df is not None, df is not None, has_model()]
-    labels = ["Data", "Time & outcome", "Paid channels", "Controls", "Fit"]
+    labels = ["Data", "Time & outcome", "Paid channels", "Controls", "Run"]
     chips = "".join(
         f'<span class="sm-step {"on" if d else ""}"><b>{i}</b>{lab}</span>'
         for i, (lab, d) in enumerate(zip(labels, done), start=1)
@@ -241,7 +241,7 @@ def _configure(df: pd.DataFrame):
                                       label_visibility="collapsed", placeholder="Pick any columns that apply")
 
     with right:
-        _section(5, "rocket_launch", "Fit", "Check the list, then fit.")
+        _section(5, "rocket_launch", "Run", "Check the list, then run the model.")
         with st.container(border=True, key="runcard"):
             preset = st.radio("Sampling", list(M.PRESETS), index=0, key="cfg_preset",
                               help="More samples give tighter estimates. Most of the time is a one-off compile, "
@@ -268,7 +268,7 @@ def _configure(df: pd.DataFrame):
                 f'<div style="display:flex;gap:.5rem;align-items:center;font-size:.92rem;margin:.25rem 0">'
                 f'{ui.icon("check_circle" if ok else "cancel", 18, ui.GOOD if ok else ui.BAD)}{html.escape(text)}</div>'
                 for ok, text in checks), unsafe_allow_html=True)
-            fit_clicked = st.button("Refit model" if has_model() else "Fit model", type="primary", width="stretch",
+            fit_clicked = st.button("Run model again" if has_model() else "Run model", type="primary", width="stretch",
                                     icon=":material/model_training:",
                                     disabled=bool(errors) or M.MERIDIAN_VERSION is None)
         for n in notes:

@@ -26,6 +26,10 @@ Simple Meridian is MIT-licensed (see `LICENSE`). It depends on the open-source c
 | XlsxWriter | 3.3.0 | BSD-2-Clause | https://github.com/jmcnamara/XlsxWriter |
 | Material Symbols (icons, loaded by Streamlit) | | Apache-2.0 | https://github.com/google/material-design-icons |
 | Red Hat Display / Red Hat Text (fonts, loaded from Google Fonts) | | SIL Open Font License 1.1 | https://github.com/RedHatOfficial/RedHatFont |
+| Vega (live demo site, `docs/assets/vendor/`) | 6.2.0 | BSD-3-Clause | https://github.com/vega/vega |
+| Vega-Lite (live demo site) | 6.4.1 | BSD-3-Clause | https://github.com/vega/vega-lite |
+| vega-embed (live demo site) | 7.0.2 | BSD-3-Clause | https://github.com/vega/vega-embed |
+| vega-interpreter (live demo site) | 2.2.1 | BSD-3-Clause | https://github.com/vega/vega |
 
 Licenses were read from each package's installed metadata. The Apache-2.0 components ask that their license and NOTICE files travel with redistributed copies; the Docker image keeps every package's installed `*.dist-info` folder, where pip places those files.
 

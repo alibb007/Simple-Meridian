@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A shop with an ad budget problem</title>
+<style>
+  :root {
+    --navy: #0B1B3F; --ink: #101828; --muted: #5B6475; --border: #E2E7F0; --surface: #FFFFFF;
+    --primary: #2459E8; --violet: #6D4AE8; --good: #067647; --bad: #B42318; --gold: #EDA100; --grid: #EDF0F6;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: transparent; }
+  body { font-family: "Red Hat Text", "Red Hat Display", system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); }
+  .mg { width: 100%; max-width: 1100px; margin: 0 auto; background: var(--surface); border: 1px solid var(--border);
+        border-radius: 18px; overflow: hidden; }
+  .bar { display: flex; align-items: center; gap: 14px; padding: 14px 18px 4px; min-height: 64px; }
+  .dots { display: flex; gap: 6px; flex: none; }
+  .dots button { width: 26px; height: 8px; border-radius: 99px; border: 0; padding: 0; background: #E4E7EC; cursor: pointer; overflow: hidden; position: relative; }
+  .dots button i { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--primary); border-radius: 99px; }
+  .dots button.done { background: #B7C9F7; }
+  .dots button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  .cap { font-family: "Red Hat Display", "Red Hat Text", system-ui, sans-serif; font-weight: 700; font-size: 18px; line-height: 1.3; }
+  .cap .act { display: block; font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--violet); margin-bottom: 2px; }
+  .cap small { display: block; font-family: "Red Hat Text", system-ui, sans-serif; font-weight: 500; font-size: 14px;
+               color: var(--muted); margin-top: 3px; }
+  svg { display: block; width: 100%; height: auto; }
+  svg text { font-family: "Red Hat Text", system-ui, sans-serif; }
+  .lbl { font-size: 14px; fill: var(--ink); font-weight: 600; }
+  .sub { font-size: 12.5px; fill: var(--muted); }
+  .big { font-family: "Red Hat Display", system-ui, sans-serif; font-weight: 800; }
+  @media (max-width: 560px) { .cap { font-size: 15px; } .cap small { font-size: 12.5px; } }
+</style>
+</head>
+<body>
+<div class="mg" id="mg" role="img" aria-label="Story in six scenes: a shop spends on six ad channels, cannot tell which ones work, has to plan next year's budget, gives three years of weekly numbers to Meridian, sees the return on each channel, and moves money to the channels that still pay back.">
+  <div class="bar">
+    <div class="dots" id="dots" aria-label="Scenes"></div>
+    <div class="cap" id="cap" aria-live="polite"></div>
+  </div>
+  <svg id="stage" viewBox="0 0 1100 300" aria-hidden="true"></svg>
+</div>
+<script>
+(function () {
+  "use strict";
+  // Numbers come from the demo model (the page that embeds this), with the same values as a fallback.
+  var D = null;
+  try { D = window.parent && window.parent.SM_DEMO; } catch (e) {}
+  var PLAN = D ? D.plan : [
+    { channel: "TV", current_spend: 46.5e6, optimized_spend: 51.9e6 }, { channel: "Radio", current_spend: 12.2e6, optimized_spend: 15.9e6 },
+    { channel: "Display", current_spend: 24.9e6, optimized_spend: 17.4e6 }, { channel: "Search", current_spend: 17.8e6, optimized_spend: 12.4e6 },
+    { channel: "Social", current_spend: 8.8e6, optimized_spend: 10.2e6 }, { channel: "Email", current_spend: 5.9e6, optimized_spend: 7.6e6 }];
+  var ROI = D ? D.summary.filter(function (r) { return !r.is_total; }).map(function (r) { return { c: r.channel, v: r.roi }; })
+              : [{ c: "Email", v: 10.62 }, { c: "Radio", v: 6.81 }, { c: "Social", v: 3.36 }, { c: "TV", v: 2.60 }, { c: "Search", v: 2.29 }, { c: "Display", v: 1.61 }];
+  var T = D ? D.plan_totals : { budget_before: 116.1e6, outcome_before: 359.6e6, outcome_after: 378.3e6 };
+  var WEEKS = D ? D.fit.map(function (r) { return r.actual; }) : null;
+  var COLOR = { TV: "#2A78D6", Radio: "#EB6834", Display: "#1BAF7A", Search: "#EDA100", Social: "#E87BA4", Email: "#008300" };
+  ROI.sort(function (a, b) { return b.v - a.v; });
+  var M = function (x) { return "$" + (x / 1e6).toFixed(1) + "M"; };
+  var BUDGET = M(T.budget_before), GAIN = T.outcome_after - T.outcome_before, PCT = GAIN / T.outcome_before * 100;
+  var best = ROI[0], worst = ROI[ROI.length - 1];
+
+  // Pixar story spine: once upon a time, every day, until one day, because of that (twice), until finally.
+  var SCENES = [
+    ["Once upon a time", "Meet a made-up online shop.", "Last year it spent " + BUDGET + " on ads across six channels."],
+    ["Every week", "Sales go up and down.", "Ads, discounts and the season all push them, so nobody can say which channel earned what."],
+    ["Until one day", "The boss asks one question.", "Next year's budget is the same " + BUDGET + ". Where should it go?"],
+    ["Because of that", "The team gives Meridian three years of weekly numbers.", "Meridian splits the sales the ads brought in from the sales that would have happened anyway."],
+    ["Because of that", "Now they can see what each $1 brought back.", best.c + " returned $" + best.v.toFixed(2) + " for every $1. " + worst.c + " returned $" + worst.v.toFixed(2) + "."],
+    ["Until finally", "They move money to the channels that still pay back.", "Same " + BUDGET + " budget, " + M(GAIN) + " more sales from ads in a year (+" + PCT.toFixed(1) + "%)."]
+  ];
+  var N = SCENES.length, DUR = 7500;
+
+  var NS = "http://www.w3.org/2000/svg", stage = document.getElementById("stage");
+  function el(name, attrs, parent, text) {
+    var e = document.createElementNS(NS, name);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    if (text != null) e.textContent = text;
+    (parent || stage).appendChild(e);
+    return e;
+  }
+  var ease = function (t) { t = Math.max(0, Math.min(1, t)); return t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; };
+  var G = [];
+  for (var s = 0; s < N; s++) G.push(el("g", { opacity: 0 }));
+
+  // ---- Scene 1: the shop and its six channels
+  var g1 = G[0], shop = el("g", { transform: "translate(70 50)" }, g1);
+  el("rect", { x: 0, y: 60, width: 190, height: 150, rx: 14, fill: "#EEF3FF", stroke: "#C9D6FB" }, shop);
+  el("path", { d: "M-10 60 L20 10 H170 L200 60 Z", fill: "#2459E8" }, shop);
+  [0, 1, 2, 3].forEach(function (k) { el("path", { d: "M" + (-10 + k * 52.5) + " 60 q26 26 52.5 0", fill: k % 2 ? "#2459E8" : "#6D4AE8" }, shop); });
+  el("rect", { x: 70, y: 130, width: 50, height: 80, rx: 6, fill: "#fff", stroke: "#C9D6FB" }, shop);
+  el("rect", { x: 18, y: 100, width: 40, height: 34, rx: 5, fill: "#fff", stroke: "#C9D6FB" }, shop);
+  el("rect", { x: 132, y: 100, width: 40, height: 34, rx: 5, fill: "#fff", stroke: "#C9D6FB" }, shop);
+  el("text", { x: 95, y: 240, "text-anchor": "middle", class: "lbl" }, shop, "The shop");
+  var maxSpend = Math.max.apply(null, PLAN.map(function (r) { return r.current_spend; }));
+  var s1 = PLAN.slice().sort(function (a, b) { return b.current_spend - a.current_spend; }).map(function (r, i) {
+    var y = 40 + i * 38;
+    el("text", { x: 400, y: y + 17, "text-anchor": "end", class: "lbl" }, g1, r.channel);
+    el("rect", { x: 414, y: y, width: 420, height: 24, rx: 7, fill: "#F2F4F7" }, g1);
+    var b = el("rect", { x: 414, y: y, width: 0, height: 24, rx: 7, fill: COLOR[r.channel] }, g1);
+    var t = el("text", { x: 846, y: y + 17, class: "sub", opacity: 0 }, g1, M(r.current_spend));
+    return { b: b, t: t, w: r.current_spend / maxSpend * 420 };
+  });
+  el("text", { x: 414, y: 28, class: "sub" }, g1, "Ad spend last year");
+
+  // ---- Scene 2: weekly sales that nobody can explain
+  var g2 = G[1], pts = WEEKS ? WEEKS.slice(-104) : Array.apply(null, Array(104)).map(function (_, k) { return 6 + 2.4 * Math.sin(k / 8) + Math.sin(k * 1.7); });
+  var lo = Math.min.apply(null, pts), hi = Math.max.apply(null, pts);
+  var X = function (k) { return 80 + k / (pts.length - 1) * 940; }, Y = function (v) { return 250 - (v - lo) / (hi - lo) * 170; };
+  el("line", { x1: 80, x2: 1020, y1: 256, y2: 256, stroke: "#D0D5DD" }, g2);
+  el("text", { x: 80, y: 278, class: "sub" }, g2, "Weekly sales, last two years");
+  var path = el("path", { d: pts.map(function (v, k) { return (k ? "L" : "M") + X(k).toFixed(1) + " " + Y(v).toFixed(1); }).join(""),
+                          fill: "none", stroke: "#2459E8", "stroke-width": 2.5, "stroke-linejoin": "round" }, g2);
+  var plen = 0; try { plen = path.getTotalLength(); } catch (e) { plen = 3000; }
+  path.setAttribute("stroke-dasharray", plen);
+  var peaks = [];
+  for (var k = 6; k < pts.length - 6; k++) if (pts[k] === Math.max.apply(null, pts.slice(k - 6, k + 7)) && peaks.length < 6) peaks.push(k);
+  var qs = peaks.map(function (k) {
+    var g = el("g", { opacity: 0 }, g2);
+    el("circle", { cx: X(k), cy: Y(pts[k]) - 30, r: 15, fill: "#FEF0C7" }, g);
+    el("text", { x: X(k), y: Y(pts[k]) - 24, "text-anchor": "middle", class: "big", "font-size": 18, fill: "#B54708" }, g, "?");
+    return { g: g, at: k / pts.length };
+  });
+
+  // ---- Scene 3: the boss's question
+  var g3 = G[2];
+  el("rect", { x: 60, y: 40, width: 380, height: 110, rx: 18, fill: "#0B1B3F" }, g3);
+  el("path", { d: "M120 150 l-10 34 l44 -34 z", fill: "#0B1B3F" }, g3);
+  el("text", { x: 90, y: 86, class: "big", "font-size": 24, fill: "#fff" }, g3, "Next year: " + BUDGET + ".");
+  el("text", { x: 90, y: 120, class: "big", "font-size": 24, fill: "#FFD166" }, g3, "Where should it go?");
+  var slots = PLAN.map(function (r, i) {
+    var x = 520 + i * 90, g = el("g", { opacity: 0 }, g3);
+    el("rect", { x: x, y: 70, width: 70, height: 150, rx: 10, fill: "#F2F4F7", stroke: COLOR[r.channel], "stroke-width": 2, "stroke-dasharray": "6 5" }, g);
+    el("text", { x: x + 35, y: 160, "text-anchor": "middle", class: "big", "font-size": 30, fill: COLOR[r.channel] }, g, "?");
+    el("text", { x: x + 35, y: 244, "text-anchor": "middle", class: "lbl" }, g, r.channel);
+    return g;
+  });
+
+  // ---- Scene 4: weekly numbers go into Meridian, which splits sales
+  var g4 = G[3], rows = [];
+  for (var r = 0; r < 7; r++) {
+    var row = el("g", {}, g4);
+    for (var c = 0; c < 5; c++) el("rect", { x: 70 + c * 56, y: 50 + r * 28, width: 48, height: 18, rx: 4, fill: c === 4 ? "#DCE7FF" : "#F2F4F7" }, row);
+    rows.push(row);
+  }
+  el("text", { x: 70, y: 268, class: "sub" }, g4, "156 weeks: spend per channel and sales");
+  var box = el("g", {}, g4);
+  el("rect", { x: 430, y: 70, width: 220, height: 150, rx: 18, fill: "#6D4AE8" }, box);
+  el("text", { x: 540, y: 140, "text-anchor": "middle", class: "big", "font-size": 22, fill: "#fff" }, box, "Google");
+  el("text", { x: 540, y: 168, "text-anchor": "middle", class: "big", "font-size": 22, fill: "#fff" }, box, "Meridian");
+  var flow = [0, 1, 2, 3, 4, 5].map(function (k) { return el("circle", { r: 5, fill: "#2459E8", opacity: 0 }, g4); });
+  var SHARE = D ? Math.min(1, D.summary.filter(function (r) { return r.is_total; })[0].incremental /
+    D.fit.reduce(function (a, r) { return a + r.actual; }, 0)) : .78;
+  var split = el("g", { opacity: 0 }, g4);
+  el("text", { x: 720, y: 84, class: "lbl" }, split, "Would have happened anyway · " + Math.round((1 - SHARE) * 100) + "%");
+  var baseBar = el("rect", { x: 720, y: 94, width: 0, height: 40, rx: 9, fill: "#B8C2D6" }, split);
+  el("text", { x: 720, y: 176, class: "lbl" }, split, "Brought in by ads · " + Math.round(SHARE * 100) + "%");
+  var adsBar = el("rect", { x: 720, y: 186, width: 0, height: 40, rx: 9, fill: "#2459E8" }, split);
+
+  // ---- Scene 5: return per $1, by channel
+  var g5 = G[4], maxRoi = ROI[0].v;
+  var rbars = ROI.map(function (r, i) {
+    var y = 30 + i * 40;
+    el("text", { x: 230, y: y + 19, "text-anchor": "end", class: "lbl" }, g5, r.c);
+    var b = el("rect", { x: 244, y: y, width: 0, height: 26, rx: 7, fill: COLOR[r.c] }, g5);
+    var t = el("text", { x: 252, y: y + 19, class: "lbl", opacity: 0 }, g5, "$" + r.v.toFixed(2));
+    return { b: b, t: t, w: r.v / maxRoi * 620 };
+  });
+  el("line", { x1: 244 + 620 / maxRoi, x2: 244 + 620 / maxRoi, y1: 20, y2: 270, stroke: "#B42318", "stroke-dasharray": "5 4" }, g5);
+  el("text", { x: 250 + 620 / maxRoi, y: 288, class: "sub", fill: "#B42318" }, g5, "$1 back: break-even");
+
+  // ---- Scene 6: same budget, better split
+  var g6 = G[5], maxB = Math.max.apply(null, PLAN.map(function (r) { return Math.max(r.current_spend, r.optimized_spend); }));
+  var pb = PLAN.map(function (r, i) {
+    var x = 70 + i * 100, base = 250;
+    el("text", { x: x + 34, y: 274, "text-anchor": "middle", class: "lbl" }, g6, r.channel);
+    el("rect", { x: x, y: base - r.current_spend / maxB * 200, width: 30, height: r.current_spend / maxB * 200, rx: 6, fill: COLOR[r.channel], opacity: .3 }, g6);
+    var b = el("rect", { x: x + 36, y: base, width: 30, height: 0, rx: 6, fill: COLOR[r.channel] }, g6);
+    return { b: b, from: r.current_spend / maxB * 200, to: r.optimized_spend / maxB * 200, base: base };
+  });
+  el("rect", { x: 70, y: 18, width: 12, height: 12, rx: 3, fill: "#98A2B3", opacity: .4 }, g6);
+  el("text", { x: 88, y: 29, class: "sub" }, g6, "Today");
+  el("rect", { x: 150, y: 18, width: 12, height: 12, rx: 3, fill: "#475467" }, g6);
+  el("text", { x: 168, y: 29, class: "sub" }, g6, "With the plan");
+  var num = el("text", { x: 880, y: 150, "text-anchor": "middle", class: "big", "font-size": 64, fill: "#067647" }, g6, "+0.0%");
+  el("text", { x: 880, y: 186, "text-anchor": "middle", class: "lbl" }, g6, "more sales from ads");
+  el("text", { x: 880, y: 210, "text-anchor": "middle", class: "sub" }, g6, "same total budget");
+
+  function render(s, p) {
+    G.forEach(function (g, i) { g.setAttribute("opacity", i === s ? Math.min(1, Math.min(p, 1 - p) * 12 + (reduce ? 1 : 0)) : 0); });
+    if (s === 0) {
+      s1.forEach(function (x, i) { var t = ease((p - .12 - i * .06) / .3); x.b.setAttribute("width", x.w * t); x.t.setAttribute("opacity", t); });
+    } else if (s === 1) {
+      var t = ease(p / .55);
+      path.setAttribute("stroke-dashoffset", plen * (1 - t));
+      qs.forEach(function (q) { q.g.setAttribute("opacity", ease((t - q.at) * 8)); });
+    } else if (s === 2) {
+      slots.forEach(function (g, i) { g.setAttribute("opacity", ease((p - .2 - i * .07) / .12)); });
+    } else if (s === 3) {
+      rows.forEach(function (row, i) { row.setAttribute("opacity", 1 - ease((p - .1 - i * .05) / .2) * .7); });
+      flow.forEach(function (f, i) {
+        var u = ((p * 3 + i / 6) % 1), on = p > .08 && p < .6;
+        f.setAttribute("cx", 350 + u * 80); f.setAttribute("cy", 80 + i * 26 + u * (145 - 80 - i * 26));
+        f.setAttribute("opacity", reduce || !on ? 0 : Math.sin(u * Math.PI));
+      });
+      split.setAttribute("opacity", ease((p - .45) / .1));
+      baseBar.setAttribute("width", 330 * (1 - SHARE) * ease((p - .5) / .2));
+      adsBar.setAttribute("width", 330 * SHARE * ease((p - .6) / .25));
+    } else if (s === 4) {
+      rbars.forEach(function (x, i) { var t = ease((p - .1 - i * .07) / .3); x.b.setAttribute("width", x.w * t); x.t.setAttribute("x", 252 + x.w * t); x.t.setAttribute("opacity", ease((p - .3 - i * .07) / .1)); });
+    } else if (s === 5) {
+      var t2 = ease((p - .1) / .45);
+      pb.forEach(function (x) { var h = x.from + (x.to - x.from) * t2; x.b.setAttribute("y", x.base - h); x.b.setAttribute("height", h); });
+      num.textContent = "+" + (PCT * ease((p - .4) / .3)).toFixed(1) + "%";
+    }
+  }
+
+  var cap = document.getElementById("cap"), dots = document.getElementById("dots"), current = -1;
+  SCENES.forEach(function (sc, i) {
+    var b = document.createElement("button");
+    b.type = "button"; b.setAttribute("aria-label", "Scene " + (i + 1) + ": " + sc[1]);
+    b.appendChild(document.createElement("i"));
+    b.addEventListener("click", function () { jump(i); });
+    dots.appendChild(b);
+  });
+  function setCaption(s, p) {
+    if (s !== current) {
+      current = s;
+      cap.innerHTML = '<span class="act">' + SCENES[s][0] + "</span>" + SCENES[s][1] + "<small>" + SCENES[s][2] + "</small>";
+    }
+    [].forEach.call(dots.children, function (d, i) {
+      d.className = i < s ? "done" : "";
+      d.firstChild.style.width = (i === s ? p * 100 : 0) + "%";
+    });
+  }
+
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var t = 0, last = null, paused = false;
+  var mg = document.getElementById("mg");
+  mg.addEventListener("mouseenter", function () { paused = true; });
+  mg.addEventListener("mouseleave", function () { paused = false; });
+  function jump(i) { t = i * DUR + (reduce ? DUR - 1 : 0); if (reduce) draw(); }
+  function draw() { var s = Math.floor(t / DUR) % N, p = (t % DUR) / DUR; setCaption(s, p); render(s, p); }
+  if (reduce) { jump(0); return; }  // No motion: each scene shows its last frame; the dots switch scenes.
+  function tick(now) {
+    if (last !== null && !paused) t = (t + now - last) % (DUR * N);
+    last = now;
+    draw();
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>
