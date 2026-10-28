@@ -186,17 +186,24 @@
 
   var SCREENS = {
     home: '<div class="intro">' +
-      '<div class="kicker">Guided tour · Google Meridian, made simple</div>' +
-      "<h1>Find out which ads really bring in your sales</h1>" +
-      '<p class="lede">Meridian is Google\'s free tool for working out what each ad channel earns and where the next dollar ' +
-      "should go. This tour shows it on a made-up company that advertises on " + channels.length + " channels. You click Next; " +
-      "there is nothing to type.</p>" +
-      '<iframe class="motion" src="assets/story.html" title="Animated story: a shop works out where its ad budget should go"></iframe>' +
-      '<div class="start"><button class="btn btn-gold btn-big" id="t-start" type="button">' +
+      '<section class="hero" aria-labelledby="hero-h">' +
+      '<svg class="mark" viewBox="0 0 512 512" role="img" aria-label="Simple Meridian logo">' +
+      '<line class="mk-mid" x1="315" y1="170" x2="268" y2="330" stroke="#AECBFA" stroke-width="58" stroke-linecap="round"/>' +
+      '<line class="mk-a" x1="166" y1="168" x2="262" y2="334" stroke="#4285F4" stroke-width="96" stroke-linecap="round"/>' +
+      '<line class="mk-b" x1="328" y1="168" x2="424" y2="334" stroke="#1967D2" stroke-width="96" stroke-linecap="round"/>' +
+      '<circle class="mk-dot" cx="87" cy="331" r="54" fill="#174EA6"/></svg>' +
+      '<div class="kicker">Google Meridian, made simple</div>' +
+      '<p class="pre">Last year, one shop spent</p>' +
+      '<h1 id="hero-h"><span class="big">' + money(T.budget_before) + '</span><span class="q">on ads. Which part worked?</span></h1>' +
+      '<div class="chans">' + D.plan.slice().sort(function (a, b) { return b.current_spend - a.current_spend; }).map(function (r) {
+        return '<span style="--c:' + COLOR[r.channel] + '">' + esc(r.channel) + " " + money(r.current_spend) + "</span>";
+      }).join("") + "</div>" +
+      '<button class="btn btn-gold btn-big" id="t-start" type="button">' +
       '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>Start the guided tour</button>' +
-      '<span class="startnote">STEPS_COUNT steps · use Next and Back, or the arrow keys</span></div>' +
-      '<div class="sign"><img class="avatar" src="assets/ali.png" alt="" width="36" height="36">' +
-      "<span>Built by <b>Ali Barfi Bafghi</b> so anyone can try Meridian without writing code.</span></div>" +
+      '<span class="startnote">STEPS_COUNT steps on made-up data · use Next and Back, or the arrow keys</span>' +
+      '<div class="by"><img src="assets/ali.png" alt="" width="40" height="40"><span>Built by <b>Ali Barfi Bafghi</b></span></div>' +
+      "</section>" +
+      '<iframe class="motion" src="assets/story.html" title="Animated story: a shop works out where its ad budget should go"></iframe>' +
       '<p class="vnote">Updated 27 Oct 2026. I built the <a href="https://github.com/alibb007/Simple-Meridian/tree/6bde9f5" target="_blank" ' +
       'rel="noopener noreferrer">first release of Simple Meridian</a> in April 2025 on Meridian 1.0.6: upload, fit, charts and a budget ' +
       "optimizer. Today it runs Meridian 2.1.0 and adds GeoX lift tests, this guided tour and a new design.</p></div>",

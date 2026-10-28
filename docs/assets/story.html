@@ -5,32 +5,30 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>A shop with an ad budget problem</title>
 <style>
-  :root {
-    --navy: #0B1B3F; --ink: #101828; --muted: #5B6475; --border: #E2E7F0; --surface: #FFFFFF;
-    --primary: #2459E8; --violet: #6D4AE8; --good: #067647; --bad: #B42318; --gold: #EDA100; --grid: #EDF0F6;
-  }
+  @font-face { font-family: "Red Hat Display"; font-weight: 700; font-display: swap; src: url("fonts/red-hat-display-latin-700-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Red Hat Display"; font-weight: 800; font-display: swap; src: url("fonts/red-hat-display-latin-800-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Red Hat Text"; font-weight: 500; font-display: swap; src: url("fonts/red-hat-text-latin-500-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Red Hat Text"; font-weight: 600; font-display: swap; src: url("fonts/red-hat-text-latin-600-normal.woff2") format("woff2"); }
+  :root { --ink: #0B1B3F; --muted: #5B6475; --cream: #FFF8EC; --gold: #FFD166; --primary: #2459E8; --violet: #6D4AE8; }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; background: transparent; }
-  body { font-family: "Red Hat Text", "Red Hat Display", system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); }
-  .mg { width: 100%; max-width: 1100px; margin: 0 auto; background: var(--surface); border: 1px solid var(--border);
-        border-radius: 18px; overflow: hidden; }
-  .bar { display: flex; align-items: center; gap: 14px; padding: 14px 18px 4px; min-height: 64px; }
-  .pp { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--border); background: #fff; color: var(--ink); display: grid; place-items: center; cursor: pointer; padding: 0; flex: none; }
+  body { font-family: "Red Hat Text", system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); }
+  .mg { width: 100%; max-width: 1180px; margin: 0 auto; background: var(--cream); border: 3px solid var(--ink); border-radius: 22px; overflow: hidden; }
+  .bar { display: flex; align-items: center; gap: 14px; padding: 14px 18px 2px; min-height: 68px; }
+  .pp { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--ink); background: #fff; color: var(--ink); display: grid; place-items: center; cursor: pointer; padding: 0; flex: none; }
   .pp svg { width: 14px; height: 14px; }
-  .pp:hover { background: #F2F4F7; }
   .dots { display: flex; gap: 6px; flex: none; }
-  .dots button { width: 26px; height: 8px; border-radius: 99px; border: 0; padding: 0; background: #E4E7EC; cursor: pointer; overflow: hidden; position: relative; }
-  .dots button i { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--primary); border-radius: 99px; }
-  .dots button.done { background: #B7C9F7; }
-  .dots button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-  .cap { font-family: "Red Hat Display", "Red Hat Text", system-ui, sans-serif; font-weight: 700; font-size: 18px; line-height: 1.3; }
-  .cap .act { display: block; font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--violet); margin-bottom: 2px; }
-  .cap small { display: block; font-family: "Red Hat Text", system-ui, sans-serif; font-weight: 500; font-size: 14px;
-               color: var(--muted); margin-top: 3px; }
+  .dots button { width: 26px; height: 9px; border-radius: 99px; border: 2px solid var(--ink); padding: 0; background: #fff; cursor: pointer; overflow: hidden; position: relative; }
+  .dots button i { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--ink); }
+  .dots button.done { background: var(--gold); }
+  .dots button:focus-visible, .pp:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+  .cap { font-family: "Red Hat Display", system-ui, sans-serif; font-weight: 800; font-size: 19px; line-height: 1.25; }
+  .cap .act { display: block; font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase; color: #B54708; margin-bottom: 2px; }
+  .cap small { display: block; font-family: "Red Hat Text", system-ui, sans-serif; font-weight: 500; font-size: 14px; color: #475467; margin-top: 3px; }
   svg { display: block; width: 100%; height: auto; }
   svg text { font-family: "Red Hat Text", system-ui, sans-serif; }
-  .lbl { font-size: 14px; fill: var(--ink); font-weight: 600; }
-  .sub { font-size: 12.5px; fill: var(--muted); }
+  .lbl { font-size: 15px; fill: var(--ink); font-weight: 600; }
+  .sub { font-size: 13px; fill: #475467; font-weight: 500; }
   .big { font-family: "Red Hat Display", system-ui, sans-serif; font-weight: 800; }
   @media (max-width: 560px) { .cap { font-size: 15px; } .cap small { font-size: 12.5px; } }
 </style>
@@ -42,7 +40,7 @@
     <div class="dots" id="dots" aria-label="Scenes"></div>
     <div class="cap" id="cap" aria-live="polite"></div>
   </div>
-  <svg id="stage" viewBox="0 0 1100 300" aria-hidden="true"></svg>
+  <svg id="stage" viewBox="0 0 1100 330" aria-hidden="true"></svg>
 </div>
 <script>
 (function () {
@@ -58,11 +56,14 @@
               : [{ c: "Email", v: 10.62 }, { c: "Radio", v: 6.81 }, { c: "Social", v: 3.36 }, { c: "TV", v: 2.60 }, { c: "Search", v: 2.29 }, { c: "Display", v: 1.61 }];
   var T = D ? D.plan_totals : { budget_before: 116.1e6, outcome_before: 359.6e6, outcome_after: 378.3e6 };
   var WEEKS = D ? D.fit.map(function (r) { return r.actual; }) : null;
+  var SHARE = D ? Math.min(1, D.summary.filter(function (r) { return r.is_total; })[0].incremental /
+    D.fit.reduce(function (a, r) { return a + r.actual; }, 0)) : .78;
   var COLOR = { TV: "#2A78D6", Radio: "#EB6834", Display: "#1BAF7A", Search: "#EDA100", Social: "#E87BA4", Email: "#008300" };
   ROI.sort(function (a, b) { return b.v - a.v; });
   var M = function (x) { return "$" + (x / 1e6).toFixed(1) + "M"; };
   var BUDGET = M(T.budget_before), GAIN = T.outcome_after - T.outcome_before, PCT = GAIN / T.outcome_before * 100;
   var best = ROI[0], worst = ROI[ROI.length - 1];
+  var INK = "#0B1B3F";
 
   // Pixar story spine: once upon a time, every day, until one day, because of that (twice), until finally.
   var SCENES = [
@@ -83,139 +84,155 @@
     (parent || stage).appendChild(e);
     return e;
   }
+  var ink = function (a) { a.stroke = INK; a["stroke-width"] = a["stroke-width"] || 3.5; a["stroke-linejoin"] = "round"; return a; };
   var ease = function (t) { t = Math.max(0, Math.min(1, t)); return t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; };
+  var pop = function (t) { t = Math.max(0, Math.min(1, t)); return t === 0 ? 0 : 1 + 2.2 * Math.pow(t - 1, 3) + 1.2 * Math.pow(t - 1, 2); };
+  function popAt(g, cx, cy, t) { var k = pop(t); g.setAttribute("transform", "translate(" + cx + " " + cy + ") scale(" + k + ") translate(" + (-cx) + " " + (-cy) + ")"); g.setAttribute("opacity", t > 0 ? 1 : 0); }
+  // A speech bubble: rounded box with a tail, dark ink, light text.
+  function bubble(parent, x, y, w, h, tailX, tailY, lines, accent) {
+    var g = el("g", { opacity: 0 }, parent);
+    el("path", ink({ d: "M" + (tailX - 14) + " " + (y + h - 2) + " L" + tailX + " " + tailY + " L" + (tailX + 22) + " " + (y + h - 2) + " Z", fill: INK }), g);
+    el("rect", ink({ x: x, y: y, width: w, height: h, rx: 18, fill: INK }), g);
+    lines.forEach(function (ln, i) { el("text", { x: x + 22, y: y + 36 + i * 30, class: "big", "font-size": 22, fill: i === lines.length - 1 && accent ? "#FFD166" : "#fff" }, g, ln); });
+    return { g: g, cx: tailX, cy: tailY };
+  }
+  function shop(parent, x, y, s) {
+    var g = el("g", { transform: "translate(" + x + " " + y + ") scale(" + s + ")" }, parent);
+    el("rect", ink({ x: 10, y: 70, width: 180, height: 140, rx: 12, fill: "#fff" }), g);
+    el("path", ink({ d: "M0 70 L30 20 H170 L200 70 Z", fill: "#2459E8" }), g);
+    el("path", ink({ d: "M0 70 q17 22 33 0 q17 22 33 0 q17 22 33 0 q17 22 34 0 q17 22 33 0 q17 22 34 0", fill: "#FFD166" }), g);
+    el("rect", ink({ x: 78, y: 136, width: 46, height: 74, rx: 6, fill: "#EEF3FF" }), g);
+    el("rect", ink({ x: 26, y: 104, width: 38, height: 30, rx: 5, fill: "#EEF3FF" }), g);
+    el("rect", ink({ x: 138, y: 104, width: 38, height: 30, rx: 5, fill: "#EEF3FF" }), g);
+    return g;
+  }
   var G = [];
   for (var s = 0; s < N; s++) G.push(el("g", { opacity: 0 }));
 
-  // ---- Scene 1: the shop and its six channels
-  var g1 = G[0], shop = el("g", { transform: "translate(70 50)" }, g1);
-  el("rect", { x: 0, y: 60, width: 190, height: 150, rx: 14, fill: "#EEF3FF", stroke: "#C9D6FB" }, shop);
-  el("path", { d: "M-10 60 L20 10 H170 L200 60 Z", fill: "#2459E8" }, shop);
-  [0, 1, 2, 3].forEach(function (k) { el("path", { d: "M" + (-10 + k * 52.5) + " 60 q26 26 52.5 0", fill: k % 2 ? "#2459E8" : "#6D4AE8" }, shop); });
-  el("rect", { x: 70, y: 130, width: 50, height: 80, rx: 6, fill: "#fff", stroke: "#C9D6FB" }, shop);
-  el("rect", { x: 18, y: 100, width: 40, height: 34, rx: 5, fill: "#fff", stroke: "#C9D6FB" }, shop);
-  el("rect", { x: 132, y: 100, width: 40, height: 34, rx: 5, fill: "#fff", stroke: "#C9D6FB" }, shop);
-  el("text", { x: 95, y: 240, "text-anchor": "middle", class: "lbl" }, shop, "The shop");
-  var maxSpend = Math.max.apply(null, PLAN.map(function (r) { return r.current_spend; }));
-  var s1 = PLAN.slice().sort(function (a, b) { return b.current_spend - a.current_spend; }).map(function (r, i) {
-    var y = 40 + i * 38;
-    el("text", { x: 400, y: y + 17, "text-anchor": "end", class: "lbl" }, g1, r.channel);
-    el("rect", { x: 414, y: y, width: 420, height: 24, rx: 7, fill: "#F2F4F7" }, g1);
-    var b = el("rect", { x: 414, y: y, width: 0, height: 24, rx: 7, fill: COLOR[r.channel] }, g1);
-    var t = el("text", { x: 846, y: y + 17, class: "sub", opacity: 0 }, g1, M(r.current_spend));
-    return { b: b, t: t, w: r.current_spend / maxSpend * 420 };
+  // ---- Scene 1: the shop and its six ad signs
+  var g1 = G[0];
+  shop(g1, 60, 80, 1.1);
+  var b1 = bubble(g1, 40, 8, 330, 56, 150, 92, ["We spent " + BUDGET + " on ads."], false);
+  var signs = PLAN.slice().sort(function (a, b) { return b.current_spend - a.current_spend; }).map(function (r, i) {
+    var col = i % 3, row = Math.floor(i / 3), x = 430 + col * 220, y = 40 + row * 140;
+    var g = el("g", { opacity: 0 }, g1);
+    el("line", ink({ x1: x + 100, y1: y - 10, x2: x + 100, y2: y + 6 }), g);
+    el("rect", ink({ x: x, y: y + 6, width: 200, height: 104, rx: 16, fill: COLOR[r.channel] }), g);
+    el("text", { x: x + 18, y: y + 46, class: "big", "font-size": 24, fill: "#fff" }, g, r.channel);
+    el("text", { x: x + 18, y: y + 84, class: "big", "font-size": 30, fill: "#fff" }, g, M(r.current_spend));
+    return { g: g, cx: x + 100, cy: y + 58 };
   });
-  el("text", { x: 414, y: 28, class: "sub" }, g1, "Ad spend last year");
 
-  // ---- Scene 2: weekly sales that nobody can explain
-  var g2 = G[1], pts = WEEKS ? WEEKS.slice(-104) : Array.apply(null, Array(104)).map(function (_, k) { return 6 + 2.4 * Math.sin(k / 8) + Math.sin(k * 1.7); });
+  // ---- Scene 2: weekly sales nobody can explain
+  var g2 = G[1];
+  el("rect", ink({ x: 40, y: 20, width: 1020, height: 290, rx: 20, fill: "#fff" }), g2);
+  var pts = WEEKS ? WEEKS.slice(-104) : Array.apply(null, Array(104)).map(function (_, k) { return 6 + 2.4 * Math.sin(k / 8) + Math.sin(k * 1.7); });
   var lo = Math.min.apply(null, pts), hi = Math.max.apply(null, pts);
-  var X = function (k) { return 80 + k / (pts.length - 1) * 940; }, Y = function (v) { return 250 - (v - lo) / (hi - lo) * 170; };
-  el("line", { x1: 80, x2: 1020, y1: 256, y2: 256, stroke: "#D0D5DD" }, g2);
-  el("text", { x: 80, y: 278, class: "sub" }, g2, "Weekly sales, last two years");
+  var X = function (k) { return 80 + k / (pts.length - 1) * 940; }, Y = function (v) { return 280 - (v - lo) / (hi - lo) * 170; };
+  el("text", { x: 70, y: 56, class: "lbl" }, g2, "Weekly sales, last two years");
   var path = el("path", { d: pts.map(function (v, k) { return (k ? "L" : "M") + X(k).toFixed(1) + " " + Y(v).toFixed(1); }).join(""),
-                          fill: "none", stroke: "#2459E8", "stroke-width": 2.5, "stroke-linejoin": "round" }, g2);
+                          fill: "none", stroke: "#2459E8", "stroke-width": 4, "stroke-linejoin": "round", "stroke-linecap": "round" }, g2);
   var plen = 0; try { plen = path.getTotalLength(); } catch (e) { plen = 3000; }
   path.setAttribute("stroke-dasharray", plen);
   var peaks = [];
   for (var k = 6; k < pts.length - 6; k++) if (pts[k] === Math.max.apply(null, pts.slice(k - 6, k + 7)) && peaks.length < 6) peaks.push(k);
-  var qs = peaks.map(function (k) {
-    var g = el("g", { opacity: 0 }, g2);
-    el("circle", { cx: X(k), cy: Y(pts[k]) - 30, r: 15, fill: "#FEF0C7" }, g);
-    el("text", { x: X(k), y: Y(pts[k]) - 24, "text-anchor": "middle", class: "big", "font-size": 18, fill: "#B54708" }, g, "?");
-    return { g: g, at: k / pts.length };
+  var qs = peaks.map(function (k, i) {
+    var g = el("g", { opacity: 0 }, g2), cx = X(k), cy = Y(pts[k]) - 34;
+    el("circle", ink({ cx: cx, cy: cy, r: 19, fill: "#FFD166" }), g);
+    el("text", { x: cx, y: cy + 8, "text-anchor": "middle", class: "big", "font-size": 22, fill: INK }, g, "?");
+    return { g: g, cx: cx, cy: cy, at: k / pts.length };
   });
 
   // ---- Scene 3: the boss's question
-  var g3 = G[2];
-  el("rect", { x: 60, y: 40, width: 380, height: 110, rx: 18, fill: "#0B1B3F" }, g3);
-  el("path", { d: "M120 150 l-10 34 l44 -34 z", fill: "#0B1B3F" }, g3);
-  el("text", { x: 90, y: 86, class: "big", "font-size": 24, fill: "#fff" }, g3, "Next year: " + BUDGET + ".");
-  el("text", { x: 90, y: 120, class: "big", "font-size": 24, fill: "#FFD166" }, g3, "Where should it go?");
+  var g3 = G[2], boss = el("g", {}, g3);
+  el("circle", ink({ cx: 130, cy: 196, r: 34, fill: "#FFE2C2" }), boss);
+  el("path", ink({ d: "M70 320 q0 -78 60 -78 q60 0 60 78 Z", fill: "#2459E8" }), boss);
+  el("path", ink({ d: "M118 246 l12 34 l12 -34", fill: "#FFD166" }), boss);
+  var b3 = bubble(g3, 210, 34, 380, 96, 214, 186, ["Next year: " + BUDGET + ".", "Where should it go?"], true);
   var slots = PLAN.map(function (r, i) {
-    var x = 520 + i * 90, g = el("g", { opacity: 0 }, g3);
-    el("rect", { x: x, y: 70, width: 70, height: 150, rx: 10, fill: "#F2F4F7", stroke: COLOR[r.channel], "stroke-width": 2, "stroke-dasharray": "6 5" }, g);
-    el("text", { x: x + 35, y: 160, "text-anchor": "middle", class: "big", "font-size": 30, fill: COLOR[r.channel] }, g, "?");
-    el("text", { x: x + 35, y: 244, "text-anchor": "middle", class: "lbl" }, g, r.channel);
-    return g;
+    var x = 620 + i * 76, g = el("g", { opacity: 0 }, g3);
+    el("rect", ink({ x: x, y: 110, width: 62, height: 150, rx: 12, fill: "#fff", "stroke-dasharray": "8 6" }), g);
+    el("text", { x: x + 31, y: 196, "text-anchor": "middle", class: "big", "font-size": 32, fill: COLOR[r.channel] }, g, "?");
+    el("text", { x: x + 31, y: 288, "text-anchor": "middle", class: "lbl", "font-size": 13 }, g, r.channel);
+    return { g: g, cx: x + 31, cy: 185 };
   });
 
-  // ---- Scene 4: weekly numbers go into Meridian, which splits sales
-  var g4 = G[3], rows = [];
-  for (var r = 0; r < 7; r++) {
-    var row = el("g", {}, g4);
-    for (var c = 0; c < 5; c++) el("rect", { x: 70 + c * 56, y: 50 + r * 28, width: 48, height: 18, rx: 4, fill: c === 4 ? "#DCE7FF" : "#F2F4F7" }, row);
-    rows.push(row);
-  }
-  el("text", { x: 70, y: 268, class: "sub" }, g4, "156 weeks: spend per channel and sales");
+  // ---- Scene 4: a sheet of weekly numbers goes into Meridian, which splits sales
+  var g4 = G[3], sheet = el("g", {}, g4);
+  el("rect", ink({ x: 0, y: 0, width: 210, height: 220, rx: 12, fill: "#fff" }), sheet);
+  for (var r = 0; r < 7; r++) for (var c = 0; c < 4; c++) el("rect", { x: 18 + c * 46, y: 22 + r * 27, width: 38, height: 15, rx: 4, fill: c === 3 ? "#C9D8FF" : "#E4E7EC" }, sheet);
+  el("text", { x: 70, y: 300, class: "lbl" }, g4, "156 weeks of spend and sales");
   var box = el("g", {}, g4);
-  el("rect", { x: 430, y: 70, width: 220, height: 150, rx: 18, fill: "#6D4AE8" }, box);
-  el("text", { x: 540, y: 140, "text-anchor": "middle", class: "big", "font-size": 22, fill: "#fff" }, box, "Google");
-  el("text", { x: 540, y: 168, "text-anchor": "middle", class: "big", "font-size": 22, fill: "#fff" }, box, "Meridian");
-  var flow = [0, 1, 2, 3, 4, 5].map(function (k) { return el("circle", { r: 5, fill: "#2459E8", opacity: 0 }, g4); });
-  var SHARE = D ? Math.min(1, D.summary.filter(function (r) { return r.is_total; })[0].incremental /
-    D.fit.reduce(function (a, r) { return a + r.actual; }, 0)) : .78;
+  el("rect", ink({ x: 400, y: 70, width: 230, height: 170, rx: 24, fill: "#6D4AE8" }), box);
+  el("text", { x: 515, y: 148, "text-anchor": "middle", class: "big", "font-size": 26, fill: "#fff" }, box, "Google");
+  el("text", { x: 515, y: 180, "text-anchor": "middle", class: "big", "font-size": 26, fill: "#fff" }, box, "Meridian");
   var split = el("g", { opacity: 0 }, g4);
-  el("text", { x: 720, y: 84, class: "lbl" }, split, "Would have happened anyway · " + Math.round((1 - SHARE) * 100) + "%");
-  var baseBar = el("rect", { x: 720, y: 94, width: 0, height: 40, rx: 9, fill: "#B8C2D6" }, split);
-  el("text", { x: 720, y: 176, class: "lbl" }, split, "Brought in by ads · " + Math.round(SHARE * 100) + "%");
-  var adsBar = el("rect", { x: 720, y: 186, width: 0, height: 40, rx: 9, fill: "#2459E8" }, split);
+  el("text", { x: 690, y: 94, class: "lbl" }, split, "Would have sold anyway · " + Math.round((1 - SHARE) * 100) + "%");
+  var baseBar = el("rect", ink({ x: 690, y: 104, width: 1, height: 48, rx: 10, fill: "#B8C2D6" }), split);
+  el("text", { x: 690, y: 196, class: "lbl" }, split, "Brought in by ads · " + Math.round(SHARE * 100) + "%");
+  var adsBar = el("rect", ink({ x: 690, y: 206, width: 1, height: 48, rx: 10, fill: "#2459E8" }), split);
 
   // ---- Scene 5: return per $1, by channel
-  var g5 = G[4], maxRoi = ROI[0].v;
+  var g5 = G[4], maxRoi = ROI[0].v, base5 = 270, colW = 120;
+  el("line", ink({ x1: 90, x2: 1040, y1: base5, y2: base5 }), g5);
+  var yOf = function (v) { return base5 - v / maxRoi * 200; };
+  el("line", { x1: 90, x2: 1040, y1: yOf(1), y2: yOf(1), stroke: "#B42318", "stroke-width": 2.5, "stroke-dasharray": "7 6" }, g5);
+  el("text", { x: 1040, y: yOf(1) - 8, "text-anchor": "end", class: "sub", fill: "#B42318" }, g5, "$1 back: break-even");
   var rbars = ROI.map(function (r, i) {
-    var y = 30 + i * 40;
-    el("text", { x: 230, y: y + 19, "text-anchor": "end", class: "lbl" }, g5, r.c);
-    var b = el("rect", { x: 244, y: y, width: 0, height: 26, rx: 7, fill: COLOR[r.c] }, g5);
-    var t = el("text", { x: 252, y: y + 19, class: "lbl", opacity: 0 }, g5, "$" + r.v.toFixed(2));
-    return { b: b, t: t, w: r.v / maxRoi * 620 };
+    var x = 140 + i * (colW + 34);
+    var b = el("rect", ink({ x: x, y: base5, width: colW, height: 0, rx: 12, fill: COLOR[r.c] }), g5);
+    var t = el("text", { x: x + colW / 2, y: base5 - 10, "text-anchor": "middle", class: "big", "font-size": 22, fill: INK, opacity: 0 }, g5, "$" + r.v.toFixed(2));
+    el("text", { x: x + colW / 2, y: base5 + 26, "text-anchor": "middle", class: "lbl" }, g5, r.c);
+    return { b: b, t: t, h: base5 - yOf(r.v) };
   });
-  el("line", { x1: 244 + 620 / maxRoi, x2: 244 + 620 / maxRoi, y1: 20, y2: 270, stroke: "#B42318", "stroke-dasharray": "5 4" }, g5);
-  el("text", { x: 250 + 620 / maxRoi, y: 288, class: "sub", fill: "#B42318" }, g5, "$1 back: break-even");
 
   // ---- Scene 6: same budget, better split
   var g6 = G[5], maxB = Math.max.apply(null, PLAN.map(function (r) { return Math.max(r.current_spend, r.optimized_spend); }));
   var pb = PLAN.map(function (r, i) {
-    var x = 70 + i * 100, base = 250;
-    el("text", { x: x + 34, y: 274, "text-anchor": "middle", class: "lbl" }, g6, r.channel);
-    el("rect", { x: x, y: base - r.current_spend / maxB * 200, width: 30, height: r.current_spend / maxB * 200, rx: 6, fill: COLOR[r.channel], opacity: .3 }, g6);
-    var b = el("rect", { x: x + 36, y: base, width: 30, height: 0, rx: 6, fill: COLOR[r.channel] }, g6);
-    return { b: b, from: r.current_spend / maxB * 200, to: r.optimized_spend / maxB * 200, base: base };
+    var x = 70 + i * 104, base = 262;
+    el("text", { x: x + 36, y: 290, "text-anchor": "middle", class: "lbl", "font-size": 14 }, g6, r.channel);
+    el("rect", { x: x, y: base - r.current_spend / maxB * 210, width: 32, height: r.current_spend / maxB * 210, rx: 8, fill: COLOR[r.channel], opacity: .3 }, g6);
+    var b = el("rect", ink({ x: x + 38, y: base, width: 32, height: 0, rx: 8, fill: COLOR[r.channel], "stroke-width": 3 }), g6);
+    return { b: b, from: r.current_spend / maxB * 210, to: r.optimized_spend / maxB * 210, base: base };
   });
-  el("rect", { x: 70, y: 18, width: 12, height: 12, rx: 3, fill: "#98A2B3", opacity: .4 }, g6);
-  el("text", { x: 88, y: 29, class: "sub" }, g6, "Today");
-  el("rect", { x: 150, y: 18, width: 12, height: 12, rx: 3, fill: "#475467" }, g6);
-  el("text", { x: 168, y: 29, class: "sub" }, g6, "With the plan");
-  var num = el("text", { x: 880, y: 150, "text-anchor": "middle", class: "big", "font-size": 64, fill: "#067647" }, g6, "+0.0%");
-  el("text", { x: 880, y: 186, "text-anchor": "middle", class: "lbl" }, g6, "more sales from ads");
-  el("text", { x: 880, y: 210, "text-anchor": "middle", class: "sub" }, g6, "same total budget");
+  el("line", ink({ x1: 60, x2: 690, y1: 262, y2: 262 }), g6);
+  el("text", { x: 70, y: 34, class: "sub" }, g6, "Faded: today · solid: with the plan");
+  var badge = el("g", { opacity: 0 }, g6), starPts = [];
+  for (var q = 0; q < 24; q++) { var ang = q / 24 * Math.PI * 2, rr = q % 2 ? 108 : 124; starPts.push((880 + Math.cos(ang) * rr).toFixed(1) + "," + (160 + Math.sin(ang) * rr).toFixed(1)); }
+  el("polygon", ink({ points: starPts.join(" "), fill: "#FFD166" }), badge);
+  var num = el("text", { x: 880, y: 162, "text-anchor": "middle", class: "big", "font-size": 52, fill: INK }, badge, "+0.0%");
+  el("text", { x: 880, y: 194, "text-anchor": "middle", class: "lbl" }, badge, "more sales from ads");
 
   function render(s, p) {
     G.forEach(function (g, i) { g.setAttribute("opacity", i === s ? Math.min(1, Math.min(p, 1 - p) * 12 + (reduce || paused ? 1 : 0)) : 0); });
     if (s === 0) {
-      s1.forEach(function (x, i) { var t = ease((p - .12 - i * .06) / .3); x.b.setAttribute("width", x.w * t); x.t.setAttribute("opacity", t); });
+      popAt(b1.g, b1.cx, b1.cy, (p - .06) / .12);
+      signs.forEach(function (x, i) { popAt(x.g, x.cx, x.cy, (p - .22 - i * .07) / .12); });
     } else if (s === 1) {
       var t = ease(p / .55);
       path.setAttribute("stroke-dashoffset", plen * (1 - t));
-      qs.forEach(function (q) { q.g.setAttribute("opacity", ease((t - q.at) * 8)); });
+      qs.forEach(function (q) { popAt(q.g, q.cx, q.cy, (t - q.at) * 6); });
     } else if (s === 2) {
-      slots.forEach(function (g, i) { g.setAttribute("opacity", ease((p - .2 - i * .07) / .12)); });
+      popAt(b3.g, b3.cx, b3.cy, (p - .08) / .14);
+      slots.forEach(function (x, i) { popAt(x.g, x.cx, x.cy, (p - .32 - i * .06) / .12); });
     } else if (s === 3) {
-      rows.forEach(function (row, i) { row.setAttribute("opacity", 1 - ease((p - .1 - i * .05) / .2) * .7); });
-      flow.forEach(function (f, i) {
-        var u = ((p * 3 + i / 6) % 1), on = p > .08 && p < .6;
-        f.setAttribute("cx", 350 + u * 80); f.setAttribute("cy", 80 + i * 26 + u * (145 - 80 - i * 26));
-        f.setAttribute("opacity", reduce || !on ? 0 : Math.sin(u * Math.PI));
-      });
-      split.setAttribute("opacity", ease((p - .45) / .1));
-      baseBar.setAttribute("width", 330 * (1 - SHARE) * ease((p - .5) / .2));
-      adsBar.setAttribute("width", 330 * SHARE * ease((p - .6) / .25));
+      var u = ease((p - .08) / .32);
+      sheet.setAttribute("transform", "translate(" + (60 + u * 300) + " " + (40 + u * 40) + ") scale(" + (1 - u * .55) + ")");
+      sheet.setAttribute("opacity", 1 - ease((p - .36) / .06));
+      split.setAttribute("opacity", ease((p - .46) / .08));
+      baseBar.setAttribute("width", Math.max(1, 340 * (1 - SHARE) * ease((p - .5) / .18)));
+      adsBar.setAttribute("width", Math.max(1, 340 * SHARE * ease((p - .6) / .22)));
     } else if (s === 4) {
-      rbars.forEach(function (x, i) { var t = ease((p - .1 - i * .07) / .3); x.b.setAttribute("width", x.w * t); x.t.setAttribute("x", 252 + x.w * t); x.t.setAttribute("opacity", ease((p - .3 - i * .07) / .1)); });
+      rbars.forEach(function (x, i) {
+        var h = x.h * ease((p - .08 - i * .07) / .28);
+        x.b.setAttribute("y", base5 - h); x.b.setAttribute("height", h);
+        x.t.setAttribute("y", base5 - h - 12); x.t.setAttribute("opacity", ease((p - .3 - i * .07) / .1));
+      });
     } else if (s === 5) {
       var t2 = ease((p - .1) / .45);
       pb.forEach(function (x) { var h = x.from + (x.to - x.from) * t2; x.b.setAttribute("y", x.base - h); x.b.setAttribute("height", h); });
-      num.textContent = "+" + (PCT * ease((p - .4) / .3)).toFixed(1) + "%";
+      popAt(badge, 880, 160, (p - .42) / .16);
+      num.textContent = "+" + (PCT * ease((p - .45) / .25)).toFixed(1) + "%";
     }
   }
 
