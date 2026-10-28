@@ -71,6 +71,10 @@
   var M = function (x) { var v = x * SCALE; return v >= 1e6 ? "$" + (v / 1e6).toFixed(2) + "M" : "$" + Math.round(v / 1e3) + "K"; };
   var BUDGET = M(T.budget_before), GAIN = T.outcome_after - T.outcome_before, PCT = GAIN / T.outcome_before * 100;
   var best = ROI[0], worst = ROI[ROI.length - 1];
+  // Budget change per channel in the plan, biggest raise first. The plan never moves a channel more than ±30%.
+  var CHG = PLAN.map(function (r) { return { c: r.channel, pct: (r.optimized_spend / r.current_spend - 1) * 100 }; })
+                .sort(function (a, b) { return b.pct - a.pct; });
+  var UP = CHG[0].c + " and " + CHG[1].c, DOWN = CHG[CHG.length - 1].c + " and " + CHG[CHG.length - 2].c;
   var INK = "#0B1B3F";
 
   // Pixar story spine: once upon a time, every day, until one day, because of that (twice), until finally.
@@ -80,7 +84,7 @@
     ["Until one day", "The boss asked the question nobody wanted.", "Next year's budget is the same " + BUDGET + ". Where should it go?"],
     ["Because of that", "They stopped guessing and used Google Meridian!", "Another year on gut feel means another " + BUDGET + " spent blind. Meridian turns 156 weeks of numbers into answers."],
     ["Because of that", "For the first time, the answers were clear.", best.c + ", the smallest budget, returned $" + best.v.toFixed(2) + " for every $1. " + worst.c + " returned $" + worst.v.toFixed(2) + "."],
-    ["Until finally", "They moved the money, and sales went up.", "Same " + BUDGET + " budget, " + M(GAIN) + " more sales from ads in a year (+" + PCT.toFixed(1) + "%). Everyone took the credit again."],
+    ["Until finally", "They moved the money, and sales went up.", UP + " got 30% more, the most the plan allows. " + DOWN + " got less. Same " + BUDGET + " budget, " + M(GAIN) + " more sales a year."],
     ["And now", "Now it's your turn to try it.", "Take the guided tour, then run Simple Meridian on your own weekly numbers. It's free and runs on your computer."]
   ];
   var N = SCENES.length, DUR = 14000;  // each scene holds 14 s
@@ -255,18 +259,21 @@
     return { b: b, t: t, h: base5 - yOf(r.v) };
   });
 
-  // ---- Scene 6: same budget, better split
-  var g6 = G[5], maxB = Math.max.apply(null, PLAN.map(function (r) { return Math.max(r.current_spend, r.optimized_spend); }));
-  var pb = PLAN.map(function (r, i) {
-    var x = 70 + i * 104, base = 262;
-    icon(g6, r.channel, x + 2, 272, COLOR[r.channel], 0.42);
-    el("text", { x: x + 26, y: 289, class: "lbl", "font-size": 13 }, g6, r.channel);
-    el("rect", { x: x, y: base - r.current_spend / maxB * 210, width: 32, height: r.current_spend / maxB * 210, rx: 8, fill: COLOR[r.channel], opacity: .3 }, g6);
-    var b = el("rect", ink({ x: x + 38, y: base, width: 32, height: 0, rx: 8, fill: COLOR[r.channel], "stroke-width": 3 }), g6);
-    return { b: b, from: r.current_spend / maxB * 210, to: r.optimized_spend / maxB * 210, base: base };
+  // ---- Scene 6: same budget, better split. Bars show each channel's budget change in %, so a small
+  // channel that grows a lot (Email) reads as the big winner it is, not as a sliver next to TV.
+  var g6 = G[5], axis6 = 440, per6 = 7.2;  // px per 1%: 30% is 216px
+  el("text", { x: axis6 - 14, y: 34, "text-anchor": "end", class: "sub", fill: "#B42318" }, g6, "← less money");
+  el("text", { x: axis6 + 14, y: 34, class: "sub", fill: "#067647" }, g6, "more money →");
+  var pb = CHG.map(function (r, i) {
+    var y = 52 + i * 40, up = r.pct >= 0;
+    icon(g6, r.c, 60, y + 1, COLOR[r.c], 0.5);
+    el("text", { x: 90, y: y + 19, class: "lbl" }, g6, r.c);
+    var b = el("rect", ink({ x: axis6, y: y, width: 0, height: 26, rx: 8, fill: COLOR[r.c], "stroke-width": 3 }), g6);
+    var t = el("text", { x: axis6, y: y + 19, "text-anchor": up ? "start" : "end", class: "big", "font-size": 18, fill: INK, opacity: 0 }, g6,
+      (up ? "+" : "−") + Math.abs(Math.round(r.pct)) + "%");
+    return { b: b, t: t, w: Math.abs(r.pct) * per6, up: up };
   });
-  el("line", ink({ x1: 60, x2: 690, y1: 262, y2: 262 }), g6);
-  el("text", { x: 70, y: 34, class: "sub" }, g6, "Faded: today · solid: with the plan");
+  el("line", ink({ x1: axis6, x2: axis6, y1: 44, y2: 298 }), g6);
   var badge = el("g", { opacity: 0 }, g6), starPts = [];
   for (var q = 0; q < 24; q++) { var ang = q / 24 * Math.PI * 2, rr = q % 2 ? 108 : 124; starPts.push((880 + Math.cos(ang) * rr).toFixed(1) + "," + (160 + Math.sin(ang) * rr).toFixed(1)); }
   el("polygon", ink({ points: starPts.join(" "), fill: "#FFD166" }), badge);
@@ -346,8 +353,11 @@
         x.t.setAttribute("y", base5 - h - 12); x.t.setAttribute("opacity", out((ms - 1300 - i * 80) / 300));
       });
     } else if (s === 5) {
-      var t2 = ease((ms - 400) / 1800);
-      pb.forEach(function (x) { var h = x.from + (x.to - x.from) * t2; x.b.setAttribute("y", x.base - h); x.b.setAttribute("height", h); });
+      pb.forEach(function (x, i) {
+        var w = x.w * ease((ms - 400 - i * 120) / 1400);
+        x.b.setAttribute("x", x.up ? axis6 : axis6 - w); x.b.setAttribute("width", w);
+        x.t.setAttribute("x", x.up ? axis6 + w + 10 : axis6 - w - 10); x.t.setAttribute("opacity", out((ms - 1500 - i * 120) / 300));
+      });
       rise(badge, ms, 2400, 500);
       num.textContent = "+" + (PCT * out((ms - 2400) / 1200)).toFixed(1) + "%";
     } else if (s === 6) {
