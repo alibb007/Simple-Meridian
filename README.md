@@ -71,7 +71,7 @@ Everything runs on your machine. Your data is not sent anywhere.
 
 The scripts run `docker compose up --build`, so you can also use that directly. The app listens on `127.0.0.1` only, so other computers on your network can't reach it. The first build downloads Meridian, TensorFlow and JAX and takes a few minutes; the image is about 2.9 GB on Apple silicon and 3.7 GB on Intel/AMD (Windows).
 
-Tested so far: the image builds and runs natively on Apple silicon (arm64). The Intel/AMD (amd64) image used by Windows and Intel Macs builds, imports Meridian and GeoX, and opens the demo model when emulated on Apple silicon. `start.ps1`/`start.bat` have not yet been run on a real Windows machine.
+Tested so far: the image builds and runs natively on Apple silicon (arm64). The Intel/AMD (amd64) image used by Windows and Intel Macs builds, opens the demo model and fits the sample data (R² 0.965, same as native) when emulated on Apple silicon. `start.ps1`/`start.bat` have not yet been run on a real Windows machine.
 
 ### Live demo
 
