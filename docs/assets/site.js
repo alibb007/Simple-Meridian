@@ -194,9 +194,9 @@
       "<h1>Google Meridian,<br>in plain words.</h1>" +
       '<p class="lede">See which ads bring in your sales and where the next dollar should go.<br>' +
       "A guided tour on a made-up shop, then run it on your own data.</p>" +
-      '<div class="starts"><button class="btn pill pill-gold" id="t-start" type="button">Start the Simple Meridian guided tour</button>' +
-      '<button class="btn pill pill-story" id="t-story" type="button">' +
-      '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>Start the story</button></div>' +
+      '<div class="starts"><button class="btn pill pill-story" id="t-story" type="button">' +
+      '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>See it as a story first</button>' +
+      '<button class="btn pill pill-gold" id="t-start" type="button">Start the Simple Meridian guided tour</button></div>' +
       '<a class="by" href="https://www.linkedin.com/in/alibarfibafghi/" target="_blank" rel="noopener noreferrer">' +
       '<img src="assets/ali.png" alt="" width="52" height="52"><span><small>Built by</small><b>Ali Barfi Bafghi</b></span></a>' +
       '<p class="vnote">Updated 27 Oct 2026. I built the <a href="https://github.com/alibb007/Simple-Meridian/tree/5438c16" target="_blank" ' +

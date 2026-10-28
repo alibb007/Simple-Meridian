@@ -76,6 +76,25 @@ def test_donut_label_for_small_totals():
     assert fig.layout.annotations[0].text.startswith("<b>$400.0K</b>"), fig.layout.annotations[0].text
 
 
+def test_wrapped_facets_split_into_stretchable_panels():
+    import json
+    from app_pages.report import facet_panels
+    for fn, key in (("report_charts.json", "response_curves"), ("plan_charts.json", "optimized_curves")):
+        spec = json.load(open(os.path.join(ROOT, "data", "demo", fn)))[key]
+        panels = facet_panels(spec)
+        assert [v for v, _ in panels] == ["Display", "Email", "Radio", "Search", "Social", "TV"], key
+        for v, sub in panels:
+            assert sub["width"] == "container" and "facet" not in sub and "columns" not in sub
+            rows = next(iter(sub["datasets"].values()))
+            assert rows and all(r["channel"] == v for r in rows)
+            for layer in sub["layer"]:
+                enc = layer["encoding"]
+                assert enc["color"]["scale"]["domain"] == [p for p, _ in panels]  # same color per channel
+                assert all(e.get("legend", "unset") is None for k, e in enc.items() if k in ("color", "strokeDash", "shape"))
+    single = json.load(open(os.path.join(ROOT, "data", "demo", "report_charts.json")))["roi_channel"]
+    assert facet_panels(single) is None
+
+
 if __name__ == "__main__":
     for name, t in list(globals().items()):
         if name.startswith("test_") and callable(t):

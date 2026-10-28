@@ -70,7 +70,9 @@ MODEL_CHARTS = [
          what="One curve per channel: the sales it brings at different spend levels, from nothing up to double "
               "what you spend now.",
          read="Steep parts mean more money still brings more sales. Where a curve flattens out, the channel is "
-              "full and extra money mostly goes to waste."),
+              "full and extra money mostly goes to waste.",
+         legend="Solid line: spend up to today's level. Dashed line: more than today. Dot: today's spend. "
+                "Shaded band: the 90% range."),
 ]
 
 PLAN_CHARTS = [
@@ -91,5 +93,7 @@ PLAN_CHARTS = [
     dict(id="optimized_curves", group="Budget plan", icon="ssid_chart",
          title="The plan on each response curve",
          what="The same curves as before, with marks for today's spend and for the planned spend.",
-         read="The plan moves money off the flat parts of curves and onto the steep parts."),
+         read="The plan moves money off the flat parts of curves and onto the steep parts.",
+         legend="Solid line: spend inside the plan's limits. Dashed line: outside them. "
+                "The two marks are today's spend and the planned spend; hover one to see which."),
 ]

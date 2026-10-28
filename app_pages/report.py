@@ -37,6 +37,43 @@ def _plan_specs() -> tuple[dict | None, str]:
     return None, ""
 
 
+def facet_panels(spec: dict) -> list[tuple[str, dict]] | None:
+    """Split a wrapped facet chart (`columns` set) into one chart per panel.
+
+    Vega-Lite can't stretch a facet to its container, so Meridian's 3-across curves (400 px panels)
+    overflow the card. One chart per panel, each `width: container`, fits any screen. The color
+    scale keeps every channel in its domain so each panel keeps Meridian's color for it.
+    """
+    facet = spec.get("facet") or {}
+    field = facet.get("field")
+    if not field or "columns" not in spec or "spec" not in spec:
+        return None
+    name = (spec.get("data") or {}).get("name")
+    rows = (spec.get("datasets") or {}).get(name)
+    if rows is None:
+        return None
+    values = sorted({str(r[field]) for r in rows if r.get(field) is not None})
+    inner = json.loads(json.dumps(spec["spec"]))
+    for layer in inner.get("layer", [inner]):
+        enc = layer.get("encoding", {})
+        color = enc.get("color")
+        if color and color.get("field") == field:
+            color["scale"] = {**color.get("scale", {}), "domain": values}
+        # Per-panel legends would squeeze each narrow plot; the card's caption explains the marks instead.
+        for ch in ("color", "strokeDash", "shape", "size", "opacity"):
+            if isinstance(enc.get(ch), dict):
+                enc[ch]["legend"] = None
+    panels = []
+    for v in values:
+        sub = {k: val for k, val in spec.items() if k not in ("facet", "spec", "columns", "resolve", "title", "datasets")}
+        sub.update(json.loads(json.dumps(inner)))
+        sub["datasets"] = {name: [r for r in rows if str(r.get(field)) == v]}
+        sub["title"] = {"text": v, "anchor": "start", "fontSize": 14}
+        sub["width"], sub["height"] = "container", 260
+        panels.append((v, sub))
+    return panels
+
+
 def _chart_card(c: dict, spec: dict | None):
     with st.container(border=True, key=f"mr-{c['id']}"):
         st.markdown(
@@ -52,6 +89,13 @@ def _chart_card(c: dict, spec: dict | None):
         elif "table" in spec:
             t = spec["table"]
             st.dataframe(pd.DataFrame(t["data"], columns=t["columns"]), hide_index=True)
+        elif (panels := facet_panels(spec)) is not None:
+            cols = st.columns(2, gap="medium")
+            for i, (v, sub) in enumerate(panels):
+                with cols[i % 2]:
+                    st.vega_lite_chart(sub, width="stretch", key=f"mrchart-{c['id']}-{i}")
+            if c.get("legend"):
+                st.caption(c["legend"])
         else:
             st.vega_lite_chart(spec, width="stretch", key=f"mrchart-{c['id']}")
 
