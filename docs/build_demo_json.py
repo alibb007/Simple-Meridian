@@ -40,6 +40,8 @@ with open(os.path.join(DEMO, "plan.json")) as f:
     plan_totals = json.load(f)
 with open(os.path.join(DEMO, "quality.json")) as f:
     quality = json.load(f)
+with open(os.path.join(DEMO, "geox.json")) as f:  # scripts/build_geox_demo.py
+    geox = json.load(f)
 
 with open(os.path.join(ROOT, "data", "simple_dataset.csv"), newline="") as f:
     sample = [{"week": r["time"], "TV": round(float(r["TV_spend"])), "Radio": round(float(r["Radio_spend"])),
@@ -70,8 +72,7 @@ for st in tour.steps():
     tour_steps.append(step)
 
 data = {"tour": tour_steps, "sample_rows": sample, "summary": summary, "fit": fit, "curves": curves, "plan": plan, "plan_totals": plan_totals,
-        "quality": quality, "geox_sample": {"true_iroas": 2.5, "estimate": 2.53, "lo": 2.36, "hi": 2.67,
-                                            "test_regions": 11, "control_regions": 29, "mde": 0.008}}
+        "quality": quality, "geox": geox}
 with open(OUT, "w") as f:
     json.dump(data, f, separators=(",", ":"))
 # The same data as a script, so index.html also works when opened from disk (file://).

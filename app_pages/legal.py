@@ -33,8 +33,8 @@ def show_legal():
               server's memory cache for up to one hour, then they expire.</li>
               <li>Upload <b>aggregate</b> weekly or daily totals only. Do not upload personal data such as names,
               emails or customer IDs. Marketing mix models never need it.</li>
-              <li>Usage statistics to Streamlit are switched off. Page fonts and icons are loaded from Google Fonts,
-              which receives the visitor's IP address like any web request.</li>
+              <li>Usage statistics to Streamlit are switched off. Fonts and icons are served by the app itself,
+              so the page makes no requests to other sites.</li>
             </ul>""", "lock", "green")
     with c2:
         ui.card("What the results are", """

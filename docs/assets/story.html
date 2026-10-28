@@ -15,6 +15,9 @@
   .mg { width: 100%; max-width: 1100px; margin: 0 auto; background: var(--surface); border: 1px solid var(--border);
         border-radius: 18px; overflow: hidden; }
   .bar { display: flex; align-items: center; gap: 14px; padding: 14px 18px 4px; min-height: 64px; }
+  .pp { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--border); background: #fff; color: var(--ink); display: grid; place-items: center; cursor: pointer; padding: 0; flex: none; }
+  .pp svg { width: 14px; height: 14px; }
+  .pp:hover { background: #F2F4F7; }
   .dots { display: flex; gap: 6px; flex: none; }
   .dots button { width: 26px; height: 8px; border-radius: 99px; border: 0; padding: 0; background: #E4E7EC; cursor: pointer; overflow: hidden; position: relative; }
   .dots button i { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--primary); border-radius: 99px; }
@@ -35,6 +38,7 @@
 <body>
 <div class="mg" id="mg" role="img" aria-label="Story in six scenes: a shop spends on six ad channels, cannot tell which ones work, has to plan next year's budget, gives three years of weekly numbers to Meridian, sees the return on each channel, and moves money to the channels that still pay back.">
   <div class="bar">
+    <button class="pp" id="pp" type="button" aria-label="Pause the story"><svg viewBox="0 0 24 24" aria-hidden="true"><path id="ppicon" fill="currentColor" d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg></button>
     <div class="dots" id="dots" aria-label="Scenes"></div>
     <div class="cap" id="cap" aria-live="polite"></div>
   </div>
@@ -187,7 +191,7 @@
   el("text", { x: 880, y: 210, "text-anchor": "middle", class: "sub" }, g6, "same total budget");
 
   function render(s, p) {
-    G.forEach(function (g, i) { g.setAttribute("opacity", i === s ? Math.min(1, Math.min(p, 1 - p) * 12 + (reduce ? 1 : 0)) : 0); });
+    G.forEach(function (g, i) { g.setAttribute("opacity", i === s ? Math.min(1, Math.min(p, 1 - p) * 12 + (reduce || paused ? 1 : 0)) : 0); });
     if (s === 0) {
       s1.forEach(function (x, i) { var t = ease((p - .12 - i * .06) / .3); x.b.setAttribute("width", x.w * t); x.t.setAttribute("opacity", t); });
     } else if (s === 1) {
@@ -235,13 +239,17 @@
   }
 
   var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var t = 0, last = null, paused = false;
-  var mg = document.getElementById("mg");
-  mg.addEventListener("mouseenter", function () { paused = true; });
-  mg.addEventListener("mouseleave", function () { paused = false; });
-  function jump(i) { t = i * DUR + (reduce ? DUR - 1 : 0); if (reduce) draw(); }
+  var t = 0, last = null, paused = false, pp = document.getElementById("pp"), ppicon = document.getElementById("ppicon");
+  function setPaused(p) {
+    paused = p;
+    ppicon.setAttribute("d", p ? "M8 5v14l11-7z" : "M7 5h4v14H7zM13 5h4v14h-4z");
+    pp.setAttribute("aria-label", p ? "Play the story" : "Pause the story");
+  }
+  pp.addEventListener("click", function () { setPaused(!paused); });
+  // A clicked scene starts just after its fade-in and plays from there.
+  function jump(i) { t = i * DUR + (reduce ? DUR - 1 : DUR * 0.09); setPaused(false); draw(); }
   function draw() { var s = Math.floor(t / DUR) % N, p = (t % DUR) / DUR; setCaption(s, p); render(s, p); }
-  if (reduce) { jump(0); return; }  // No motion: each scene shows its last frame; the dots switch scenes.
+  if (reduce) { pp.hidden = true; jump(0); return; }  // No motion: each scene shows its last frame; the dots switch scenes.
   function tick(now) {
     if (last !== null && !paused) t = (t + now - last) % (DUR * N);
     last = now;

@@ -99,9 +99,57 @@
     return s + "</svg>";
   }
 
+  // ---------------- GeoX sample (real results from scripts/build_geox_demo.py) ----------------
+  var GX = D.geox, gxTest = {}; GX.treatment.forEach(function (g) { gxTest[g] = 1; });
+  function regionGrid() {
+    var names = Object.keys(GX.geo_size).sort(), s = '<svg viewBox="0 0 400 210" role="img" aria-label="40 regions: ' + GX.treatment.length + ' test, ' + GX.control.length + ' control">';
+    names.forEach(function (n, k) {
+      var x = 10 + (k % 8) * 48, y = 10 + Math.floor(k / 8) * 40, t = gxTest[n];
+      s += '<rect x="' + x + '" y="' + y + '" width="42" height="34" rx="7" fill="' + (t ? "#6D4AE8" : "#DCE7FF") + '"/>';
+      s += '<text x="' + (x + 21) + '" y="' + (y + 21) + '" font-size="10" text-anchor="middle" fill="' + (t ? "#fff" : "#1D3A8A") + '">' + n.replace("Region ", "") + "</text>";
+    });
+    return s + "</svg>";
+  }
+  function lineChart(series, opts) {
+    // series: [{v: [...], color, dash}], all the same length; opts.shadeFrom: index where the test starts
+    var W = 640, H = 210, L = 46, R = 10, T = 12, B = 26, n = series[0].v.length;
+    var all = [].concat.apply([], series.map(function (s) { return s.v.filter(function (x) { return x != null; }); }));
+    var lo = Math.min.apply(null, all), hi = Math.max.apply(null, all), pad = (hi - lo) * 0.08; lo -= pad; hi += pad;
+    var X = function (k) { return L + k / (n - 1) * (W - L - R); }, Y = function (v) { return T + (hi - v) / (hi - lo) * (H - T - B); };
+    var s = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="' + esc(opts.label) + '">';
+    if (opts.shadeFrom != null) {
+      s += '<rect x="' + X(opts.shadeFrom) + '" y="' + T + '" width="' + (X(n - 1) - X(opts.shadeFrom)) + '" height="' + (H - T - B) + '" fill="#F4F0FF"/>';
+      s += '<text x="' + (X(opts.shadeFrom) + 6) + '" y="' + (T + 14) + '" font-size="11" fill="#6941C6">ads running</text>';
+    }
+    [0, .5, 1].forEach(function (f) { var v = lo + (hi - lo) * f; s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + Y(v) + '" y2="' + Y(v) + '" stroke="#EDF0F6"/>' +
+      '<text x="' + (L - 6) + '" y="' + (Y(v) + 4) + '" font-size="10" text-anchor="end" fill="#5B6475">' + opts.fmt(v) + "</text>"; });
+    series.forEach(function (sr) {
+      var d = "", started = false;
+      sr.v.forEach(function (v, k) { if (v == null) { started = false; return; } d += (started ? "L" : "M") + X(k).toFixed(1) + " " + Y(v).toFixed(1); started = true; });
+      s += '<path d="' + d + '" fill="none" stroke="' + sr.color + '" stroke-width="2"' + (sr.dash ? ' stroke-dasharray="6 4"' : "") + "/>";
+    });
+    s += '<text x="' + L + '" y="' + (H - 6) + '" font-size="10" fill="#5B6475">' + esc(opts.from) + '</text><text x="' + (W - R) + '" y="' + (H - 6) + '" font-size="10" text-anchor="end" fill="#5B6475">' + esc(opts.to) + "</text>";
+    return s + "</svg>";
+  }
+  var legend = function (items) { return '<div class="lgd">' + items.map(function (it) { return '<span><i style="background:' + it[1] + (it[2] ? ";background:repeating-linear-gradient(90deg," + it[1] + " 0 6px,transparent 6px 9px)" : "") + '"></i>' + it[0] + "</span>"; }).join("") + "</div>"; };
+  var gxPre = (function () {
+    var t = GX.pre_groups.test, c = GX.pre_groups.control, mt = t.reduce(function (a, b) { return a + b; }, 0) / t.length, mc = c.reduce(function (a, b) { return a + b; }, 0) / c.length;
+    return lineChart([{ v: c.map(function (v) { return v / mc * 100; }), color: "#7DA2F0" }, { v: t.map(function (v) { return v / mt * 100; }), color: "#6D4AE8" }],
+      { label: "Daily sales before the test, test vs control regions, indexed to 100", fmt: function (v) { return v.toFixed(0); }, from: GX.pre_groups.date[0], to: GX.pre_groups.date[GX.pre_groups.date.length - 1] });
+  })();
+  var gxCf = (function () {
+    var rows = GX.counterfactual.data, start = rows.findIndex(function (r) { return r[0].slice(0, 10) >= GX.start; });
+    return lineChart([{ v: rows.map(function (r) { return r[2]; }), color: "#98A2B3", dash: true }, { v: rows.map(function (r) { return r[1]; }), color: "#6D4AE8" }],
+      { label: "Test regions: actual sales vs what GeoX expects without the ads", shadeFrom: start, fmt: function (v) { return money(v); }, from: rows[0][0].slice(0, 10), to: rows[rows.length - 1][0].slice(0, 10) });
+  })();
+  var gxCum = GX.cumulative.data[GX.cumulative.data.length - 1];
+  function rangeBar(lo, hi, max, color) {
+    return '<div class="rbar"><span style="left:' + (lo / max * 100) + "%;width:" + ((hi - lo) / max * 100) + "%;background:" + color + '"></span></div>';
+  }
+
   // ---------------- Simulated app screens ----------------
   // Region ids (data-t) match the app's tour anchors in utils/tour.py.
-  var Q = D.quality, G = D.geox_sample;
+  var Q = D.quality;
   var tabs = function (on) {
     return '<div class="tabs">' + ["ROI", "Contribution", "Response curves", "Model fit", "Report"].map(function (t, k) {
       return '<span class="' + (k === on ? "on" : "") + '">' + t + "</span>";
@@ -130,6 +178,9 @@
         '<div class="field"><span>Spend column</span><em>' + esc(n) + "_spend ▾</em></div>" +
         '<div class="field"><span>Impressions or clicks</span><em>' + esc(n) + "_impression ▾</em></div></div>";
     }).join("") + '<div class="chcard add">+ Add a channel</div>';
+  }
+  function code(text) {
+    return '<div class="code"><pre><code>' + esc(text) + '</code></pre><button class="copy" type="button" data-copy="' + esc(text) + '">Copy</button></div>';
   }
   var sel = function (label, value) { return '<div class="field"><span>' + label + "</span><em>" + value + " ▾</em></div>"; };
 
@@ -175,10 +226,18 @@
       '<div class="radio">How long should Meridian learn? ◉ Quick check (about 30 s) ○ Standard (about 1 min) ○ Thorough</div>' +
       '<span class="fakebtn bigbtn">▶ Run model</span></div>',
     ready: '<div class="kick">Step 1 of 3 · after the run</div><h3>Model ready</h3>' +
-      '<div class="box" data-t="s1-ready"><div class="boxh">How good is the model?</div><div class="tiles">' +
+      '<div class="box readybox" data-t="s1-ready"><div class="build" aria-live="polite"><div class="ring"></div>' +
+      '<div class="btxt">Meridian is learning…</div><div class="bbar"><span></span></div>' +
+      '<div class="bdone"><span>✓</span>Done. The model is ready.</div></div>' +
+      '<div class="boxh">How good is the model?</div><div class="tiles">' +
       '<div class="tile"><div class="k">Fit (R²)</div><div class="v">' + Q.r2.toFixed(2) + '</div><div class="d">weekly ups and downs explained</div></div>' +
       '<div class="tile"><div class="k">Error (MAPE)</div><div class="v">' + (Q.mape * 100).toFixed(1) + '%</div><div class="d">average miss per week</div></div>' +
       '<div class="tile"><div class="k">Convergence (R-hat)</div><div class="v">' + Q.max_rhat.toFixed(2) + '</div><div class="d up">converged</div></div></div>' +
+      '<table class="fit"><thead><tr><th>Score</th><th>Value</th><th>What it means</th><th>Good when</th></tr></thead><tbody>' +
+      '<tr><td>R-squared</td><td>' + Q.r2.toFixed(3) + '</td><td>Share of the week-to-week ups and downs the model explains</td><td>close to 1</td></tr>' +
+      '<tr><td>MAPE</td><td>' + (Q.mape * 100).toFixed(1) + '%</td><td>How far off it is in an average week</td><td>under 10%</td></tr>' +
+      '<tr><td>wMAPE</td><td>' + (Q.wmape * 100).toFixed(1) + '%</td><td>The same, with big weeks counting more</td><td>under 10%</td></tr>' +
+      '<tr><td>R-hat</td><td>' + Q.max_rhat.toFixed(2) + '</td><td>Whether the model finished learning</td><td>under 1.2</td></tr></tbody></table>' +
       '<div class="row"><span class="fakebtn">Next: see the insights →</span><span class="fakebtn ghostbtn">Download the model</span></div></div>',
     step2: '<div class="kick">Step 2 of 3</div><h3>Insights</h3>' + insightsTiles + tabs(0) + '<div class="chart" data-t="s2-roi">' + roiChart() + "</div>",
     step3: '<div class="kick">Step 3 of 3</div><h3>Budget plan</h3>' +
@@ -191,27 +250,41 @@
       '<div class="tile"><div class="k">ROI</div><div class="v">' + T.roi_after.toFixed(2) + '×</div><div class="d">was ' + T.roi_before.toFixed(2) + "×</div></div></div>" +
       '<div class="chart">' + planChart() + "</div>",
     geox: '<div class="kick">Meridian GeoX <span class="new">NEW</span></div><h3>GeoX (Lift test)</h3>' +
-      '<div class="box" data-t="gx-plan"><div class="boxh">1 · Plan the test</div>' +
-      '<div class="callout">Made-up data for 40 regions. The campaign really returns $' + G.true_iroas.toFixed(2) + " per $1. Can GeoX find it?</div>" +
-      '<span class="fakebtn">Pick test regions</span> <span class="fakebtn">Run the test and measure</span></div>' +
-      '<div class="tiles">' +
-      '<div class="tile"><div class="k">Test regions</div><div class="v">' + G.test_regions + '</div><div class="d">ads run here</div></div>' +
-      '<div class="tile"><div class="k">Control regions</div><div class="v">' + G.control_regions + '</div><div class="d">no change</div></div>' +
-      '<div class="tile"><div class="k">Return per $1 found</div><div class="v">$' + G.estimate.toFixed(2) + '</div><div class="d">90% range $' + G.lo.toFixed(2) + " – $" + G.hi.toFixed(2) + "</div></div>" +
-      '<div class="tile"><div class="k">True value</div><div class="v">$' + G.true_iroas.toFixed(2) + '</div><div class="d up">inside the range</div></div></div>',
+      '<div class="box" data-t="gx-why"><div class="boxh">Why a test?</div><div class="why">' +
+      '<div><b>A model looks back</b><p>It sees that sales rose in weeks with more TV, but it cannot be sure TV caused it.</p></div>' +
+      '<div class="arrow" aria-hidden="true">→</div>' +
+      '<div><b>A test checks it live</b><p>Ads run in some regions and stay off in similar ones. The difference is what the ads did.</p></div></div></div>' +
+      '<div class="box" data-t="gx-plan"><div class="boxh">1 · Pick the test regions</div><div class="gx2">' +
+      '<div>' + regionGrid() + legend([["Test regions (" + GX.treatment.length + ")", "#6D4AE8"], ["Control regions (" + GX.control.length + ")", "#DCE7FF"]]) + "</div>" +
+      '<div><div class="chart">' + gxPre + "</div>" + legend([["Test regions", "#6D4AE8"], ["Control regions", "#7DA2F0"]]) +
+      '<p class="note">Daily sales before the test, each group indexed to its own average (100).</p></div></div></div>' +
+      '<div class="box" data-t="gx-run"><div class="boxh">2 · Run the ads for ' + GX.test_days + ' days</div>' +
+      '<div class="chart">' + gxCf + "</div>" + legend([["Test regions: actual sales", "#6D4AE8"], ["Without the ads (GeoX's estimate)", "#98A2B3", 1]]) + "</div>" +
+      '<div class="box" data-t="gx-result"><div class="boxh">3 · The result</div><div class="tiles">' +
+      '<div class="tile"><div class="k">Back for every $1</div><div class="v">$' + GX.iroas.mean.toFixed(2) + '</div><div class="d">90% range $' + GX.iroas.lo.toFixed(2) + " – $" + GX.iroas.hi.toFixed(2) + "</div></div>" +
+      '<div class="tile"><div class="k">True value we hid</div><div class="v">$' + GX.true_iroas.toFixed(2) + '</div><div class="d up">inside the range</div></div>' +
+      '<div class="tile"><div class="k">Extra sales in ' + GX.test_days + ' days</div><div class="v">' + money(gxCum[1]) + '</div><div class="d">+' + (GX.pct.mean * 100).toFixed(1) + "% in the test regions</div></div>" +
+      '<div class="tile"><div class="k">Is it real?</div><div class="v">Yes</div><div class="d">p = ' + GX.lift.p.toFixed(3) + "</div></div></div></div>" +
+      '<div class="box" data-t="gx-prior"><div class="boxh">4 · Teach the model: TV\'s likely ROI</div>' +
+      '<div class="prior"><span>Before the test</span>' + rangeBar(1.42, 3.86, 4.5, "#B8C2D6") + "<b>$1.42 – $3.86</b></div>" +
+      '<div class="prior"><span>After the test</span>' + rangeBar(2.23, 2.95, 4.5, "#6D4AE8") + "<b>$2.23 – $2.95</b></div>" +
+      '<p class="note">90% ranges from the demo model, Quick check preset, with the test result as TV\'s prior.</p></div>',
     run: '<div class="kick">Your turn</div><h3>Run it on your own data</h3>' +
-      '<div class="runwrap" data-t="run-cta"><p class="lede">The full app fits Meridian on your own weekly data, runs budget plans and ' +
-      'GeoX (Lift test)<span class="new">NEW</span> experiments, and keeps your data on your computer. It runs in ' +
-      '<a href="https://www.docker.com/products/docker-desktop/" target="_blank" rel="noopener noreferrer">Docker Desktop</a> ' +
+      '<div class="runwrap" data-t="run-cta">' +
+      '<div class="safe"><b>Your data stays on your computer.</b> The app runs in Docker on your own machine at ' +
+      '<code>localhost</code>. Your file is never uploaded anywhere, Meridian runs on your computer, usage statistics are off, ' +
+      "and the app's fonts and icons come with it, so the page makes no requests to other sites.</div>" +
+      '<p class="lede">The full app fits Meridian on your own weekly data, runs budget plans and GeoX (Lift test)<span class="new">NEW</span> ' +
+      'experiments. It runs in <a href="https://www.docker.com/products/docker-desktop/" target="_blank" rel="noopener noreferrer">Docker Desktop</a> ' +
       "on a Mac or a Windows PC. Tested so far on Apple silicon; the Intel/Windows build passed a full model fit under emulation.</p>" +
       '<div class="runs">' +
-      '<div class="box"><div class="boxh">1. Get the code</div><pre><code>git clone https://github.com/alibb007/Simple-Meridian.git\ncd Simple-Meridian</code></pre>' +
+      '<div class="box"><div class="boxh">1. Get the code</div>' + code("git clone https://github.com/alibb007/Simple-Meridian.git\ncd Simple-Meridian") +
       '<p>No git? Download the ZIP from <a href="https://github.com/alibb007/Simple-Meridian" target="_blank" rel="noopener noreferrer">GitHub</a> and unzip it.</p></div>' +
-      '<div class="box"><div class="boxh">2. Start it</div><pre><code>./start.sh</code></pre>' +
+      '<div class="box"><div class="boxh">2. Start it</div>' + code("./start.sh") +
       "<p>That's on a Mac. On Windows, double-click <code>start.bat</code>. The first build takes a few minutes.</p></div>" +
-      '<div class="box"><div class="boxh">3. Upload your file</div><p>Go to <b>http://localhost:8501</b> and upload a CSV or Excel file ' +
-      "with one row per week, or load the sample data to try it first.</p>" +
-      '<p><a href="https://github.com/alibb007/Simple-Meridian#quick-start" target="_blank" rel="noopener noreferrer">Full instructions in the README</a></p></div>' +
+      '<div class="box"><div class="boxh">3. Upload your file</div><p>Open <b>http://localhost:8501</b> and upload a CSV or Excel file ' +
+      'with one row per week, or load the sample data to try it first. <a href="https://github.com/alibb007/Simple-Meridian#quick-start" ' +
+      'target="_blank" rel="noopener noreferrer">Full instructions in the README</a></p></div>' +
       "</div></div>",
   };
 
@@ -237,7 +310,7 @@
       // Adapted for the web demo: the app says "Click Change data…".
       st.screen = "run"; st.target = "run-cta"; st.last = true;
       st.body = "The full app is free and runs on your computer. Upload a spreadsheet with one row per week: a date, your sales " +
-        "and the spend on each channel. The app finds the columns for you, and <b>Help &amp; glossary</b> explains the terms.";
+        "and the spend on each channel. Your file never leaves your computer, and nothing is sent to us or anyone else.";
     }
     return st;
   });
@@ -379,8 +452,48 @@
       if (c < 0 || c > window.innerHeight * 0.4) window.scrollBy({ top: c - 16, behavior: "auto" });
     }
   }
+  // After "Run the model": a short build animation, then the scores.
+  var buildTimer = null, readyBox = main.querySelector(".readybox");
+  function finishBuild() {
+    clearTimeout(buildTimer); buildTimer = null;
+    readyBox.classList.remove("building", "isdone");
+    cap.style.visibility = "";
+  }
+  function build() {
+    finishBuild();
+    var txt = readyBox.querySelector(".btxt"), stages = ["Reading 156 weeks of sales and spend…", "Learning how long each ad keeps working…",
+      "Trying hundreds of possible answers…", "Checking the answers agree…"], k = 0, at = i;
+    readyBox.classList.add("building"); cap.style.visibility = "hidden";
+    txt.textContent = stages[0];
+    (function next() {
+      buildTimer = setTimeout(function () {
+        if (i !== at) return;
+        k++;
+        if (k < stages.length) { txt.textContent = stages[k]; next(); return; }
+        readyBox.classList.add("isdone");
+        buildTimer = setTimeout(function () { if (i === at) { finishBuild(); place(false); } }, 900);
+      }, 650);
+    })();
+  }
+  main.addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest(".copy");
+    if (!b) return;
+    var done = function () { b.textContent = "Copied"; setTimeout(function () { b.textContent = "Copy"; }, 1500); };
+    var fallback = function () {  // older browsers, or when the clipboard API is not allowed
+      var t = document.createElement("textarea");
+      t.value = b.dataset.copy; t.setAttribute("readonly", ""); t.style.position = "fixed"; t.style.opacity = "0";
+      document.body.appendChild(t); t.select();
+      var ok = false; try { ok = document.execCommand("copy"); } catch (err) {}
+      document.body.removeChild(t);
+      if (ok) done(); else b.textContent = "Select and copy";
+    };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(b.dataset.copy).then(done, fallback);
+    else fallback();
+  });
+
   function chapterEnd(k) { for (var j = k + 1; j < STEPS.length; j++) if (STEPS[j].chapter !== STEPS[k].chapter) return j; return STEPS.length; }
   function go(j, scrollToo) {
+    var from = i;
     i = Math.max(-1, Math.min(STEPS.length - 1, j));
     var intro = i < 0, s = intro ? { screen: "home" } : STEPS[i];
     [].forEach.call(main.children, function (c) { c.classList.toggle("on", c.dataset.screen === s.screen); });
@@ -406,6 +519,7 @@
     skipBtn.hidden = chapterEnd(i) >= STEPS.length || !!s.last;
     nextBtn.hidden = !!s.last; againBtn.hidden = !s.last;
     bar.style.width = ((i + 1) / STEPS.length * 100) + "%";
+    if (s.target === "s1-ready" && from === i - 1 && !reduce) build(); else finishBuild();
     place(scrollToo);
     // Layout can still shift for a moment (scrollbar appearing, chart sizing), so place again once it settles.
     var at = i;

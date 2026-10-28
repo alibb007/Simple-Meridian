@@ -94,7 +94,16 @@ def badge(name: str, accent: str = "blue", size: int = 40) -> str:
 
 CSS = f"""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@500;600;700;800&family=Red+Hat+Text:wght@400;500;600&family=Red+Hat+Mono:wght@400;500&display=swap');
+/* Fonts are served by the app itself (static/fonts, OFL-1.1), so the browser makes no outside requests. */
+@font-face {{ font-family: 'Red Hat Display'; font-style: normal; font-weight: 500; font-display: swap; src: url('app/static/fonts/red-hat-display-latin-500-normal.woff2') format('woff2'); }}
+@font-face {{ font-family: 'Red Hat Display'; font-style: normal; font-weight: 600; font-display: swap; src: url('app/static/fonts/red-hat-display-latin-600-normal.woff2') format('woff2'); }}
+@font-face {{ font-family: 'Red Hat Display'; font-style: normal; font-weight: 700; font-display: swap; src: url('app/static/fonts/red-hat-display-latin-700-normal.woff2') format('woff2'); }}
+@font-face {{ font-family: 'Red Hat Display'; font-style: normal; font-weight: 800; font-display: swap; src: url('app/static/fonts/red-hat-display-latin-800-normal.woff2') format('woff2'); }}
+@font-face {{ font-family: 'Red Hat Text'; font-style: normal; font-weight: 400; font-display: swap; src: url('app/static/fonts/red-hat-text-latin-400-normal.woff2') format('woff2'); }}
+@font-face {{ font-family: 'Red Hat Text'; font-style: normal; font-weight: 500; font-display: swap; src: url('app/static/fonts/red-hat-text-latin-500-normal.woff2') format('woff2'); }}
+@font-face {{ font-family: 'Red Hat Text'; font-style: normal; font-weight: 600; font-display: swap; src: url('app/static/fonts/red-hat-text-latin-600-normal.woff2') format('woff2'); }}
+@font-face {{ font-family: 'Red Hat Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url('app/static/fonts/red-hat-mono-latin-400-normal.woff2') format('woff2'); }}
+@font-face {{ font-family: 'Red Hat Mono'; font-style: normal; font-weight: 500; font-display: swap; src: url('app/static/fonts/red-hat-mono-latin-500-normal.woff2') format('woff2'); }}
 
 :root {{
   --navy: {NAVY}; --bg: {BG}; --surface: {SURFACE}; --ink: {INK}; --muted: {MUTED};

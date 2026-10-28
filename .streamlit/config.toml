@@ -22,6 +22,8 @@ maxUploadSize = 50
 headless = true
 enableXsrfProtection = true
 enableCORS = true
+# Serves ./static (the app's own fonts) at /app/static/.
+enableStaticServing = true
 
 [browser]
 gatherUsageStats = false
