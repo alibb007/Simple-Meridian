@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Simple Meridian · live demo</title>
-<meta name="description" content="A no-code app for Google Meridian, the open-source marketing mix model. Watch a guided demo, then run the full version on your computer.">
+<title>Simple Meridian guided tour</title>
+<meta name="description" content="A guided tour of Google Meridian, the open-source marketing mix model, on a made-up company's results. Plays in your browser, nothing to install.">
 <!-- Static page: no cookies, no trackers, no third-party requests. -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; frame-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="no-referrer">
@@ -12,126 +12,40 @@
 <link rel="stylesheet" href="assets/site.css">
 </head>
 <body>
-<a class="skip" href="#main">Skip to content</a>
-<div class="layout">
-  <aside class="side" aria-label="Site">
-    <a class="brand" href="#top">
+<a class="skip" href="#t-caption">Skip to the tour caption</a>
+<div class="app" id="app">
+  <aside class="app-side" aria-label="Tour chapters">
+    <div class="brand">
       <span class="logo"><img src="assets/logo.png" alt="Simple Meridian logo"></span>
-      <span><b>Simple Meridian</b><span>Google Meridian, made simple</span></span>
-    </a>
-    <nav aria-label="Sections">
-      <a class="tourbtn" href="#tour" data-play>
-        <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>Play the guided tour</a>
-      <div class="label">On this page</div>
-      <a href="#how">How Meridian thinks</a>
-      <a href="#tour">Guided tour</a>
-      <a href="#run">Run it on your computer</a>
-      <div class="label">Learn more</div>
+      <span><b>Simple Meridian</b><span>Guided tour</span></span>
+    </div>
+    <nav id="chapters" aria-label="Chapters"></nav>
+    <div class="side-foot">
+      <a class="btn btn-gold" href="https://github.com/alibb007/Simple-Meridian#quick-start" target="_blank" rel="noopener noreferrer">Run it on your own data</a>
       <a href="https://developers.google.com/meridian" target="_blank" rel="noopener noreferrer">Google Meridian</a>
-      <a href="https://developers.google.com/meridian/geox" target="_blank" rel="noopener noreferrer">GeoX (Lift test)<span class="new">NEW</span></a>
-      <a href="https://github.com/alibb007/Simple-Meridian" target="_blank" rel="noopener noreferrer">Source code on GitHub</a>
-    </nav>
-    <div class="note">This page is a recorded demo. It shows results from a model fitted on made-up data. To fit your own data, run the full app on your computer.</div>
+      <a href="https://developers.google.com/meridian/geox" target="_blank" rel="noopener noreferrer">Meridian GeoX</a>
+      <a href="https://github.com/alibb007/Simple-Meridian" target="_blank" rel="noopener noreferrer">Source code</a>
+      <p>Made-up data. Runs in your browser, sets no cookies and sends nothing. Not affiliated with Google; Meridian is a trademark of Google LLC.</p>
+    </div>
   </aside>
 
-  <main id="main">
-    <a id="top"></a>
-    <div class="version"><span class="tag">Updated 27 Oct 2026</span>
-      <span>First release <b>April 2025</b> on Google Meridian 1.0.6</span>
-      <span>Now on <b>Meridian 2.1.0</b>, with a guided tour, a ready-made demo and <b>GeoX (Lift test)</b><span class="new">NEW</span></span>
+  <main class="app-main" id="app-main"></main>
+  <div class="spot" id="spot" aria-hidden="true"></div>
+
+  <div class="caption floating" id="t-caption" role="region" aria-label="Tour caption" aria-live="polite" tabindex="-1">
+    <div class="top"><span id="t-chapter"></span><span class="sep" aria-hidden="true">·</span><span id="t-count"></span></div>
+    <div class="progress" aria-hidden="true"><span id="t-progress"></span></div>
+    <h3 id="t-title"></h3>
+    <p id="t-body"></p>
+    <div class="ctrl">
+      <button class="btn btn-light" id="t-back" type="button">Back</button>
+      <button class="btn btn-primary" id="t-play" type="button">Pause</button>
+      <button class="btn btn-light" id="t-next" type="button">Next</button>
+      <button class="btn btn-link" id="t-skip" type="button">Skip this part</button>
+      <button class="btn btn-light" id="t-again" type="button" hidden>Watch again</button>
     </div>
-
-    <section class="hero" aria-labelledby="h-hero">
-      <div>
-        <div class="kicker">Free and open source · built on <a href="https://developers.google.com/meridian" target="_blank" rel="noopener noreferrer" style="color:inherit">Google Meridian</a></div>
-        <h1 id="h-hero">Find out which ads really bring in your sales</h1>
-        <p>Google Meridian can tell a business what each marketing channel earns and where the next dollar should go, but it normally needs a data scientist and a lot of Python. I built Simple Meridian so anyone can run a quick test, watch how Meridian works, and see what it can tell them, without writing a line of code.</p>
-        <div class="sign"><img class="avatar" src="assets/ali.png" alt="Ali Barfi Bafghi" width="40" height="40"><span><b style="color:#fff">Ali Barfi Bafghi</b> · creator of Simple Meridian</span></div>
-        <div class="row">
-          <a class="btn btn-gold" href="#tour" data-play>
-            <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>Play the guided tour</a>
-          <a class="btn btn-ghost" href="https://github.com/alibb007/Simple-Meridian#quick-start" target="_blank" rel="noopener noreferrer">Run the full version on your computer</a>
-        </div>
-      </div>
-      <div class="glass" aria-label="Demo results">
-        <h4>DEMO RESULT · REVENUE PER $1</h4>
-        <div id="hero-roi"></div>
-        <div class="gain" id="hero-gain"></div>
-      </div>
-    </section>
-
-    <section id="how" aria-labelledby="h-how">
-      <h2 id="h-how">How Meridian thinks</h2>
-      <p class="lede">Sixteen seconds, no statistics. These four ideas are how a marketing mix model works.</p>
-      <iframe class="motion" src="assets/how-it-works.html" title="Animation: how Meridian turns ad spend and sales into a better budget" loading="lazy"></iframe>
-    </section>
-
-    <section id="tour" class="tour" aria-labelledby="h-tour">
-      <h2 id="h-tour">Guided tour</h2>
-      <p class="lede">The tour plays on its own, one part of the app at a time. Use the buttons, or the arrow keys and the space bar, to move at your own pace. <b>Skip this part</b> jumps to the next chapter.</p>
-
-      <div class="caption" id="t-caption" role="region" aria-label="Tour caption" aria-live="polite">
-        <div class="top"><span id="t-chapter"></span><span class="sep" aria-hidden="true">·</span><span id="t-count"></span></div>
-        <div class="progress" aria-hidden="true"><span id="t-progress"></span></div>
-        <h3 id="t-title"></h3>
-        <p id="t-body"></p>
-        <div class="ctrl">
-          <button class="btn btn-light" id="t-back" type="button">Back</button>
-          <button class="btn btn-primary" id="t-play" type="button">Pause</button>
-          <button class="btn btn-light" id="t-next" type="button">Next</button>
-          <button class="btn btn-link" id="t-skip" type="button">Skip this part</button>
-          <a class="btn btn-primary" id="t-run" href="https://github.com/alibb007/Simple-Meridian#quick-start" target="_blank" rel="noopener noreferrer" hidden>Run the full version on your computer</a>
-        </div>
-      </div>
-
-      <div class="window" aria-label="Simulated Simple Meridian app">
-        <div class="chrome" aria-hidden="true"><i style="background:#F87171"></i><i style="background:#FBBF24"></i><i style="background:#34D399"></i>
-          <span>localhost:8501 · Simple Meridian</span></div>
-        <div class="app" id="app">
-          <div class="app-side" aria-hidden="true">
-            <div class="brand"><span class="logo"><img src="assets/logo.png" alt=""></span><span><b>Simple Meridian</b></span></div>
-            <span class="nav-item" data-nav="home">Overview</span>
-            <span class="nav-item" data-nav="data">Data &amp; model</span>
-            <span class="nav-item" data-nav="insights">Insights</span>
-            <span class="nav-item" data-nav="plan">Budget plan</span>
-            <span class="nav-item" data-nav="geox">GeoX (Lift test)<span class="new">NEW</span></span>
-            <span class="nav-item" data-nav="help">Help &amp; glossary</span>
-          </div>
-          <div class="app-main" id="app-main"></div>
-          <div class="spot" id="spot" aria-hidden="true"></div>
-        </div>
-      </div>
-    </section>
-
-    <section id="run" aria-labelledby="h-run">
-      <h2 id="h-run">Run the full version on your computer</h2>
-      <p class="lede">This page only replays results. The full app fits Meridian on your own data, runs budget plans and GeoX (Lift test)<span class="new">NEW</span> experiments, and keeps your data on your machine. It runs in <a href="https://www.docker.com/products/docker-desktop/" target="_blank" rel="noopener noreferrer">Docker Desktop</a> on a Mac or a Windows PC. Tested so far on Apple silicon; the Intel/Windows build passed a full model fit under emulation.</p>
-      <div class="grid g3">
-        <div class="card">
-          <h3>1. Get the code</h3>
-          <pre><code>git clone https://github.com/alibb007/Simple-Meridian.git
-cd Simple-Meridian</code></pre>
-          <p>No git? Download the ZIP from <a href="https://github.com/alibb007/Simple-Meridian" target="_blank" rel="noopener noreferrer">GitHub</a> and unzip it.</p>
-        </div>
-        <div class="card">
-          <h3>2. Start it</h3>
-          <pre><code>./start.sh</code></pre>
-          <p>That's on a Mac. On Windows, double-click <code>start.bat</code>. Both build the app and open <code>http://localhost:8501</code>; the first build takes a few minutes.</p>
-        </div>
-        <div class="card">
-          <h3>3. Open the app</h3>
-          <p>Go to <b>http://localhost:8501</b>, then press <b>Take the 2-minute tour</b> or upload your own weekly data.</p>
-          <p><a href="https://github.com/alibb007/Simple-Meridian#quick-start" target="_blank" rel="noopener noreferrer">Full instructions in the README</a></p>
-        </div>
-      </div>
-    </section>
-
-    <footer>
-      <p>Built by <b>Ali Barfi Bafghi</b> on the open-source <a href="https://developers.google.com/meridian" target="_blank" rel="noopener noreferrer">Google Meridian</a> and <a href="https://developers.google.com/meridian/geox" target="_blank" rel="noopener noreferrer">Meridian GeoX</a> libraries. Not affiliated with Google. Meridian is a trademark of Google LLC.</p>
-      <p>This demo runs entirely in your browser. It sets no cookies and sends no data. The numbers come from a model fitted on made-up data and are not advice.</p>
-      <p><a href="https://github.com/alibb007/Simple-Meridian" target="_blank" rel="noopener noreferrer">GitHub</a> · <a href="https://www.linkedin.com/in/alibarfibafghi/" target="_blank" rel="noopener noreferrer">LinkedIn</a> · MIT License</p>
-    </footer>
-  </main>
+    <div class="keys" aria-hidden="true">← → to move · space to pause</div>
+  </div>
 </div>
 <script src="assets/demo.js"></script>
 <script src="assets/site.js"></script>

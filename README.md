@@ -15,7 +15,7 @@ Upload weekly spend and sales, and get channel ROI, response curves and a budget
 
 **Updated 27 Oct 2026.** First released April 2025 on Meridian 1.0.6, now on Meridian 2.1.0. See the [version history](#version-history).
 
-<img src="pic/home.png" alt="Simple Meridian home page" width="92%">
+<img src="pic/home.png" alt="Simple Meridian upload screen" width="92%">
 
 </div>
 
@@ -34,7 +34,7 @@ I built Simple Meridian so anyone can run a quick test, see how Meridian works, 
 | **3 · Budget plan** | Pick a period, a per-channel limit (±30% by default), and keep the budget or set a new total. | The spend split with the most incremental revenue, where it lands on each response curve, and CSV, Excel and HTML exports. |
 | **GeoX (Lift test)** (new) | Design a geo experiment with [Meridian GeoX](https://developers.google.com/meridian/geox), or upload a test you already ran. | Test and control regions, the smallest lift the test can detect, the measured extra revenue and return per $1, and a one-click ROI prior for the next model fit. |
 
-New to marketing measurement? Click **Take the 2-minute tour** on the home page. It walks through the demo page by page and highlights what to click. **Help & glossary** in the sidebar explains every term.
+New to marketing measurement? Watch the [guided tour](https://alibb007.github.io/simple-meridian-demo/) first. It plays in your browser and walks through a made-up company's results, part by part. **Help & glossary** in the app's sidebar explains every term.
 
 Everything runs on your machine. Your data is not sent anywhere.
 
@@ -53,7 +53,7 @@ Everything runs on your machine. Your data is not sent anywhere.
 
 | | Live demo | Local edition |
 |---|---|---|
-| What it is | A recorded walkthrough of the demo company, with an auto-playing guided tour | The full app: your own data, model fits, budget plans, GeoX lift tests |
+| What it is | The guided tour: an auto-playing walkthrough of the demo company's results | The full app: your own data, model fits, budget plans, GeoX lift tests |
 | Where it runs | In the browser, hosted free on GitHub Pages (`docs/` folder) | On your Mac or Windows PC, in Docker |
 | Needs | Nothing | Docker Desktop and about 4 GB of free RAM |
 | Your data | No uploads; the page sends no data and sets no cookies | Stays on your computer |
@@ -75,7 +75,7 @@ Tested so far: the image builds and runs natively on Apple silicon (arm64). The 
 
 ### Live demo
 
-**https://alibb007.github.io/simple-meridian-demo/** shows the demo results, the motion graphic and the auto-playing tour. It is built from this repository's `docs/` folder and published from the [simple-meridian-demo](https://github.com/alibb007/simple-meridian-demo) repository with GitHub Pages. GitHub Pages is free for public repositories, with a 1 GB site limit and a soft limit of 100 GB of traffic per month; the demo is about 170 KB.
+**https://alibb007.github.io/simple-meridian-demo/** is the guided tour. It opens straight into an auto-playing walkthrough with a chapter list, the motion graphic and every Meridian chart. It is built from this repository's `docs/` folder and published from the [simple-meridian-demo](https://github.com/alibb007/simple-meridian-demo) repository with GitHub Pages. GitHub Pages is free for public repositories, with a 1 GB site limit and a soft limit of 100 GB of traffic per month; the demo is about 170 KB.
 
 ### Run with Python
 
@@ -90,11 +90,11 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-The home page gives you three ways in:
+The app opens on the upload screen, with three ways in:
 
-- **Take the 2-minute tour**: a guided walkthrough of the demo for people who have never used an MMM.
-- **Open the demo**: a model already fitted on the sample data. Results open in a few seconds.
-- **Use my data**: upload a CSV or Excel file. You can also load the sample data and fit it yourself in about a minute.
+- **Upload your file**: a CSV or Excel file with one row per week.
+- **Use the sample**: load the sample data and fit it yourself in about a minute.
+- **Open demo results**: a model already fitted on the sample data. Results open in a few seconds.
 
 ## GeoX (Lift test)
 
@@ -167,16 +167,14 @@ app_pages/
 utils/
   mmm.py                       all Meridian calls; returns plain pandas tables
   geox.py                      all GeoX calls, plus the sample geo data
-  tour.py                      the guided tour
   report_charts.py             plain-words text for every Meridian report chart
   charts.py                    Plotly charts
   ui.py                        theme, CSS, sidebar navigation, small components
-static/motion/how-it-works.html  16-second motion graphic on the home page
-docs/                          static live demo for GitHub Pages
+docs/                          the guided tour website (GitHub Pages); tour text in docs/tour_steps.py
 start.sh / start.bat / start.ps1  one-step start on macOS, Linux and Windows
 docker-compose.yml             local edition, bound to 127.0.0.1
 scripts/build_demo.py          refits the demo model and precomputes its charts
-tests/test_pages.py            renders every page and tour step headlessly
+tests/test_pages.py            renders every page headlessly
 .streamlit/config.toml         theme
 data/simple_dataset.csv        sample data
 data/sample_model.binpb        demo model (Standard preset)
@@ -192,11 +190,10 @@ After upgrading `google-meridian`, run `python scripts/build_demo.py --refit` so
 **27 Oct 2026, Meridian 2.1.0**
 
 - Upgraded from `google-meridian` 1.0.6 to **2.1.0** (TensorFlow 2.21, JAX backend). Ported the app to the 2.x API: `DataFrameDataLoader`, `start_date`/`end_date` in the optimizer, and the new report signatures.
-- Added a guided tour for people new to MMM, and a Help & glossary page.
+- Added a Help & glossary page, and a guided tour website for people new to MMM.
 - Added **lift tests with Meridian GeoX 1.0.1**: design a geo experiment, measure it, and use the result as an ROI prior.
 - Added a demo: a pre-fitted model with precomputed charts, so you can see the results without fitting anything.
-- New home page: what the app is for, the demo's real results, a 16-second motion graphic, and three pictures of how Meridian reasons.
-- Guided tour spotlights each part it explains and dims the rest; its card sits right above that part. It has 26 steps: step 1 section by section, then every chart from Meridian's own report.
+- The guided tour lives on its own website. It spotlights each part it explains and dims the rest, with a caption right above that part. It has 27 steps: how Meridian thinks, step 1 section by section, then every chart from Meridian's own report. The app itself opens on the upload screen.
 - New **Meridian charts** page: the 12 model charts and 4 budget-plan charts from Meridian's HTML report, drawn by Meridian, each with "what it shows" and "how to read it" in plain words.
 - Step 1 now runs in order (data, time and outcome, channels, controls, fit), with channel cards you can rename, re-map, add and remove.
 - Budget plan period: latest 52 weeks, last full calendar year, full history, or custom dates from an in-app calendar.
@@ -204,7 +201,7 @@ After upgrading `google-meridian`, run `python scripts/build_demo.py --refit` so
 - Local edition for macOS and Windows (`start.sh`, `start.bat`, `docker-compose.yml`) and a static live demo in `docs/`.
 - Faster: Meridian loads in the background instead of on the first page load (page import went from 7.1 s to 0.5 s), optimizer results are cached, and the JAX backend is pinned.
 - Models are saved as `.binpb` with Meridian's serializer, replacing the deprecated pickle format.
-- Redesigned the interface: a home page with three starting points, a navigation sidebar, icons, pill tabs, and one color per channel across every chart. Step 1 now has numbered sections and a "Ready to fit" checklist; data is checked before fitting.
+- Redesigned the interface: an upload screen with three starting points, a navigation sidebar, icons, pill tabs, and one color per channel across every chart. Step 1 now has numbered sections and a "Ready to fit" checklist; data is checked before fitting.
 - Budget plan supports a new total budget as well as the same budget, with per-channel limits.
 - Docker image went from 3.82 GB to 2.62 GB by dropping C++ headers, test suites, libclang and debug symbols. It runs on Python 3.12 as a non-root user, with a health check.
 

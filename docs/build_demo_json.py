@@ -1,7 +1,7 @@
 """Pack the precomputed demo results (data/demo/) into docs/assets/demo.json.
 
 Run from the repo root after `python scripts/build_demo.py`, with the app's
-virtualenv (the tour text is imported from utils/tour.py so it never drifts):
+virtualenv (the tour text is imported from docs/tour_steps.py so it never drifts):
 
     .venv/bin/python docs/build_demo_json.py
 """
@@ -47,8 +47,8 @@ with open(os.path.join(ROOT, "data", "simple_dataset.csv"), newline="") as f:
                "Sales": round(float(r["Sales"]))} for _, r in zip(range(6), csv.DictReader(f))]
 
 # Guided tour: the app's own steps (titles and text) and the chart screenshots.
-sys.path.insert(0, ROOT)
-from utils import tour  # noqa: E402
+sys.path.insert(0, os.path.join(ROOT, "docs"))
+import tour_steps as tour  # noqa: E402
 
 CHARTS = os.path.join(ROOT, "docs", "assets", "charts")
 

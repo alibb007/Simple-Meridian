@@ -5,7 +5,7 @@ import pandas as pd
 import streamlit as st
 
 from app_pages.common import cached_periods, cached_summary, get_model, require_model
-from utils import charts, tour
+from utils import charts
 from utils import mmm as M
 from utils import ui
 
@@ -26,7 +26,6 @@ def show_optimization():
     periods = cached_periods(mmm, st.session_state.model_key)
 
     start, end = _period_picker(periods)
-    tour.here("s3-settings")
     with st.container(border=True, key="s3-settings"):
         c1, c2 = st.columns([1.6, 1], gap="large")
         with c1:

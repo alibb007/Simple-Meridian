@@ -43,6 +43,7 @@ STEPS = [
     ("step2", "Insights", ":material/insights:", "ROI, contribution, saturation"),
     ("step3", "Budget plan", ":material/savings:", "Reallocate spend for more return"),
 ]
+TOUR_URL = "https://alibb007.github.io/simple-meridian-demo/"
 EXTRA = [
     ("report", "Meridian charts", ":material/description:", "Every chart from Meridian's report, explained"),
     ("geox", "GeoX (Lift test)", ":material/science:", "Design and measure a geo experiment with Meridian GeoX"),
@@ -199,22 +200,9 @@ h3 {{ font-weight: 700 !important; font-size: 1.12rem !important; }}
 [data-testid="stSidebar"] [class*="st-key-nav-"][class*="-geox"] .stButton button p::after {{
   content: "NEW"; margin-left: .5rem; background: linear-gradient(135deg, #F04438, #F79009); color:#fff; font-weight:800;
   font-size:.62rem; letter-spacing:.06em; padding:.1rem .4rem; border-radius: 5px; vertical-align: 2px; }}
-[data-testid="stSidebar"] .st-key-tour-btn .stButton button {{ background: #FFD166 !important; }}
-[data-testid="stSidebar"] .st-key-tour-btn .stButton button p, [data-testid="stSidebar"] .st-key-tour-btn .stButton button span {{ color: {NAVY} !important; font-weight: 700 !important; }}
-[data-testid="stSidebar"] .st-key-tour-btn .stButton button:hover {{ background: #FFDE8A !important; }}
-
-/* ---------- Guided tour card (sits right above the section it explains) ---------- */
-.st-key-tour {{ position: relative; z-index: 1003; scroll-margin-top: 4rem; background: linear-gradient(var(--surface), var(--surface)) padding-box,
-  linear-gradient(135deg, #6D4AE8, #2459E8, #14B8A6) border-box; border: 2px solid transparent; border-radius: 18px;
-  padding: 1rem 1.2rem 1rem !important; box-shadow: 0 16px 40px -18px rgba(109,74,232,.55); margin-bottom: 1.2rem; }}
-@keyframes sm-pulse {{ 0%, 100% {{ box-shadow: 0 0 0 0 rgba(109,74,232,.55); }} 50% {{ box-shadow: 0 0 0 7px rgba(109,74,232,0); }} }}
-@media (prefers-reduced-motion: reduce) {{ [data-testid] {{ animation: none !important; }} }}
-.sm-tour-top {{ display:flex; align-items:center; gap:.45rem; font-size:.8rem; font-weight:700; color:#6941C6; }}
-.sm-progress {{ display:inline-block; width: 160px; height: 6px; border-radius: 99px; background: #E9E3FC; margin-left:.6rem; overflow:hidden; }}
-.sm-progress i {{ display:block; height: 100%; background: linear-gradient(90deg, #6D4AE8, #2459E8); border-radius: 99px; }}
-.sm-tour-body {{ display:flex; gap: .9rem; align-items:flex-start; margin-top:.55rem; }}
-.sm-tour-body h3 {{ margin: 0 0 .25rem !important; padding: 0 !important; font-size: 1.15rem !important; }}
-.sm-tour-body p {{ margin: 0; color: #344054; font-size: .98rem; line-height: 1.55; }}
+[data-testid="stSidebar"] .sm-tourlink {{ display:flex; align-items:center; gap:.5rem; margin-top:.8rem; padding:.55rem .75rem;
+  border-radius:10px; color:#FFD166 !important; font-weight:600; font-size:.88rem; text-decoration:none; border:1px solid rgba(255,209,102,.35); }}
+[data-testid="stSidebar"] .sm-tourlink:hover {{ background: rgba(255,209,102,.08); }}
 
 .sm-explain {{ display:grid; grid-template-columns: 1fr 1fr; gap: .4rem 1.4rem; margin: .7rem 0 .4rem; }}
 .sm-explain p {{ margin: 0; color: #344054; font-size: .95rem; line-height: 1.5; }}
@@ -323,16 +311,6 @@ def page_header(step: int, title: str, lede: str | None = None, icon_name: str =
         st.markdown(f'<p class="sm-lede">{lede}</p>', unsafe_allow_html=True)
 
 
-def version_banner():
-    st.markdown(
-        f'<div class="sm-version"><span class="tag">{icon("new_releases", 14)} Updated 27 Oct 2026</span>'
-        '<span>First release <b>April 2025</b> on Google Meridian 1.0.6</span><span class="sep"></span>'
-        '<span>Now on <b>Meridian 2.1.0</b>, with a guided tour, a ready-made demo, '
-        '<span class="sm-new">NEW</span><b>GeoX (Lift test)</b>, and a new design</span></div>',
-        unsafe_allow_html=True,
-    )
-
-
 def start_card_header(icon_name: str, accent: str, title: str, body: str, meta: list[str], hot: str | None = None):
     chips = (f'<span class="hot">{html.escape(hot)}</span>' if hot else "") + "".join(
         f"<span>{html.escape(m)}</span>" for m in meta)
@@ -398,15 +376,6 @@ def sidebar(meridian_version: str | None):
     with st.sidebar:
         st.markdown(f'<div class="sm-brand">{logo(40)}<div><b>Simple Meridian</b>'
                     f'<span>Google Meridian, made simple</span></div></div>', unsafe_allow_html=True)
-        with st.container(key=f"nav-{'here' if st.session_state.get('page') == 'home' else 'todo'}-home"):
-            if st.button("Overview", key="btn_home", icon=":material/space_dashboard:", width="stretch"):
-                go_to("home")
-        if st.session_state.get("tour") is None:
-            with st.container(key="tour-btn"):
-                if st.button("Guided tour", key="btn_tour", icon=":material/tour:", width="stretch",
-                             help="A two-minute walkthrough of the demo, in plain words"):
-                    from utils import tour
-                    tour.start()
         st.markdown('<div class="sm-label">Workflow</div>', unsafe_allow_html=True)
         for page, label, ic, desc in STEPS:
             state = step_state(page)
@@ -444,6 +413,8 @@ def sidebar(meridian_version: str | None):
         rows.append(f'<div>{icon("verified", 18, "#FFD166" if meridian_version else "#F87171")}'
                     f'<small>google-meridian {meridian_version or "not installed"}</small></div>')
         st.markdown(f'<div class="sm-status">{"".join(rows)}</div>', unsafe_allow_html=True)
+        st.markdown(f'<a class="sm-tourlink" href="{TOUR_URL}" target="_blank" rel="noopener noreferrer">'
+                    f'{icon("play_circle", 18)}New to this? Watch the guided tour</a>', unsafe_allow_html=True)
 
 
 def footer():

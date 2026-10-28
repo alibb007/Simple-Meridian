@@ -1,7 +1,7 @@
 """Plain-words explanations for every chart in Meridian's HTML report.
 
-One list, used by the Meridian charts page and by the guided tour, so the two
-never drift apart. `group` is the section the chart sits in.
+One list, used by the Meridian charts page and by the live demo's guided tour
+(docs/tour_steps.py), so the two never drift apart. `group` is the section the chart sits in.
 """
 
 MODEL_CHARTS = [

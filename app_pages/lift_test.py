@@ -3,7 +3,7 @@ import pandas as pd
 import streamlit as st
 
 from app_pages.common import cached_summary, has_model
-from utils import charts, tour
+from utils import charts
 from utils import geox as G
 from utils import mmm as M
 from utils import ui
@@ -92,7 +92,6 @@ def _sample_tab():
     ui.callout("This is made-up data for 40 regions. You choose how well the pretend campaign really works, then "
                "see whether GeoX can find that number without being told.", "info")
 
-    tour.here("gx-plan")
     with st.container(border=True, key="gx-plan"):
         st.markdown("#### 1 · Plan the test")
         c1, c2, c3 = st.columns(3)

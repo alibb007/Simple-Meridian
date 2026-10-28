@@ -6,7 +6,7 @@ from app_pages.common import (
     cached_curves, cached_fit_series, cached_periods, cached_quality, cached_summary, get_model,
     model_download_button, require_model,
 )
-from utils import charts, tour
+from utils import charts
 from utils import mmm as M
 from utils import ui
 
@@ -52,13 +52,11 @@ def show_insights():
                    "would lose money. Step 3 can still shift spend between channels.", "info")
 
     ui.legend(colors)
-    tour.here("s2-tabs")
     tabs = st.tabs([":material/bar_chart: ROI", ":material/donut_large: Contribution",
                     ":material/show_chart: Response curves", ":material/fact_check: Model fit",
                     ":material/description: Report"])
 
     with tabs[0]:
-        tour.here("s2-roi")
         with st.container(key="s2-roi"):
             st.markdown("### Return per dollar")
             st.caption("Average ROI over the full period. Whiskers show the 90% credible interval; "

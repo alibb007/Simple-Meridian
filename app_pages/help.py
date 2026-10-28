@@ -1,6 +1,7 @@
 import streamlit as st
 
-from utils import tour, ui
+from utils import ui
+from utils.mmm import MERIDIAN_VERSION
 
 GLOSSARY = [
     ("Marketing mix model (MMM)", "A statistical model that looks at weekly sales and weekly ad spend over a few years "
@@ -23,7 +24,7 @@ GLOSSARY = [
 ]
 
 FAQ = [
-    ("Do I need to know statistics?", "No. Take the guided tour, then load your own spreadsheet. Every chart has a "
+    ("Do I need to know statistics?", "No. Watch the guided tour (link in the sidebar), then load your own spreadsheet. Every chart has a "
                                       "plain-language caption."),
     ("What data do I need?", "One row per week with no gaps (two to three years is ideal): a date, your sales or "
                              "revenue, and spend for each channel. Impressions or clicks per channel help."),
@@ -37,10 +38,9 @@ FAQ = [
 def show_help():
     st.markdown(f'<div class="sm-head">{ui.badge("help", "amber", 52)}<div><div class="sm-kicker">New here?</div>'
                 f"<h1>Help &amp; glossary</h1></div></div>", unsafe_allow_html=True)
-    st.markdown('<p class="sm-lede">Every term the app uses, in plain words. Or let the guided tour walk you '
-                "through the demo step by step.</p>", unsafe_allow_html=True)
-    if st.button("Start the guided tour", type="primary", icon=":material/tour:", key="help_tour"):
-        tour.start()
+    st.markdown('<p class="sm-lede">Every term the app uses, in plain words. The guided tour walks through '
+                "a demo company step by step, in your browser.</p>", unsafe_allow_html=True)
+    st.link_button("Watch the guided tour", ui.TOUR_URL, type="primary", icon=":material/play_circle:")
 
     st.markdown("### Words you'll see")
     cols = st.columns(3, gap="medium")
@@ -62,3 +62,11 @@ def show_help():
     for q, a in FAQ:
         with st.expander(q, icon=":material/help:"):
             st.markdown(a)
+
+    st.markdown("### Version history")
+    st.markdown(
+        f"- **27 Oct 2026 · Meridian {MERIDIAN_VERSION or '2.1.0'}**: GeoX (Lift test), Meridian's own report charts "
+        "explained, budget date presets, a demo model, a smaller Docker image and a new design. The guided tour "
+        "moved to its own website.\n"
+        "- **April 2025 · Meridian 1.0.6**: first release with upload, model fit, Meridian charts and the budget optimizer."
+    )

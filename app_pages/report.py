@@ -8,7 +8,7 @@ import streamlit as st
 
 from app_pages.common import DEMO_DIR, _is_demo, get_model, require_model
 from utils import mmm as M
-from utils import tour, ui
+from utils import ui
 from utils.report_charts import MODEL_CHARTS, PLAN_CHARTS
 
 
@@ -38,7 +38,6 @@ def _plan_specs() -> tuple[dict | None, str]:
 
 
 def _chart_card(c: dict, spec: dict | None):
-    tour.here(f"mr-{c['id']}")
     with st.container(border=True, key=f"mr-{c['id']}"):
         st.markdown(
             f'<div style="display:flex;gap:.7rem;align-items:center">{ui.badge(c["icon"], "violet", 40)}'
