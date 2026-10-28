@@ -99,6 +99,10 @@ a { color: var(--primary); }
 .starts { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
 .pill { border-radius: 99px; padding: 1.05rem 2.1rem; font-size: 1.12rem; font-family: var(--display); }
 .pill-dark { background: var(--ink); color: #fff; }
+.pill-gold { background: var(--gold); color: var(--navy); box-shadow: 0 10px 24px -12px rgba(237,161,0,.8); }
+.pill-story { color: #fff; background: linear-gradient(100deg, #6D4AE8, #2459E8 55%, #14B8A6); box-shadow: 0 10px 24px -12px rgba(109,74,232,.8); }
+.pill-story .ic { width: 16px; height: 16px; }
+.caption .sep, #t-count { display: none; }
 .pill-light { background: #fff; color: var(--ink); border: 2px solid var(--ink); }
 .pill-light .ic { width: 16px; height: 16px; }
 .startnote { font-size: .85rem; color: var(--muted); margin-top: -10px; }

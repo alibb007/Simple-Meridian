@@ -193,7 +193,7 @@ After upgrading `google-meridian`, run `python scripts/build_demo.py --refit` so
 - Added a Help & glossary page, and a guided tour website for people new to MMM.
 - Added **lift tests with Meridian GeoX 1.0.1**: design a geo experiment, measure it, and use the result as an ROI prior.
 - Added a demo: a pre-fitted model with precomputed charts, so you can see the results without fitting anything.
-- The guided tour lives on its own website. It spotlights each part it explains and dims the rest, with a caption right above that part. It has 27 steps: how Meridian thinks, step 1 section by section, then every chart from Meridian's own report. The app itself opens on the upload screen.
+- The guided tour lives on its own website. It spotlights each part it explains and dims the rest, with a caption right above that part. It opens with a short animated story, then walks through upload, the model run, every chart from Meridian's own report, the budget plan and GeoX. The app itself opens on the upload screen.
 - New **Meridian charts** page: the 12 model charts and 4 budget-plan charts from Meridian's HTML report, drawn by Meridian, each with "what it shows" and "how to read it" in plain words.
 - Step 1 now runs in order (data, time and outcome, channels, controls, fit), with channel cards you can rename, re-map, add and remove.
 - Budget plan period: latest 52 weeks, last full calendar year, full history, or custom dates from an in-app calendar.

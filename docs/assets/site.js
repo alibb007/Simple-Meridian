@@ -194,17 +194,17 @@
       "<h1>Google Meridian,<br>made simple.</h1>" +
       '<p class="lede">See which ads bring in your sales and where the next dollar should go. A guided tour on a made-up shop, ' +
       "then run it on your own data.</p>" +
-      '<div class="starts"><button class="btn pill pill-dark" id="t-start" type="button">Start the Simple Meridian guided tour</button>' +
-      '<button class="btn pill pill-light" id="t-story" type="button">' +
+      '<div class="starts"><button class="btn pill pill-gold" id="t-start" type="button">Start the Simple Meridian guided tour</button>' +
+      '<button class="btn pill pill-story" id="t-story" type="button">' +
       '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>Start the story</button></div>' +
-      '<span class="startnote">STEPS_COUNT steps on made-up data · use Next and Back, or the arrow keys</span>' +
+      '<span class="startnote">Made-up data · use Next and Back, or the arrow keys</span>' +
       '<div class="by"><img src="assets/ali.png" alt="" width="52" height="52"><span>Built by <b>Ali Barfi Bafghi</b></span></div>' +
       '<p class="vnote">Updated 27 Oct 2026. I built the <a href="https://github.com/alibb007/Simple-Meridian/tree/6bde9f5" target="_blank" ' +
       'rel="noopener noreferrer">first release of Simple Meridian</a> in April 2025 on Meridian 1.0.6: upload, fit, charts and a budget ' +
       "optimizer. Today it runs Meridian 2.1.0 and adds GeoX lift tests, this guided tour and a new design.</p></div>",
-    story: '<div class="storypage"><div class="kick">The story · 60 seconds</div>' +
+    story: '<div class="storypage"><div class="kick">The story</div>' +
       '<iframe class="motion" data-src="assets/story.html" title="Animated story: a shop works out where its ad budget should go"></iframe>' +
-      '<div class="starts"><button class="btn pill pill-dark" id="t-start2" type="button">Start the Simple Meridian guided tour</button>' +
+      '<div class="starts"><button class="btn pill pill-gold" id="t-start2" type="button">Start the Simple Meridian guided tour</button>' +
       '<button class="btn pill pill-light" id="t-home" type="button">Back to the start</button></div></div>',
     upload: '<div class="kick">Step 1 of 3</div><h3>Data &amp; model</h3>' +
       '<div class="startcards" data-t="s1-upload">' +
@@ -541,7 +541,7 @@
       return;
     }
     chap.textContent = s.chapter;
-    count.textContent = "Step " + (i + 1) + " of " + STEPS.length;
+    count.textContent = "";  // no step numbers: the chapter name and the bar show where you are
     title.textContent = s.title; body.innerHTML = s.body;
     skipBtn.hidden = chapterEnd(i) >= STEPS.length || !!s.last;
     nextBtn.hidden = !!s.last; againBtn.hidden = !s.last;
