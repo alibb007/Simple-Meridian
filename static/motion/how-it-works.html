@@ -240,7 +240,7 @@
     return;
   }
   function tick(now) {
-    var t = (now - start + offset) % (DUR * N), s = Math.floor(t / DUR), p = (t % DUR) / DUR;
+    var L = DUR * N, t = (((now - start + offset) % L) + L) % L, s = Math.floor(t / DUR), p = (t % DUR) / DUR;  // rAF time can precede start
     setCaption(s); render(s, p);
     requestAnimationFrame(tick);
   }

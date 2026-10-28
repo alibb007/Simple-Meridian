@@ -1,12 +1,15 @@
 """Pack the precomputed demo results (data/demo/) into docs/assets/demo.json.
 
-Run from the repo root after `python scripts/build_demo.py`:
+Run from the repo root after `python scripts/build_demo.py`, with the app's
+virtualenv (the tour text is imported from utils/tour.py so it never drifts):
 
-    python docs/build_demo_json.py
+    .venv/bin/python docs/build_demo_json.py
 """
 import csv
 import json
 import os
+import struct
+import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEMO = os.path.join(ROOT, "data", "demo")
@@ -43,7 +46,30 @@ with open(os.path.join(ROOT, "data", "simple_dataset.csv"), newline="") as f:
                "Search": round(float(r["Search_spend"])), "Email": round(float(r["Email_spend"])),
                "Sales": round(float(r["Sales"]))} for _, r in zip(range(6), csv.DictReader(f))]
 
-data = {"sample_rows": sample, "summary": summary, "fit": fit, "curves": curves, "plan": plan, "plan_totals": plan_totals,
+# Guided tour: the app's own steps (titles and text) and the chart screenshots.
+sys.path.insert(0, ROOT)
+from utils import tour  # noqa: E402
+
+CHARTS = os.path.join(ROOT, "docs", "assets", "charts")
+
+
+def png_size(path):
+    with open(path, "rb") as f:
+        head = f.read(24)
+    return struct.unpack(">II", head[16:24])
+
+
+tour_steps = []
+for st in tour.steps():
+    step = {"chapter": st["chapter"], "page": st["page"], "title": st["title"], "body": st["body"],
+            "anchor": st.get("anchor", "")}
+    if st["page"] == "report":
+        cid = st["anchor"][3:]  # "mr-<id>"
+        w, h = png_size(os.path.join(CHARTS, cid + ".png"))
+        step.update(chart=cid, w=w, h=h)
+    tour_steps.append(step)
+
+data = {"tour": tour_steps, "sample_rows": sample, "summary": summary, "fit": fit, "curves": curves, "plan": plan, "plan_totals": plan_totals,
         "quality": quality, "geox_sample": {"true_iroas": 2.5, "estimate": 2.53, "lo": 2.36, "hi": 2.67,
                                             "test_regions": 11, "control_regions": 29, "mde": 0.008}}
 with open(OUT, "w") as f:

@@ -46,7 +46,7 @@
         <div class="kicker">Free and open source · built on <a href="https://developers.google.com/meridian" target="_blank" rel="noopener noreferrer" style="color:inherit">Google Meridian</a></div>
         <h1 id="h-hero">Find out which ads really bring in your sales</h1>
         <p>Google Meridian can tell a business what each marketing channel earns and where the next dollar should go, but it normally needs a data scientist and a lot of Python. I built Simple Meridian so anyone can run a quick test, watch how Meridian works, and see what it can tell them, without writing a line of code.</p>
-        <div class="sign"><span class="logo"><img src="assets/logo.png" alt=""></span><span><b style="color:#fff">Ali Barfi Bafghi</b> · creator of Simple Meridian</span></div>
+        <div class="sign"><img class="avatar" src="assets/ali.png" alt="Ali Barfi Bafghi" width="40" height="40"><span><b style="color:#fff">Ali Barfi Bafghi</b> · creator of Simple Meridian</span></div>
         <div class="row">
           <a class="btn btn-gold" href="#tour" data-play>
             <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>Play the guided tour</a>
@@ -62,23 +62,25 @@
 
     <section id="how" aria-labelledby="h-how">
       <h2 id="h-how">How Meridian thinks</h2>
-      <p class="lede">Sixteen seconds, no statistics. These four ideas are the whole trick behind a marketing mix model.</p>
+      <p class="lede">Sixteen seconds, no statistics. These four ideas are how a marketing mix model works.</p>
       <iframe class="motion" src="assets/how-it-works.html" title="Animation: how Meridian turns ad spend and sales into a better budget" loading="lazy"></iframe>
     </section>
 
     <section id="tour" class="tour" aria-labelledby="h-tour">
       <h2 id="h-tour">Guided tour</h2>
-      <p class="lede">The tour plays on its own. Use the buttons, or the arrow keys and the space bar, to move at your own pace.</p>
+      <p class="lede">The tour plays on its own, one part of the app at a time. Use the buttons, or the arrow keys and the space bar, to move at your own pace. <b>Skip this part</b> jumps to the next chapter.</p>
 
-      <div class="caption" role="region" aria-label="Tour caption" aria-live="polite">
-        <div class="top"><span id="t-count">Step 1 of 7</span><span class="dots" id="t-dots"></span></div>
+      <div class="caption" id="t-caption" role="region" aria-label="Tour caption" aria-live="polite">
+        <div class="top"><span id="t-chapter"></span><span class="sep" aria-hidden="true">·</span><span id="t-count"></span></div>
+        <div class="progress" aria-hidden="true"><span id="t-progress"></span></div>
         <h3 id="t-title"></h3>
         <p id="t-body"></p>
-        <div class="progress" aria-hidden="true"><span id="t-progress"></span></div>
         <div class="ctrl">
           <button class="btn btn-light" id="t-back" type="button">Back</button>
           <button class="btn btn-primary" id="t-play" type="button">Pause</button>
           <button class="btn btn-light" id="t-next" type="button">Next</button>
+          <button class="btn btn-link" id="t-skip" type="button">Skip this part</button>
+          <a class="btn btn-primary" id="t-run" href="https://github.com/alibb007/Simple-Meridian#quick-start" target="_blank" rel="noopener noreferrer" hidden>Run the full version on your computer</a>
         </div>
       </div>
 
@@ -88,6 +90,7 @@
         <div class="app" id="app">
           <div class="app-side" aria-hidden="true">
             <div class="brand"><span class="logo"><img src="assets/logo.png" alt=""></span><span><b>Simple Meridian</b></span></div>
+            <span class="nav-item" data-nav="home">Overview</span>
             <span class="nav-item" data-nav="data">Data &amp; model</span>
             <span class="nav-item" data-nav="insights">Insights</span>
             <span class="nav-item" data-nav="plan">Budget plan</span>
@@ -102,7 +105,7 @@
 
     <section id="run" aria-labelledby="h-run">
       <h2 id="h-run">Run the full version on your computer</h2>
-      <p class="lede">This page only replays results. The full app fits Meridian on your own data, runs budget plans and GeoX lift tests, and keeps your data on your machine. It runs on macOS (Apple Silicon and Intel) and Windows with <a href="https://www.docker.com/products/docker-desktop/" target="_blank" rel="noopener noreferrer">Docker Desktop</a>.</p>
+      <p class="lede">This page only replays results. The full app fits Meridian on your own data, runs budget plans and GeoX (Lift test)<span class="new">NEW</span> experiments, and keeps your data on your machine. It runs in <a href="https://www.docker.com/products/docker-desktop/" target="_blank" rel="noopener noreferrer">Docker Desktop</a> on a Mac or a Windows PC. Tested so far on Apple silicon; the Intel/Windows build passed a full model fit under emulation.</p>
       <div class="grid g3">
         <div class="card">
           <h3>1. Get the code</h3>
@@ -111,10 +114,9 @@ cd Simple-Meridian</code></pre>
           <p>No git? Download the ZIP from <a href="https://github.com/alibb007/Simple-Meridian" target="_blank" rel="noopener noreferrer">GitHub</a> and unzip it.</p>
         </div>
         <div class="card">
-          <h3>2. Build and start</h3>
-          <pre><code>docker build -t simple-meridian .
-docker run --rm -p 8501:8501 simple-meridian</code></pre>
-          <p>The same two commands work in Terminal on a Mac and in PowerShell on Windows.</p>
+          <h3>2. Start it</h3>
+          <pre><code>./start.sh</code></pre>
+          <p>That's on a Mac. On Windows, double-click <code>start.bat</code>. Both build the app and open <code>http://localhost:8501</code>; the first build takes a few minutes.</p>
         </div>
         <div class="card">
           <h3>3. Open the app</h3>
