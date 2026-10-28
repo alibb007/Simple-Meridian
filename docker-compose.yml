@@ -1,0 +1,22 @@
+# Simple Meridian, local edition. Works on macOS (Apple silicon and Intel),
+# Windows 10/11 (Docker Desktop with WSL 2) and Linux.
+#
+#   docker compose up --build      then open http://localhost:8501
+#
+services:
+  simple-meridian:
+    build: .
+    image: simple-meridian:latest
+    container_name: simple-meridian
+    # 127.0.0.1 keeps the app private to this computer. To share it on your
+    # network on purpose, change this to "8501:8501".
+    ports:
+      - "127.0.0.1:8501:8501"
+    environment:
+      MAX_CONCURRENT_FITS: "1"
+    # Model fits use 1.5-2 GB of RAM; give Docker Desktop at least 4 GB.
+    mem_limit: 4g
+    restart: unless-stopped
+    read_only: false
+    security_opt:
+      - no-new-privileges:true

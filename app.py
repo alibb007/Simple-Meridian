@@ -11,6 +11,7 @@ st.set_page_config(
 from app_pages.common import demo_available, demo_model  # noqa: E402
 from app_pages.help import show_help  # noqa: E402
 from app_pages.home import show_home  # noqa: E402
+from app_pages.legal import show_legal  # noqa: E402
 from app_pages.lift_test import show_lift_test  # noqa: E402
 from app_pages.step1_upload_and_run import show_upload_and_run  # noqa: E402
 from app_pages.step2_insights import show_insights  # noqa: E402
@@ -51,6 +52,7 @@ PAGES = {
     "step3": show_optimization,
     "geox": show_lift_test,
     "help": show_help,
+    "legal": show_legal,
 }
 
 
@@ -59,7 +61,7 @@ def main():
     ui.sidebar(MERIDIAN_VERSION)
     if MERIDIAN_VERSION is None:
         st.error("google-meridian is not installed. Run `pip install -r requirements.txt` and restart the app.")
-    tour.card(st.session_state.page)
+    tour.paused(st.session_state.page)
     PAGES.get(st.session_state.page, show_home)()
     ui.footer()
 

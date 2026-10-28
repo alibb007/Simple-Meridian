@@ -1,10 +1,11 @@
+import html
 import io
 
 import pandas as pd
 import streamlit as st
 
 from app_pages.common import cached_periods, cached_summary, get_model, require_model
-from utils import charts
+from utils import charts, tour
 from utils import mmm as M
 from utils import ui
 
@@ -23,25 +24,22 @@ def show_optimization():
 
     mmm = st.session_state.mmm
     periods = cached_periods(mmm, st.session_state.model_key)
-    default_start = periods[max(0, len(periods) - 52)]
 
-    with st.form("opt_form", border=False):
+    start, end = _period_picker(periods)
+    tour.here("s3-settings")
+    with st.container(border=True, key="s3-settings"):
         c1, c2 = st.columns([1.6, 1], gap="large")
         with c1:
-            start, end = st.select_slider(
-                "Plan based on spend in", options=periods, value=(default_start, periods[-1]), key="opt_range",
-                help="The optimizer starts from what you actually spent in this window. The last 52 weeks is a good default.",
-            )
             limit = st.slider("Max change per channel", 5, 100, 30, step=5, format="±%d%%", key="opt_limit",
                               help="Keeps the plan realistic. ±30% is Meridian's default.")
         with c2:
-            mode = st.radio("Budget", ["Same total as before", "Set a new total"], key="opt_mode")
+            mode = st.segmented_control("Budget", ["Same total", "New total"], default="Same total", key="opt_mode")
             budget = None
-            if mode == "Set a new total":
+            if mode == "New total":
                 hist = _historical_budget(get_model(), start, end)
                 budget = st.number_input("New total budget ($)", min_value=0.0, value=float(round(hist, -3)),
                                          step=max(1000.0, round(hist * 0.05, -3)), format="%.0f", key="opt_budget")
-        submitted = st.form_submit_button("Optimize budget", type="primary", icon=":material/tune:")
+        submitted = st.button("Optimize budget", type="primary", icon=":material/tune:", key="opt_go")
 
     if submitted:
         with st.spinner("Optimizing… usually under a minute"):
@@ -61,7 +59,44 @@ def show_optimization():
     _results(opt)
 
 
-@st.cache_resource(show_spinner=False, max_entries=16)
+def _period_picker(periods: list[str]) -> tuple[str, str]:
+    """Quick choices plus an in-app calendar; dates snap to the model's weeks."""
+    weeks = pd.to_datetime(pd.Series(periods))
+    first, last = weeks.iloc[0], weeks.iloc[-1]
+    # Latest calendar year the data covers (at least 50 of its weeks).
+    per_year = weeks.dt.year.value_counts()
+    full_years = sorted(y for y, n in per_year.items() if n >= 50)
+    last_full_year = full_years[-1] if full_years else last.year
+    choices = {
+        "Latest 52 weeks": (weeks.iloc[max(0, len(weeks) - 52)], last),
+        f"Calendar year {last_full_year}": (pd.Timestamp(last_full_year, 1, 1), pd.Timestamp(last_full_year, 12, 31)),
+        "Full history": (first, last),
+        "Custom dates": None,
+    }
+    with st.container(border=True, key="s3-period"):
+        st.markdown(f'<div style="display:flex;gap:.55rem;align-items:center;font-weight:700">'
+                    f'{ui.icon("date_range", 20, ui.PRIMARY)}Plan based on spend in</div>', unsafe_allow_html=True)
+        pick = st.segmented_control("Period", list(choices), default="Latest 52 weeks", key="opt_period",
+                                    label_visibility="collapsed")
+        pick = pick or "Latest 52 weeks"
+        if pick == "Custom dates":
+            d = st.date_input("From – to", value=(choices["Latest 52 weeks"][0].date(), last.date()),
+                              min_value=first.date(), max_value=last.date(), format="DD/MM/YYYY", key="opt_dates")
+            lo, hi = (pd.Timestamp(d[0]), pd.Timestamp(d[1])) if isinstance(d, (tuple, list)) and len(d) == 2 \
+                else choices["Latest 52 weeks"]
+        else:
+            lo, hi = choices[pick]
+        inside = weeks[(weeks >= lo) & (weeks <= hi)]
+        if inside.empty:
+            st.warning("No model weeks fall in that range; using the latest 52 weeks.")
+            lo, hi = choices["Latest 52 weeks"]
+            inside = weeks[(weeks >= lo) & (weeks <= hi)]
+        start, end = inside.iloc[0].strftime("%Y-%m-%d"), inside.iloc[-1].strftime("%Y-%m-%d")
+        st.caption(f"{len(inside)} weeks: {inside.iloc[0]:%d %b %Y} to {inside.iloc[-1]:%d %b %Y}")
+    return start, end
+
+
+@st.cache_resource(show_spinner=False, max_entries=16, ttl=3600)
 def _optimize(model_key: str, start: str, end: str, budget, limit: int) -> dict:
     """Shared across sessions: the same model + settings always give the same plan."""
     model = get_model()
@@ -114,9 +149,9 @@ def _results(opt):
     if len(add) or len(cut):
         parts = []
         if len(add):
-            parts.append("Move money into " + " and ".join(f"<b>{c}</b> ({p:+.0f}%)" for c, p in zip(add.channel, add.spend_change_pct)))
+            parts.append("Move money into " + " and ".join(f"<b>{html.escape(c)}</b> ({p:+.0f}%)" for c, p in zip(add.channel, add.spend_change_pct)))
         if len(cut):
-            parts.append("out of " + " and ".join(f"<b>{c}</b> ({p:+.0f}%)" for c, p in zip(cut.channel, cut.spend_change_pct)))
+            parts.append("out of " + " and ".join(f"<b>{html.escape(c)}</b> ({p:+.0f}%)" for c, p in zip(cut.channel, cut.spend_change_pct)))
         ui.callout("; ".join(parts) + ". Make big shifts in stages and watch results, since the model is an estimate.",
                    "swap_horiz")
 

@@ -1,10 +1,12 @@
+import html
+
 import streamlit as st
 
 from app_pages.common import (
     cached_curves, cached_fit_series, cached_periods, cached_quality, cached_summary, get_model,
     model_download_button, require_model,
 )
-from utils import charts
+from utils import charts, tour
 from utils import mmm as M
 from utils import ui
 
@@ -42,7 +44,7 @@ def show_insights():
     ])
 
     if len(room):
-        names = ", ".join(f"<b>{c}</b>" for c in room.channel.head(3))
+        names = ", ".join(f"<b>{html.escape(c)}</b>" for c in room.channel.head(3))
         ui.callout(f"The next dollar still pays back in {names} (marginal ROI above 1). "
                    "These are the first places to test more budget.", "lightbulb")
     else:
@@ -50,15 +52,18 @@ def show_insights():
                    "would lose money. Step 3 can still shift spend between channels.", "info")
 
     ui.legend(colors)
+    tour.here("s2-tabs")
     tabs = st.tabs([":material/bar_chart: ROI", ":material/donut_large: Contribution",
                     ":material/show_chart: Response curves", ":material/fact_check: Model fit",
                     ":material/description: Report"])
 
     with tabs[0]:
-        st.markdown("### Return per dollar")
-        st.caption("Average ROI over the full period. Whiskers show the 90% credible interval; "
-                   "wide whiskers mean the data can't pin that channel down.")
-        st.plotly_chart(charts.roi_bars(summary, colors), config=charts.CONFIG)
+        tour.here("s2-roi")
+        with st.container(key="s2-roi"):
+            st.markdown("### Return per dollar")
+            st.caption("Average ROI over the full period. Whiskers show the 90% credible interval; "
+                       "wide whiskers mean the data can't pin that channel down.")
+            st.plotly_chart(charts.roi_bars(summary, colors), config=charts.CONFIG)
         st.markdown("### Average return vs. return on the next dollar")
         st.caption("A channel can have a high average ROI and still be saturated. Bubble size is spend.")
         st.plotly_chart(charts.roi_vs_mroi(summary, colors), config=charts.CONFIG)

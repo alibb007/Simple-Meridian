@@ -3,6 +3,7 @@ import os
 
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
 
 from app_pages.common import DEMO_DIR, demo_available, load_demo, load_sample
 from utils import charts, tour, ui
@@ -19,6 +20,16 @@ def _demo_numbers():
         return summary[~summary.is_total].sort_values("roi", ascending=False), plan
     except Exception:
         return None, None
+
+
+_MOTION = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "static", "motion",
+                       "how-it-works.html")
+
+
+@st.cache_data(show_spinner=False)
+def _motion_html() -> str:
+    with open(_MOTION, encoding="utf-8") as f:
+        return f.read()
 
 
 # Three small pictures of how Meridian reasons, for people new to MMM.
@@ -55,6 +66,7 @@ def show_home():
     summary, plan = _demo_numbers()
 
     # ---- Hero: the promise, three ways in, and real demo numbers ------------
+    tour.here("home-hero")
     with st.container(key="hero"):
         left, right = st.columns([1.2, 1], gap="large", vertical_alignment="center")
         with left:
@@ -62,7 +74,8 @@ def show_home():
                         unsafe_allow_html=True)
             st.markdown("# Find out which ads really bring in your sales")
             st.markdown(
-                '<p class="sm-lede">Google Meridian can tell a business what each marketing channel earns and where '
+                '<p class="sm-lede"><a href="https://developers.google.com/meridian" target="_blank" rel="noopener" '
+                'style="color:#FFD166">Google Meridian</a> can tell a business what each marketing channel earns and where '
                 "the next dollar should go, but it normally needs a data scientist and a lot of Python. I built "
                 "Simple Meridian so anyone can run a quick test, watch how Meridian works, and see what it can tell "
                 "them, without writing a line of code.</p>",
@@ -82,6 +95,13 @@ def show_home():
                     ui.go_to("step1")
         with right:
             _demo_preview(summary, plan)
+
+    # ---- Motion graphic: the whole idea in 16 seconds ------------------------
+    st.markdown("<div style='height:1.4rem'></div>", unsafe_allow_html=True)
+    st.markdown("## Watch it in 16 seconds")
+    st.markdown('<p class="sm-lede" style="margin-top:-.2rem">From weekly ad spend to a better budget, using the demo '
+                "company's real results. Click a dot to jump to a scene.</p>", unsafe_allow_html=True)
+    components.html(_motion_html(), height=400)
 
     # ---- How Meridian thinks -------------------------------------------------
     st.markdown("<div style='height:1.4rem'></div>", unsafe_allow_html=True)
@@ -114,7 +134,7 @@ def show_home():
          "step2", None),
         ("savings", "teal", "Plan a better budget", "Same total, moved to where the next dollar earns most.",
          "step3", None),
-        ("science", "rose", "Run a lift test", f"Design and measure a geo experiment with Meridian GeoX "
+        ("science", "rose", "GeoX (Lift test)", f"Design and measure a geo experiment with Meridian GeoX "
                                                 f"{GEOX_VERSION or ''}, then feed it back into the model.", "geox", "NEW"),
         ("description", "amber", "Share the results", "Download Meridian's HTML reports, Excel tables and the model.",
          "step2", None),
@@ -153,7 +173,7 @@ def show_home():
             f"""
             <div class="sm-tile" style="margin-bottom:.6rem">{ui.badge("new_releases", "green", 36)}<div>
               <div style="font-weight:700">27 Oct 2026 · Meridian {MERIDIAN_VERSION or "2.1.0"}</div>
-              <div class="d" style="font-size:.88rem">Guided tour, demo model, lift tests with GeoX, new design,
+              <div class="d" style="font-size:.88rem">Guided tour, demo model, GeoX (Lift test), new design,
               budget scenarios, smaller Docker image.</div></div></div>
             <div class="sm-tile">{ui.badge("history", "blue", 36)}<div>
               <div style="font-weight:700">April 2025 · Meridian 1.0.6</div>

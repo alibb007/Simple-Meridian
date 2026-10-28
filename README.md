@@ -32,7 +32,7 @@ I built Simple Meridian so anyone can run a quick test, see how Meridian works, 
 | **1 · Data & model** | Upload a CSV or Excel file. Confirm the date, outcome and channel columns (they are detected automatically). Pick a sampling preset. | A fitted Meridian model, fit quality (R², MAPE, R-hat), and a model file you can download and reopen later. |
 | **2 · Insights** | Look through the tabs. | ROI with 90% credible intervals, average vs. marginal ROI, baseline vs. media revenue, share of spend vs. share of revenue, response curves, actual vs. predicted, and Meridian's HTML report. |
 | **3 · Budget plan** | Pick a period, a per-channel limit (±30% by default), and keep the budget or set a new total. | The spend split with the most incremental revenue, where it lands on each response curve, and CSV, Excel and HTML exports. |
-| **Lift test** (new) | Design a geo experiment with [Meridian GeoX](https://developers.google.com/meridian/geox), or upload a test you already ran. | Test and control regions, the smallest lift the test can detect, the measured extra revenue and return per $1, and a one-click ROI prior for the next model fit. |
+| **GeoX (Lift test)** (new) | Design a geo experiment with [Meridian GeoX](https://developers.google.com/meridian/geox), or upload a test you already ran. | Test and control regions, the smallest lift the test can detect, the measured extra revenue and return per $1, and a one-click ROI prior for the next model fit. |
 
 New to marketing measurement? Click **Take the 2-minute tour** on the home page. It walks through the demo page by page and highlights what to click. **Help & glossary** in the sidebar explains every term.
 
@@ -49,18 +49,33 @@ Everything runs on your machine. Your data is not sent anywhere.
   </tr>
 </table>
 
+## Two editions
+
+| | Live demo | Local edition |
+|---|---|---|
+| What it is | A recorded walkthrough of the demo company, with an auto-playing guided tour | The full app: your own data, model fits, budget plans, GeoX lift tests |
+| Where it runs | In the browser, hosted free on GitHub Pages (`docs/` folder) | On your Mac or Windows PC, in Docker |
+| Needs | Nothing | Docker Desktop and about 4 GB of free RAM |
+| Your data | No uploads; the page sends no data and sets no cookies | Stays on your computer |
+
 ## Quick start
 
-### Run with Docker
+### Local edition on macOS or Windows (Docker)
 
-```bash
-git clone https://github.com/alibb007/Simple-Meridian.git
-cd Simple-Meridian
-docker build -t simple-meridian .
-docker run --rm -p 8501:8501 simple-meridian
-```
+1. Install [Docker Desktop](https://www.docker.com/products/docker-desktop/) and start it. On Windows, use the WSL 2 backend (the default).
+2. Download this repository (green **Code** button → **Download ZIP**, or `git clone https://github.com/alibb007/Simple-Meridian.git`).
+3. Start the app:
+   - **macOS / Linux:** open Terminal in the folder and run `./start.sh`
+   - **Windows:** double-click `start.bat`
+4. Your browser opens <http://localhost:8501>. Stop the app with `docker compose down`.
 
-Then open <http://localhost:8501>. The image is about 2.6 GB (down from 3.8 GB) because Meridian depends on TensorFlow and JAX, so the first build takes a few minutes.
+The scripts run `docker compose up --build`, so you can also use that directly. The app listens on `127.0.0.1` only, so other computers on your network can't reach it. The first build downloads Meridian, TensorFlow and JAX and takes a few minutes; the image is about 2.9 GB on Apple silicon and 3.7 GB on Intel/AMD (Windows).
+
+Tested so far: the image builds and runs natively on Apple silicon (arm64). The Intel/AMD (amd64) image used by Windows and Intel Macs builds, imports Meridian and GeoX, and opens the demo model when emulated on Apple silicon. `start.ps1`/`start.bat` have not yet been run on a real Windows machine.
+
+### Live demo
+
+The `docs/` folder is a static site with the demo results, the motion graphic and the auto-playing tour. To publish it for free, turn on **Settings → Pages → Deploy from a branch → `main` / `docs`** in the GitHub repository. It will be served at `https://alibb007.github.io/Simple-Meridian/`. GitHub Pages is free for public repositories, with a 1 GB site limit and a soft limit of 100 GB of traffic per month; the demo is about 170 KB.
 
 ### Run with Python
 
@@ -81,9 +96,9 @@ The home page gives you three ways in:
 - **Open the demo**: a model already fitted on the sample data. Results open in a few seconds.
 - **Use my data**: upload a CSV or Excel file. You can also load the sample data and fit it yourself in about a minute.
 
-## Lift tests with Meridian GeoX
+## GeoX (Lift test)
 
-A marketing mix model learns from history, so two channels that always moved together can fool it. A lift test is an experiment: a campaign runs in some regions and stays off in similar ones, and the gap is what the campaign caused. The **Lift test** page uses [Meridian GeoX](https://github.com/google/meridian-geox) 1.0.1 for both halves:
+A marketing mix model learns from history, so two channels that always moved together can fool it. A lift test is an experiment: a campaign runs in some regions and stays off in similar ones, and the gap is what the campaign caused. The **GeoX (Lift test)** page uses [Meridian GeoX](https://github.com/google/meridian-geox) 1.0.1 for both halves:
 
 1. **Plan**: GeoX searches thousands of region splits and picks test and control groups that tracked each other before the test. It also reports the smallest lift the test can detect and a suggested budget.
 2. **Measure**: after the test, GeoX predicts what the test regions would have done without the campaign (Time-Based Regression) and reports the extra revenue, the lift and the return per $1 (iROAS), each with a 90% range.
@@ -125,7 +140,7 @@ Meridian estimates the model with MCMC sampling. More samples take longer and gi
 
 \* Measured with the sample data (six channels, 156 weeks) on an Apple M-series laptop: 26 s and 35 s. Most of that is a one-off JAX compile, so Standard costs little more than Quick check. Time grows with the number of channels and weeks. Meridian's JAX backend fitted the sample about 2.8× faster than its TensorFlow backend (26 s vs. 74 s), so the app uses JAX.
 
-Under **Advanced** you can set the maximum carryover (default 8 weeks) and the random seed. The same seed with the same data gives the same result.
+The app uses Meridian's default carryover window (8 weeks) and a fixed random seed, so the same data and preset always give the same result.
 
 If max R-hat on the **Model fit** tab is above 1.2, the chains have not agreed yet. Fit again with a longer preset before trusting the numbers.
 
@@ -146,6 +161,7 @@ app_pages/
   step3_optimization.py        budget optimizer and exports
   lift_test.py                 Meridian GeoX: design, measure, use as prior
   help.py                      glossary and FAQ
+  legal.py                     privacy, terms, licenses
   common.py                    shared state, caching, model upload/download
 utils/
   mmm.py                       all Meridian calls; returns plain pandas tables
@@ -153,6 +169,10 @@ utils/
   tour.py                      the guided tour
   charts.py                    Plotly charts
   ui.py                        theme, CSS, sidebar navigation, small components
+static/motion/how-it-works.html  16-second motion graphic on the home page
+docs/                          static live demo for GitHub Pages
+start.sh / start.bat / start.ps1  one-step start on macOS, Linux and Windows
+docker-compose.yml             local edition, bound to 127.0.0.1
 scripts/build_demo.py          refits the demo model and precomputes its charts
 tests/test_pages.py            renders every page and tour step headlessly
 .streamlit/config.toml         theme
@@ -173,7 +193,12 @@ After upgrading `google-meridian`, run `python scripts/build_demo.py --refit` so
 - Added a guided tour for people new to MMM, and a Help & glossary page.
 - Added **lift tests with Meridian GeoX 1.0.1**: design a geo experiment, measure it, and use the result as an ROI prior.
 - Added a demo: a pre-fitted model with precomputed charts, so you can see the results without fitting anything.
-- New home page: what the app is for, the demo's real results, and three pictures of how Meridian reasons.
+- New home page: what the app is for, the demo's real results, a 16-second motion graphic, and three pictures of how Meridian reasons.
+- Guided tour spotlights each part it explains and dims the rest; its card sits right above that part.
+- Step 1 now runs in order (data, time and outcome, channels, controls, fit), with channel cards you can rename, re-map, add and remove.
+- Budget plan period: latest 52 weeks, last full calendar year, full history, or custom dates from an in-app calendar.
+- Privacy & terms page, SECURITY.md and THIRD_PARTY_NOTICES.md; pickle model files are off by default; uploads capped at 50 MB.
+- Local edition for macOS and Windows (`start.sh`, `start.bat`, `docker-compose.yml`) and a static live demo in `docs/`.
 - Faster: Meridian loads in the background instead of on the first page load (page import went from 7.1 s to 0.5 s), optimizer results are cached, and the JAX backend is pinned.
 - Models are saved as `.binpb` with Meridian's serializer, replacing the deprecated pickle format.
 - Redesigned the interface: a home page with three starting points, a navigation sidebar, icons, pill tabs, and one color per channel across every chart. Step 1 now has numbered sections and a "Ready to fit" checklist; data is checked before fitting.
@@ -190,6 +215,13 @@ After upgrading `google-meridian`, run `python scripts/build_demo.py --refit` so
 - **"Dates are not evenly spaced."** Meridian needs one row per period with no gaps. Fill missing weeks with zeros for spend and the real outcome value.
 - **ROI intervals are very wide.** The data cannot separate that channel from the others, often because its spend barely changes or moves in step with another channel. Longer history or more spend variation helps.
 - **Port 8501 is taken.** Use `docker run -p 8502:8501 simple-meridian` and open <http://localhost:8502>.
+
+## Privacy, security and licenses
+
+- Uploaded files are processed in memory on the machine running the app and are not sent anywhere. Upload aggregate weekly totals only, never personal data.
+- Results are statistical estimates, not financial advice. The software is provided "as is" under the MIT License.
+- Security measures and how to report a problem: [SECURITY.md](SECURITY.md). Open-source components and their licenses: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The app's **Privacy & terms** page has the same summary.
+- Learn more about the libraries this app runs on: [Google Meridian](https://developers.google.com/meridian) · [Meridian GeoX](https://developers.google.com/meridian/geox) · [Meridian on GitHub](https://github.com/google/meridian).
 
 ## Credits
 

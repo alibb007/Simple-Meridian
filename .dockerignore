@@ -15,3 +15,9 @@ pic/app.png
 pic/home.png
 pic/budget-plan.png
 .claude
+docs
+start.sh
+start.ps1
+start.bat
+docker-compose.yml
+tests

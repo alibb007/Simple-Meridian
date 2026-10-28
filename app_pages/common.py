@@ -59,7 +59,7 @@ def get_model():
     return m
 
 
-@st.cache_data(show_spinner=False, max_entries=8)
+@st.cache_data(show_spinner=False, max_entries=8, ttl=3600)
 def cached_periods(_mmm, model_key: str) -> list[str]:
     if _is_demo(model_key):
         return pd.read_csv(os.path.join(DEMO_DIR, "fit_series.csv"))["time"].astype(str).str[:10].tolist()
@@ -103,14 +103,14 @@ def _is_demo(model_key: str) -> bool:
     return str(model_key).startswith("demo-") and os.path.isdir(DEMO_DIR)
 
 
-@st.cache_data(show_spinner=False, max_entries=8)
+@st.cache_data(show_spinner=False, max_entries=8, ttl=3600)
 def cached_summary(_mmm, model_key: str) -> pd.DataFrame:
     if _is_demo(model_key):
         return pd.read_csv(os.path.join(DEMO_DIR, "summary.csv"))
     return M.channel_summary(_mmm)
 
 
-@st.cache_data(show_spinner=False, max_entries=8)
+@st.cache_data(show_spinner=False, max_entries=8, ttl=3600)
 def cached_quality(_mmm, model_key: str) -> dict:
     if _is_demo(model_key):
         with open(os.path.join(DEMO_DIR, "quality.json")) as f:
@@ -118,21 +118,21 @@ def cached_quality(_mmm, model_key: str) -> dict:
     return M.fit_quality(_mmm)
 
 
-@st.cache_data(show_spinner=False, max_entries=8)
+@st.cache_data(show_spinner=False, max_entries=8, ttl=3600)
 def cached_fit_series(_mmm, model_key: str) -> pd.DataFrame:
     if _is_demo(model_key):
         return pd.read_csv(os.path.join(DEMO_DIR, "fit_series.csv"), parse_dates=["time"])
     return M.fit_series(_mmm)
 
 
-@st.cache_data(show_spinner=False, max_entries=8)
+@st.cache_data(show_spinner=False, max_entries=8, ttl=3600)
 def cached_curves(_mmm, model_key: str) -> pd.DataFrame:
     if _is_demo(model_key):
         return pd.read_csv(os.path.join(DEMO_DIR, "curves.csv"))
     return M.response_curves(_mmm)
 
 
-@st.cache_data(show_spinner=False, max_entries=8)
+@st.cache_data(show_spinner=False, max_entries=8, ttl=3600)
 def cached_model_bytes(_mmm, model_key: str) -> tuple[bytes, str]:
     if _is_demo(model_key):
         with open(DEMO_MODEL_PATH, "rb") as f:
@@ -164,6 +164,12 @@ def model_loader(key: str):
     )
     if file is not None and st.session_state.get(f"{key}_loaded") != file.file_id:
         if file.name.lower().endswith(".pkl"):
+            # Pickle files can execute arbitrary code when loaded; refuse them unless the operator opts in.
+            if os.environ.get("ALLOW_PICKLE_MODELS") != "1":
+                st.error("`.pkl` model files can run code when opened, so they are turned off. Re-fit the model "
+                         "and save it as `.binpb`, or (on your own computer only) start the app with "
+                         "`ALLOW_PICKLE_MODELS=1`.")
+                return
             st.warning("`.pkl` files run code when opened. Only open model files you created yourself.")
         with st.spinner("Opening model…"):
             try:

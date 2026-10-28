@@ -17,11 +17,16 @@ textColor = "#DCE3F1"
 borderColor = "#22386B"
 
 [server]
-maxUploadSize = 200
+# Security: cap upload size, keep XSRF protection and CORS checks on.
+maxUploadSize = 50
 headless = true
+enableXsrfProtection = true
+enableCORS = true
 
 [browser]
 gatherUsageStats = false
 
 [client]
 toolbarMode = "minimal"
+# Show only the error type to visitors, not full stack traces.
+showErrorDetails = "type"

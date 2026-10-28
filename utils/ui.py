@@ -44,8 +44,9 @@ STEPS = [
     ("step3", "Budget plan", ":material/savings:", "Reallocate spend for more return"),
 ]
 EXTRA = [
-    ("geox", "Lift test", ":material/science:", "Design and measure a geo experiment with Meridian GeoX"),
+    ("geox", "GeoX (Lift test)", ":material/science:", "Design and measure a geo experiment with Meridian GeoX"),
     ("help", "Help & glossary", ":material/help:", "Every term in plain words"),
+    ("legal", "Privacy & terms", ":material/shield:", "How your data is handled, licenses, disclaimer"),
 ]
 
 
@@ -187,8 +188,8 @@ h3 {{ font-weight: 700 !important; font-size: 1.12rem !important; }}
 [data-testid="stSidebar"] .st-key-tour-btn .stButton button p, [data-testid="stSidebar"] .st-key-tour-btn .stButton button span {{ color: {NAVY} !important; font-weight: 700 !important; }}
 [data-testid="stSidebar"] .st-key-tour-btn .stButton button:hover {{ background: #FFDE8A !important; }}
 
-/* ---------- Guided tour card ---------- */
-.st-key-tour {{ background: linear-gradient(var(--surface), var(--surface)) padding-box,
+/* ---------- Guided tour card (sits right above the section it explains) ---------- */
+.st-key-tour {{ position: relative; z-index: 1003; scroll-margin-top: 4rem; background: linear-gradient(var(--surface), var(--surface)) padding-box,
   linear-gradient(135deg, #6D4AE8, #2459E8, #14B8A6) border-box; border: 2px solid transparent; border-radius: 18px;
   padding: 1rem 1.2rem 1rem !important; box-shadow: 0 16px 40px -18px rgba(109,74,232,.55); margin-bottom: 1.2rem; }}
 @keyframes sm-pulse {{ 0%, 100% {{ box-shadow: 0 0 0 0 rgba(109,74,232,.55); }} 50% {{ box-shadow: 0 0 0 7px rgba(109,74,232,0); }} }}
@@ -200,6 +201,27 @@ h3 {{ font-weight: 700 !important; font-size: 1.12rem !important; }}
 .sm-tour-body {{ display:flex; gap: .9rem; align-items:flex-start; margin-top:.55rem; }}
 .sm-tour-body h3 {{ margin: 0 0 .25rem !important; padding: 0 !important; font-size: 1.15rem !important; }}
 .sm-tour-body p {{ margin: 0; color: #344054; font-size: .98rem; line-height: 1.55; }}
+
+/* ---------- Step 1 ---------- */
+.sm-stepbar {{ display:flex; flex-wrap:wrap; gap:.4rem; margin: -.4rem 0 1.2rem; }}
+.sm-step {{ display:inline-flex; align-items:center; gap:.45rem; font-size:.85rem; font-weight:600; color: var(--muted);
+  background: var(--surface); border: 1px solid var(--border); border-radius: 99px; padding: .25rem .8rem .25rem .3rem; }}
+.sm-step b {{ display:inline-flex; width:22px; height:22px; border-radius:50%; align-items:center; justify-content:center;
+  background:#F2F4F7; color:#475467; font-size:.75rem; }}
+.sm-step.on {{ color: var(--ink); border-color: #C7D7FE; }}
+.sm-step.on b {{ background: var(--primary); color:#fff; }}
+.sm-sec {{ display:flex; align-items:center; gap:.65rem; margin: 1.1rem 0 .15rem; }}
+.sm-sec-n {{ display:inline-flex; width:30px; height:30px; border-radius:9px; align-items:center; justify-content:center;
+  background:#EEF3FF; color: var(--primary); font-weight:800; font-size:.92rem; }}
+.sm-sec-t {{ font-family: var(--display); font-weight: 700; font-size: 1.15rem; color: var(--ink); }}
+.sm-sec-h {{ color: var(--muted); font-size: .9rem; margin: 0 0 .55rem 2.6rem; }}
+[class*="st-key-chcard-"] {{ background: var(--surface); border-radius: 14px !important; box-shadow: var(--shadow);
+  transition: box-shadow .15s, border-color .15s; }}
+[class*="st-key-chcard-"]:hover {{ box-shadow: var(--shadow-lg); border-color: #C7D7FE !important; }}
+[class*="st-key-chcard-"] [data-testid="stTextInput"] input {{ font-weight: 700; font-size: 1rem; }}
+.sm-chfoot {{ display:flex; align-items:center; gap:.45rem; font-size:.82rem; color: var(--muted); }}
+.sm-chfoot i {{ width:10px; height:10px; border-radius:3px; display:inline-block; }}
+[class*="st-key-s1-"], [class*="st-key-s3-"], .st-key-runcard, .st-key-gx-plan {{ background: var(--surface); }}
 
 /* ---------- Hero ---------- */
 .st-key-hero {{
@@ -276,7 +298,7 @@ def version_banner():
         f'<div class="sm-version"><span class="tag">{icon("new_releases", 14)} Updated 27 Oct 2026</span>'
         '<span>First release <b>April 2025</b> on Google Meridian 1.0.6</span><span class="sep"></span>'
         '<span>Now on <b>Meridian 2.1.0</b>, with a guided tour, a ready-made demo, '
-        '<span class="sm-new">NEW</span><b>lift tests with Meridian GeoX</b>, and a new design</span></div>',
+        '<span class="sm-new">NEW</span><b>GeoX (Lift test)</b>, and a new design</span></div>',
         unsafe_allow_html=True,
     )
 
@@ -304,11 +326,13 @@ def tiles(items: list[dict]):
         chip = ""
         if it.get("chip"):
             arrow = "arrow_upward" if it.get("direction") == "up" else "arrow_downward"
-            chip = f'<span class="sm-chip {it.get("direction", "")}">{icon(arrow, 14)}{it["chip"]}</span> '
-        detail = f'<div class="d">{chip}{it.get("detail", "")}</div>' if (chip or it.get("detail")) else ""
+            chip = (f'<span class="sm-chip {html.escape(it.get("direction", ""))}">{icon(arrow, 14)}'
+                    f'{html.escape(str(it["chip"]))}</span> ')
+        # Values can come from uploaded files (channel names), so escape everything.
+        detail = f'<div class="d">{chip}{html.escape(str(it.get("detail", "")))}</div>' if (chip or it.get("detail")) else ""
         b = badge(it["icon"], it.get("accent", "blue")) if it.get("icon") else ""
-        out.append(f'<div class="sm-tile">{b}<div><div class="k">{it["label"]}</div>'
-                   f'<div class="v">{it["value"]}</div>{detail}</div></div>')
+        out.append(f'<div class="sm-tile">{b}<div><div class="k">{html.escape(str(it["label"]))}</div>'
+                   f'<div class="v">{html.escape(str(it["value"]))}</div>{detail}</div></div>')
     st.markdown(f'<div class="sm-tiles">{"".join(out)}</div>', unsafe_allow_html=True)
 
 
@@ -385,7 +409,7 @@ def sidebar(meridian_version: str | None):
             rows.append(f'<div>{icon("model_training", 18, "#5B6E96")}<small>No model yet</small></div>')
         cal = st.session_state.get("calibration") or {}
         if cal:
-            rows.append(f'<div>{icon("tune", 18, "#C4B5FD")}<span><b>Lift-test priors</b><br>'
+            rows.append(f'<div>{icon("tune", 18, "#C4B5FD")}<span><b>GeoX priors</b><br>'
                         f'<small>{html.escape(", ".join(cal))}</small></span></div>')
         rows.append(f'<div>{icon("verified", 18, "#FFD166" if meridian_version else "#F87171")}'
                     f'<small>google-meridian {meridian_version or "not installed"}</small></div>')
@@ -397,10 +421,13 @@ def footer():
         f"""
         <div class="sm-footer">
           <span>Built by Ali Barfi Bafghi on the open-source
-          <a href="https://github.com/google/meridian" target="_blank">Google Meridian</a> library. Not affiliated with Google.</span>
-          <span style="display:flex;gap:1rem">
-            <a href="https://github.com/alibb007/Simple-Meridian" target="_blank">{icon("code", 17)}GitHub</a>
-            <a href="https://www.linkedin.com/in/alibarfibafghi/" target="_blank">{icon("person", 17)}LinkedIn</a>
+          <a href="https://developers.google.com/meridian" target="_blank" rel="noopener">Google Meridian</a> and
+          <a href="https://developers.google.com/meridian/geox" target="_blank" rel="noopener">Meridian GeoX</a> libraries.
+          Not affiliated with or endorsed by Google. Results are statistical estimates, not financial advice.</span>
+          <span style="display:flex;gap:1rem;flex-wrap:wrap">
+            <a href="https://developers.google.com/meridian" target="_blank" rel="noopener">{icon("open_in_new", 17)}Meridian docs</a>
+            <a href="https://github.com/alibb007/Simple-Meridian" target="_blank" rel="noopener">{icon("code", 17)}GitHub</a>
+            <a href="https://www.linkedin.com/in/alibarfibafghi/" target="_blank" rel="noopener">{icon("person", 17)}LinkedIn</a>
             <a href="mailto:ali.barfib@gmail.com">{icon("mail", 17)}Email</a>
           </span>
         </div>

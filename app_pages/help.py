@@ -17,8 +17,8 @@ GLOSSARY = [
     ("Credible interval (90% range)", "The range the true value is very likely in. Narrow means the model is sure."),
     ("R²", "How much of the week-to-week movement in sales the model explains. 1.0 is perfect."),
     ("R-hat", "A check that the model finished learning. Below 1.2 is good; above it, fit again with more samples."),
-    ("Lift test", "An experiment: ads run in some regions and not others, and the gap is measured. "
-                  "See the Lift test page."),
+    ("Lift test (GeoX)", "An experiment: ads run in some regions and not others, and the gap is measured. "
+                         "See the GeoX (Lift test) page."),
     ("Prior", "What the model believes before it sees your data. A lift test result makes a much better prior."),
 ]
 
@@ -49,6 +49,14 @@ def show_help():
             st.markdown(f'<div class="sm-tile" style="margin-bottom:.7rem;min-height:118px"><div>'
                         f'<div style="font-weight:700">{term}</div><div class="d" style="font-size:.9rem">{text}</div>'
                         f"</div></div>", unsafe_allow_html=True)
+
+    st.markdown("### Learn more from Google")
+    st.markdown(
+        "- [Google Meridian: official site and documentation](https://developers.google.com/meridian)\n"
+        "- [Meridian on GitHub](https://github.com/google/meridian)\n"
+        "- [Meridian GeoX: lift tests](https://developers.google.com/meridian/geox)\n"
+        "- [Using past experiments as priors](https://developers.google.com/meridian/docs/advanced-modeling/set-custom-priors-past-experiments)"
+    )
 
     st.markdown("### Common questions")
     for q, a in FAQ:

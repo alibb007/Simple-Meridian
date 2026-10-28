@@ -3,7 +3,7 @@ import pandas as pd
 import streamlit as st
 
 from app_pages.common import cached_summary, has_model
-from utils import charts
+from utils import charts, tour
 from utils import geox as G
 from utils import mmm as M
 from utils import ui
@@ -46,13 +46,14 @@ def show_lift_test():
     st.markdown(
         f'<div class="sm-head">{ui.badge("science", "violet", 52)}<div>'
         f'<div class="sm-kicker"><span class="sm-new">NEW</span> Meridian GeoX {G.GEOX_VERSION or ""}</div>'
-        f'<h1>Lift test</h1></div></div>',
+        f'<h1>GeoX (Lift test)</h1></div></div>',
         unsafe_allow_html=True,
     )
     st.markdown(
         '<p class="sm-lede">A marketing mix model learns from history, so it can be wrong. A lift test is a real '
         "experiment: run a campaign in some regions, keep it off in similar ones, and measure the gap. "
-        "Google's GeoX picks the regions and does the math. Its result can then steer your Meridian model.</p>",
+        '<a href="https://developers.google.com/meridian/geox" target="_blank">Google\'s Meridian GeoX</a> picks the '
+        "regions and does the math. Its result can then steer your Meridian model.</p>",
         unsafe_allow_html=True,
     )
     if G.GEOX_VERSION is None:
@@ -91,7 +92,8 @@ def _sample_tab():
     ui.callout("This is made-up data for 40 regions. You choose how well the pretend campaign really works, then "
                "see whether GeoX can find that number without being told.", "info")
 
-    with st.container(border=True):
+    tour.here("gx-plan")
+    with st.container(border=True, key="gx-plan"):
         st.markdown("#### 1 · Plan the test")
         c1, c2, c3 = st.columns(3)
         test_days = c1.select_slider("Test length", [14, 21, 28, 42], value=28, format_func=lambda d: f"{d} days",
