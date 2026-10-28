@@ -32,6 +32,9 @@ I built Simple Meridian so anyone can run a quick test, see how Meridian works, 
 | **1 · Data & model** | Upload a CSV or Excel file. Confirm the date, outcome and channel columns (they are detected automatically). Pick a sampling preset. | A fitted Meridian model, fit quality (R², MAPE, R-hat), and a model file you can download and reopen later. |
 | **2 · Insights** | Look through the tabs. | ROI with 90% credible intervals, average vs. marginal ROI, baseline vs. media revenue, share of spend vs. share of revenue, response curves, actual vs. predicted, and Meridian's HTML report. |
 | **3 · Budget plan** | Pick a period, a per-channel limit (±30% by default), and keep the budget or set a new total. | The spend split with the most incremental revenue, where it lands on each response curve, and CSV, Excel and HTML exports. |
+| **Lift test** (new) | Design a geo experiment with [Meridian GeoX](https://developers.google.com/meridian/geox), or upload a test you already ran. | Test and control regions, the smallest lift the test can detect, the measured extra revenue and return per $1, and a one-click ROI prior for the next model fit. |
+
+New to marketing measurement? Click **Take the 2-minute tour** on the home page. It walks through the demo page by page and highlights what to click. **Help & glossary** in the sidebar explains every term.
 
 Everything runs on your machine. Your data is not sent anywhere.
 
@@ -72,11 +75,25 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-The home page gives you three ways to start:
+The home page gives you three ways in:
 
-- **See the demo results**: a model already fitted on the sample data. Results open in a few seconds.
-- **Fit the sample data yourself**: the same three-year, six-channel synthetic dataset, fitted on your machine in about a minute.
-- **Use your own data**: upload a CSV or Excel file.
+- **Take the 2-minute tour**: a guided walkthrough of the demo for people who have never used an MMM.
+- **Open the demo**: a model already fitted on the sample data. Results open in a few seconds.
+- **Use my data**: upload a CSV or Excel file. You can also load the sample data and fit it yourself in about a minute.
+
+## Lift tests with Meridian GeoX
+
+A marketing mix model learns from history, so two channels that always moved together can fool it. A lift test is an experiment: a campaign runs in some regions and stays off in similar ones, and the gap is what the campaign caused. The **Lift test** page uses [Meridian GeoX](https://github.com/google/meridian-geox) 1.0.1 for both halves:
+
+1. **Plan**: GeoX searches thousands of region splits and picks test and control groups that tracked each other before the test. It also reports the smallest lift the test can detect and a suggested budget.
+2. **Measure**: after the test, GeoX predicts what the test regions would have done without the campaign (Time-Based Regression) and reports the extra revenue, the lift and the return per $1 (iROAS), each with a 90% range.
+3. **Calibrate**: one click turns that return per $1 into an ROI prior for the matching channel. The next fit in step 1 uses it.
+
+The sample test uses 40 made-up regions. You choose the true return per $1 hidden in the data and check whether GeoX finds it. With the default settings it estimates $2.53 for a true $2.50 (90% range $2.36 to $2.67). Across 12 different region splits, the 90% range held the true value 9 times and every estimate was within 10% of it. Feeding that $2.53 ± 0.25 into the sample model as TV's prior narrowed TV's ROI range from 1.42–3.86 to 2.23–2.95 (Quick check preset).
+
+<img src="pic/lift-test.png" alt="Lift test results: GeoX finds $2.53 per $1 against a true $2.50" width="92%">
+
+For your own test, upload daily data with `date`, `location`, `conversions` and `spend` columns, pick the test regions and dates, and press **Measure the lift**.
 
 ## Data format
 
@@ -127,12 +144,17 @@ app_pages/
   step1_upload_and_run.py      upload, column mapping, validation, fitting
   step2_insights.py            ROI, contribution, response curves, fit, report
   step3_optimization.py        budget optimizer and exports
+  lift_test.py                 Meridian GeoX: design, measure, use as prior
+  help.py                      glossary and FAQ
   common.py                    shared state, caching, model upload/download
 utils/
   mmm.py                       all Meridian calls; returns plain pandas tables
+  geox.py                      all GeoX calls, plus the sample geo data
+  tour.py                      the guided tour
   charts.py                    Plotly charts
   ui.py                        theme, CSS, sidebar navigation, small components
 scripts/build_demo.py          refits the demo model and precomputes its charts
+tests/test_pages.py            renders every page and tour step headlessly
 .streamlit/config.toml         theme
 data/simple_dataset.csv        sample data
 data/sample_model.binpb        demo model (Standard preset)
@@ -148,7 +170,10 @@ After upgrading `google-meridian`, run `python scripts/build_demo.py --refit` so
 **27 Oct 2026, Meridian 2.1.0**
 
 - Upgraded from `google-meridian` 1.0.6 to **2.1.0** (TensorFlow 2.21, JAX backend). Ported the app to the 2.x API: `DataFrameDataLoader`, `start_date`/`end_date` in the optimizer, and the new report signatures.
+- Added a guided tour for people new to MMM, and a Help & glossary page.
+- Added **lift tests with Meridian GeoX 1.0.1**: design a geo experiment, measure it, and use the result as an ROI prior.
 - Added a demo: a pre-fitted model with precomputed charts, so you can see the results without fitting anything.
+- New home page: what the app is for, the demo's real results, and three pictures of how Meridian reasons.
 - Faster: Meridian loads in the background instead of on the first page load (page import went from 7.1 s to 0.5 s), optimizer results are cached, and the JAX backend is pinned.
 - Models are saved as `.binpb` with Meridian's serializer, replacing the deprecated pickle format.
 - Redesigned the interface: a home page with three starting points, a navigation sidebar, icons, pill tabs, and one color per channel across every chart. Step 1 now has numbered sections and a "Ready to fit" checklist; data is checked before fitting.

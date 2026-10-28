@@ -43,6 +43,10 @@ STEPS = [
     ("step2", "Insights", ":material/insights:", "ROI, contribution, saturation"),
     ("step3", "Budget plan", ":material/savings:", "Reallocate spend for more return"),
 ]
+EXTRA = [
+    ("geox", "Lift test", ":material/science:", "Design and measure a geo experiment with Meridian GeoX"),
+    ("help", "Help & glossary", ":material/help:", "Every term in plain words"),
+]
 
 
 _LOGO_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "pic", "Logo.png")
@@ -173,6 +177,30 @@ h3 {{ font-weight: 700 !important; font-size: 1.12rem !important; }}
 .st-key-runcard {{ position: sticky; top: 4rem; background: var(--surface); box-shadow: var(--shadow-lg); border-radius: 18px !important; }}
 [data-testid="stVerticalBlockBorderWrapper"], [data-testid="stLayoutWrapper"] > [data-testid="stVerticalBlock"][class*="st-key-"] {{ border-radius: 16px; }}
 
+/* ---------- NEW badge ---------- */
+.sm-new {{ display:inline-block; background: linear-gradient(135deg, #F04438, #F79009); color:#fff !important; font-weight:800;
+  font-size:.68rem; letter-spacing:.06em; padding:.12rem .45rem; border-radius: 6px; margin-right:.35rem; vertical-align: 1px; }}
+[data-testid="stSidebar"] [class*="st-key-nav-"][class*="-geox"] .stButton button p::after {{
+  content: "NEW"; margin-left: .5rem; background: linear-gradient(135deg, #F04438, #F79009); color:#fff; font-weight:800;
+  font-size:.62rem; letter-spacing:.06em; padding:.1rem .4rem; border-radius: 5px; vertical-align: 2px; }}
+[data-testid="stSidebar"] .st-key-tour-btn .stButton button {{ background: #FFD166 !important; }}
+[data-testid="stSidebar"] .st-key-tour-btn .stButton button p, [data-testid="stSidebar"] .st-key-tour-btn .stButton button span {{ color: {NAVY} !important; font-weight: 700 !important; }}
+[data-testid="stSidebar"] .st-key-tour-btn .stButton button:hover {{ background: #FFDE8A !important; }}
+
+/* ---------- Guided tour card ---------- */
+.st-key-tour {{ background: linear-gradient(var(--surface), var(--surface)) padding-box,
+  linear-gradient(135deg, #6D4AE8, #2459E8, #14B8A6) border-box; border: 2px solid transparent; border-radius: 18px;
+  padding: 1rem 1.2rem 1rem !important; box-shadow: 0 16px 40px -18px rgba(109,74,232,.55); margin-bottom: 1.2rem; }}
+@keyframes sm-pulse {{ 0%, 100% {{ box-shadow: 0 0 0 0 rgba(109,74,232,.55); }} 50% {{ box-shadow: 0 0 0 7px rgba(109,74,232,0); }} }}
+@media (prefers-reduced-motion: reduce) {{ [data-testid] {{ animation: none !important; }} }}
+.sm-tour-top {{ display:flex; align-items:center; gap:.45rem; font-size:.8rem; font-weight:700; color:#6941C6; }}
+.sm-dots {{ display:inline-flex; gap:.25rem; margin-left:.6rem; }}
+.sm-dots span {{ width: 18px; height: 5px; border-radius: 99px; background: #E9E3FC; }}
+.sm-dots span.on {{ background: #6D4AE8; }}
+.sm-tour-body {{ display:flex; gap: .9rem; align-items:flex-start; margin-top:.55rem; }}
+.sm-tour-body h3 {{ margin: 0 0 .25rem !important; padding: 0 !important; font-size: 1.15rem !important; }}
+.sm-tour-body p {{ margin: 0; color: #344054; font-size: .98rem; line-height: 1.55; }}
+
 /* ---------- Hero ---------- */
 .st-key-hero {{
   background: radial-gradient(1200px 400px at 85% -10%, rgba(109,74,232,.55), transparent 60%),
@@ -247,8 +275,8 @@ def version_banner():
     st.markdown(
         f'<div class="sm-version"><span class="tag">{icon("new_releases", 14)} Updated 27 Oct 2026</span>'
         '<span>First release <b>April 2025</b> on Google Meridian 1.0.6</span><span class="sep"></span>'
-        '<span>Now on <b>Meridian 2.1.0</b> with a new design, a ready-made demo model, data checks, '
-        'budget scenarios and Docker support</span></div>',
+        '<span>Now on <b>Meridian 2.1.0</b>, with a guided tour, a ready-made demo, '
+        '<span class="sm-new">NEW</span><b>lift tests with Meridian GeoX</b>, and a new design</span></div>',
         unsafe_allow_html=True,
     )
 
@@ -319,12 +347,24 @@ def sidebar(meridian_version: str | None):
         with st.container(key=f"nav-{'here' if st.session_state.get('page') == 'home' else 'todo'}-home"):
             if st.button("Overview", key="btn_home", icon=":material/space_dashboard:", width="stretch"):
                 go_to("home")
+        if st.session_state.get("tour") is None:
+            with st.container(key="tour-btn"):
+                if st.button("Guided tour", key="btn_tour", icon=":material/tour:", width="stretch",
+                             help="A two-minute walkthrough of the demo, in plain words"):
+                    from utils import tour
+                    tour.start()
         st.markdown('<div class="sm-label">Workflow</div>', unsafe_allow_html=True)
         for page, label, ic, desc in STEPS:
             state = step_state(page)
             with st.container(key=f"nav-{state}-{page}"):
                 if st.button(label, key=f"btn_{page}", help=desc, width="stretch",
                              icon=":material/check_circle:" if state == "done" else ic):
+                    go_to(page)
+        st.markdown('<div class="sm-label">More</div>', unsafe_allow_html=True)
+        for page, label, ic, desc in EXTRA:
+            here = "here" if st.session_state.get("page") == page else "todo"
+            with st.container(key=f"nav-{here}-{page}"):
+                if st.button(label, key=f"btn_{page}", help=desc, width="stretch", icon=ic):
                     go_to(page)
 
         data = st.session_state.get("data")
@@ -343,6 +383,10 @@ def sidebar(meridian_version: str | None):
                         f'<small>{html.escape(info.get("source", ""))}{r2s}</small></span></div>')
         else:
             rows.append(f'<div>{icon("model_training", 18, "#5B6E96")}<small>No model yet</small></div>')
+        cal = st.session_state.get("calibration") or {}
+        if cal:
+            rows.append(f'<div>{icon("tune", 18, "#C4B5FD")}<span><b>Lift-test priors</b><br>'
+                        f'<small>{html.escape(", ".join(cal))}</small></span></div>')
         rows.append(f'<div>{icon("verified", 18, "#FFD166" if meridian_version else "#F87171")}'
                     f'<small>google-meridian {meridian_version or "not installed"}</small></div>')
         st.markdown(f'<div class="sm-status">{"".join(rows)}</div>', unsafe_allow_html=True)

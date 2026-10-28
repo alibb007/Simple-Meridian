@@ -1,0 +1,11 @@
+{
+  "start": "2023-12-31",
+  "end": "2024-12-22",
+  "budget_before": 116100000.0,
+  "budget_after": 116100000.0,
+  "outcome_before": 359582273.13133633,
+  "outcome_after": 378282938.59494233,
+  "roi_before": 3.097177201820296,
+  "roi_after": 3.258250978423276,
+  "is_revenue": true
+}

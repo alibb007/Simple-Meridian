@@ -6,7 +6,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     TF_CPP_MIN_LOG_LEVEL=2 \
     # JAX fits the sample model ~2.8x faster than the TensorFlow backend.
-    MERIDIAN_BACKEND=jax
+    MERIDIAN_BACKEND=jax \
+    # Model fits and lift tests allowed at the same time; the rest wait in a queue.
+    MAX_CONCURRENT_FITS=1
 
 WORKDIR /app
 

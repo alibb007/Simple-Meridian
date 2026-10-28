@@ -164,6 +164,8 @@ class ModelConfig:
     preset: str = "Standard"
     max_lag: int = 8
     seed: int = 1
+    # Lift-test calibration: channel name -> (ROI mean, ROI sd), e.g. from GeoX.
+    roi_priors: dict = field(default_factory=dict)
 
 
 def parse_dates(series: pd.Series) -> pd.Series:
@@ -260,6 +262,46 @@ def build_input_data(df: pd.DataFrame, cfg: ModelConfig):
     return loader.load()
 
 
+# Heavy jobs (model fits, lift tests) each use several CPU cores and 1-2 GB of
+# RAM. On a shared server, run at most this many at once and queue the rest.
+MAX_HEAVY_JOBS = max(1, int(os.environ.get("MAX_CONCURRENT_FITS", "1")))
+_heavy_slots = threading.BoundedSemaphore(MAX_HEAVY_JOBS)
+
+
+class heavy_job:
+    """Context manager: wait for a free slot; `on_wait` is called if we have to queue."""
+
+    def __init__(self, on_wait=None):
+        self.on_wait = on_wait
+
+    def __enter__(self):
+        if not _heavy_slots.acquire(blocking=False):
+            if self.on_wait:
+                self.on_wait()
+            _heavy_slots.acquire()
+        return self
+
+    def __exit__(self, *exc):
+        _heavy_slots.release()
+        return False
+
+
+def roi_prior(channels: list[str], roi_priors: dict):
+    """Meridian's default ROI prior, replaced by LogNormal(mean, sd) for calibrated channels."""
+    from meridian import backend, constants
+    from meridian.model import prior_distribution
+
+    default = prior_distribution.PriorDistribution().roi_m  # LogNormal(0.2, 0.9)
+    mu = np.full(len(channels), float(np.asarray(default.loc)))
+    sigma = np.full(len(channels), float(np.asarray(default.scale)))
+    for i, ch in enumerate(channels):
+        if ch in roi_priors:
+            mean, sd = roi_priors[ch]
+            s2 = np.log(1 + (sd / mean) ** 2)
+            mu[i], sigma[i] = np.log(mean) - s2 / 2, np.sqrt(s2)
+    return prior_distribution.PriorDistribution(roi_m=backend.tfd.LogNormal(mu, sigma, name=constants.ROI_M))
+
+
 def fit(input_data, cfg: ModelConfig, on_stage=None):
     """Build and sample a Meridian model. Returns (mmm, seconds)."""
     p = PRESETS[cfg.preset]
@@ -267,7 +309,13 @@ def fit(input_data, cfg: ModelConfig, on_stage=None):
     started = time.time()
 
     stage("Building model")
-    mmm = lib().model.Meridian(input_data=input_data, model_spec=lib().spec.ModelSpec(max_lag=cfg.max_lag))
+    spec_args = dict(max_lag=cfg.max_lag)
+    channels = [str(c) for c in input_data.get_all_paid_channels()]
+    priors = {c: v for c, v in (cfg.roi_priors or {}).items() if c in channels}
+    if priors:
+        stage("Using lift-test ROI priors for " + ", ".join(priors))
+        spec_args["prior"] = roi_prior(channels, priors)
+    mmm = lib().model.Meridian(input_data=input_data, model_spec=lib().spec.ModelSpec(**spec_args))
 
     stage("Sampling prior")
     mmm.sample_prior(p["n_prior"], seed=cfg.seed)

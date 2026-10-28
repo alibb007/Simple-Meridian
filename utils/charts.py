@@ -39,8 +39,7 @@ def _layout(fig: go.Figure, height: int = 420, legend: bool = False, **kw) -> go
         hoverlabel=dict(bgcolor=SURFACE, bordercolor=BORDER, font=dict(family=FONT_BODY, color=INK, size=13)),
         showlegend=legend,
         legend=dict(orientation="h", yanchor="bottom", y=1.01, xanchor="left", x=0, font=dict(color=MUTED)),
-        bargap=0.38,
-        **kw,
+        **{"bargap": 0.38, **kw},
     )
     axis = dict(gridcolor=GRID, zeroline=False, linecolor=BORDER, tickfont=dict(color=MUTED, size=12))
     fig.update_xaxes(**axis)
@@ -225,3 +224,63 @@ def allocation_bars(table: pd.DataFrame, colors: dict) -> go.Figure:
     fig.update_yaxes(tickfont=dict(color=INK, size=13))
     return fig
 
+
+
+# --------------------------------------------------------------------------- #
+# Lift test (GeoX)
+# --------------------------------------------------------------------------- #
+TREATMENT, CONTROL = "#6250D6", "#98A2B3"
+
+
+def geo_groups(df: pd.DataFrame, treatment: list[str], excluded: list[str] | None = None) -> go.Figure:
+    """Average daily revenue per region, colored by group."""
+    excluded = set(excluded or [])
+    size = df.groupby("location")["conversions"].mean().sort_values(ascending=False)
+    groups = ["Test" if g in set(treatment) else ("Left out" if g in excluded else "Control") for g in size.index]
+    colors = {"Test": TREATMENT, "Control": CONTROL, "Left out": "#E4E7EC"}
+    fig = go.Figure()
+    for name in ["Test", "Control", "Left out"]:
+        idx = [i for i, g in enumerate(groups) if g == name]
+        if idx:
+            fig.add_bar(x=size.index[idx], y=size.values[idx], name=name, marker=dict(color=colors[name], cornerradius=4),
+                        hovertemplate="<b>%{x}</b><br>avg $%{y:,.0f} per day<extra>" + name + "</extra>")
+    _layout(fig, height=300, legend=True, bargap=0.25)
+    fig.update_xaxes(categoryorder="array", categoryarray=list(size.index), showticklabels=False, title="Regions, largest first")
+    fig.update_yaxes(tickprefix="$", tickformat="~s", title="Avg daily revenue")
+    return fig
+
+
+def geo_counterfactual(cf: pd.DataFrame, start) -> go.Figure:
+    """Test regions: what happened vs. what GeoX predicts would have happened without the campaign."""
+    d = cf.copy()
+    d["date"] = pd.to_datetime(d["date"])
+    test = d[d["date"] >= pd.Timestamp(start)]
+    fig = go.Figure()
+    fig.add_vrect(x0=pd.Timestamp(start), x1=d["date"].max(), fillcolor=_rgba(TREATMENT, .07), line_width=0,
+                  annotation_text="Test period", annotation_position="top left",
+                  annotation_font=dict(color=TREATMENT, size=12))
+    fig.add_scatter(x=pd.concat([test.date, test.date[::-1]]), y=pd.concat([test.upper_bound, test.lower_bound[::-1]]),
+                    fill="toself", fillcolor=_rgba(CONTROL, .25), line=dict(width=0), hoverinfo="skip",
+                    name="Range without campaign")
+    fig.add_scatter(x=d.date, y=d.observed, name="Actual (test regions)", line=dict(color=TREATMENT, width=2),
+                    hovertemplate="%{x|%d %b}<br>Actual $%{y:,.0f}<extra></extra>")
+    fig.add_scatter(x=d.date, y=d.counterfactual, name="Expected without campaign", line=dict(color="#475467", width=1.8, dash="dot"),
+                    hovertemplate="Expected $%{y:,.0f}<extra></extra>")
+    _layout(fig, height=380, legend=True, hovermode="x unified")
+    fig.update_yaxes(tickprefix="$", tickformat="~s")
+    return fig
+
+
+def geo_cumulative(cum: pd.DataFrame) -> go.Figure:
+    d = cum.copy()
+    d["date"] = pd.to_datetime(d["date"])
+    d = d.dropna(subset=["lift"])
+    fig = go.Figure()
+    fig.add_scatter(x=pd.concat([d.date, d.date[::-1]]), y=pd.concat([d.upper_bound, d.lower_bound[::-1]]),
+                    fill="toself", fillcolor=_rgba(TREATMENT, .15), line=dict(width=0), hoverinfo="skip", name="90% range")
+    fig.add_scatter(x=d.date, y=d.lift, name="Extra revenue so far", line=dict(color=TREATMENT, width=2.5),
+                    hovertemplate="%{x|%d %b}<br>+$%{y:,.0f}<extra></extra>")
+    fig.add_hline(y=0, line=dict(color="#667085", width=1))
+    _layout(fig, height=320, legend=True)
+    fig.update_yaxes(tickprefix="$", tickformat="~s")
+    return fig

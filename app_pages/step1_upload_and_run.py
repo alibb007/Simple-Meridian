@@ -217,6 +217,7 @@ def _configure_and_fit(df: pd.DataFrame):
             cfg = M.ModelConfig(
                 date_col=date_col, kpi_col=kpi_col, kpi_type=kpi_type, channels=channels, controls=controls,
                 revenue_per_kpi_col=rpk, preset=preset, max_lag=int(max_lag), seed=int(seed),
+                roi_priors=dict(st.session_state.get("calibration") or {}),
             )
             errors, notes = M.validate(df, cfg)
             n_ch = len([r for r in channels if r.get("Channel") and r.get("Spend column")])
@@ -227,6 +228,10 @@ def _configure_and_fit(df: pd.DataFrame):
                 (True, f"{len(controls)} control{'s' if len(controls) != 1 else ''}"),
                 (not errors, "Data checks passed" if not errors else f"{len(errors)} problem{'s' if len(errors) > 1 else ''} to fix"),
             ]
+            names = {r.get("Channel", "").strip() for r in channels}
+            for ch, (m, sd) in (cfg.roi_priors or {}).items():
+                checks.append((ch in names, f"Lift-test prior for {ch}: ${m:.2f} ± {sd:.2f}"
+                                            + ("" if ch in names else " (no such channel, ignored)")))
             st.markdown("".join(
                 f'<div style="display:flex;gap:.5rem;align-items:center;font-size:.92rem;margin:.25rem 0">'
                 f'{ui.icon("check_circle" if ok else "cancel", 18, ui.GOOD if ok else ui.BAD)}{text}</div>'
@@ -250,9 +255,11 @@ def _run_fit(df: pd.DataFrame, cfg: M.ModelConfig):
             M.lib()
             st.write("Preparing data")
             input_data = M.build_input_data(df, cfg)
-            mmm, elapsed = M.fit(input_data, cfg, on_stage=st.write)
+            with M.heavy_job(on_wait=lambda: st.write("Another fit is running on this server. Waiting for a free slot…")):
+                mmm, elapsed = M.fit(input_data, cfg, on_stage=st.write)
             st.write("Computing fit quality")
-            set_model(mmm, "fitted here", {"elapsed": elapsed, "preset": cfg.preset})
+            set_model(mmm, "fitted here", {"elapsed": elapsed, "preset": cfg.preset,
+                                           "priors": sorted(cfg.roi_priors)})
         except Exception as e:
             status.update(label="Model fit failed", state="error")
             st.error(f"{type(e).__name__}: {e}")
