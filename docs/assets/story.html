@@ -284,6 +284,7 @@
     draw();
     requestAnimationFrame(tick);
   }
+  draw();  // the first frame right away, before the first animation frame arrives
   requestAnimationFrame(tick);
 })();
 </script>
