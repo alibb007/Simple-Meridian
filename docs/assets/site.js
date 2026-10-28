@@ -99,14 +99,6 @@
     return s + "</svg>";
   }
 
-  function heroRoi() {
-    var top = best.roi;
-    return '<div class="roih">Demo result · revenue per $1</div>' + byRoi.map(function (r) {
-      return '<div class="roirow"><span>' + esc(r.channel) + '</span><span class="track"><span class="fill" style="width:' +
-        (r.roi / top * 100).toFixed(0) + '%;background:' + COLOR[r.channel] + '"></span></span><b>$' + r.roi.toFixed(2) + "</b></div>";
-    }).join("") + '<div class="gain">Same budget, better split: <b>+' + money(gain) + " (+" + gainPct.toFixed(1) + "%)</b> revenue over the last year</div>";
-  }
-
   // ---------------- Simulated app screens ----------------
   // Region ids (data-t) match the app's tour anchors in utils/tour.py.
   var Q = D.quality, G = D.geox_sample;
@@ -142,19 +134,19 @@
   var sel = function (label, value) { return '<div class="field"><span>' + label + "</span><em>" + value + " ▾</em></div>"; };
 
   var SCREENS = {
-    home: '<div class="welcome" data-t="home-hero">' +
-      '<div class="kicker">Guided tour · a made-up company, real Meridian results</div>' +
+    home: '<div class="intro">' +
+      '<div class="kicker">Guided tour · Google Meridian, made simple</div>' +
       "<h1>Find out which ads really bring in your sales</h1>" +
-      "<p>Google Meridian can tell a business what each marketing channel earns and where the next dollar should go, " +
-      "but it normally needs a data scientist and a lot of Python. I built Simple Meridian so anyone can run a quick test, " +
-      "watch how Meridian works, and see what it can tell them, without writing a line of code.</p>" +
-      '<div class="sign"><img class="avatar" src="assets/ali.png" alt="" width="40" height="40">' +
-      '<span><b>Ali Barfi Bafghi</b> · creator of Simple Meridian</span></div>' +
-      '<div class="welcome-roi">' + heroRoi() + "</div>" +
-      '<div class="version">First release April 2025 on Meridian 1.0.6 · updated 27 Oct 2026 to Meridian 2.1.0 with ' +
-      'GeoX (Lift test)<span class="new">NEW</span></div></div>',
-    how: '<div class="kick">Welcome</div><h3>How Meridian thinks</h3>' +
-      '<iframe class="motion" data-t="how" src="assets/how-it-works.html" title="Animation: how Meridian turns ad spend and sales into a better budget"></iframe>',
+      '<p class="lede">Meridian is Google\'s free tool for working out what each ad channel earns and where the next dollar ' +
+      "should go. This tour shows it on a made-up company that advertises on " + channels.length + " channels. You click Next; " +
+      "there is nothing to type.</p>" +
+      '<iframe class="motion" src="assets/how-it-works.html" title="Animation: how Meridian turns ad spend and sales into a better budget"></iframe>' +
+      '<div class="start"><button class="btn btn-gold btn-big" id="t-start" type="button">' +
+      '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>Start the guided tour</button>' +
+      '<span class="startnote">STEPS_COUNT steps · use Next and Back, or the arrow keys</span></div>' +
+      '<div class="sign"><img class="avatar" src="assets/ali.png" alt="" width="36" height="36">' +
+      "<span>Built by <b>Ali Barfi Bafghi</b> so anyone can try Meridian without writing code. First release April 2025 on " +
+      "Meridian 1.0.6, updated 27 Oct 2026 to Meridian 2.1.0.</span></div></div>",
     step1: '<div class="kick">Step 1 of 3</div><h3>Data &amp; model</h3>' +
       '<div class="box" data-t="s1-data"><div class="boxh">Your data</div>' +
       '<div class="pills"><span>simple_dataset.csv</span><span>156 weeks</span><span>02 Jan 2022 → 22 Dec 2024</span></div>' +
@@ -206,14 +198,15 @@
       "</div></div>",
   };
 
-  // ---------------- Tour steps (text comes from the app's utils/tour.py) ----------------
-  var STEPS = (D.tour || []).map(function (s) {
+  // ---------------- Tour steps (text comes from docs/tour_steps.py) ----------------
+  // The welcome page is not a step: it has its own start button.
+  var STEPS = (D.tour || []).filter(function (s) { return s.chapter !== "Welcome"; }).map(function (s) {
     var st = { chapter: s.chapter, title: s.title, body: s.body, screen: s.page, target: s.anchor };
     if (s.chart) {
       st.screen = "mr-" + s.chart; st.target = "mr-" + s.chart;
       if (!SCREENS[st.screen]) {
         SCREENS[st.screen] = '<div class="kick">' + (s.chapter === "Budget plan charts" ? "Budget plan · charts" : "Insights · Meridian's own charts") + "</div>" +
-          '<div class="shot" data-t="mr-' + s.chart + '"><img src="assets/charts/' + s.chart + '.png" loading="lazy" width="' + s.w +
+          '<div class="shot" data-t="mr-' + s.chart + '"><img src="assets/charts/' + s.chart + '.png" width="' + s.w +
           '" height="' + s.h + '" alt="' + esc(s.title) + ' (chart from the Simple Meridian app)"></div>';
       }
     }
@@ -225,137 +218,157 @@
     }
     return st;
   });
-  STEPS.splice(1, 0, { chapter: "Welcome", screen: "how", target: "how", title: "How Meridian thinks, in 16 seconds",
-    body: "Ads keep working for weeks after they run, each extra dollar on a channel buys a little less, and some sales " +
-      "would happen with no ads at all. Meridian measures all three from your weekly numbers, then suggests a better split " +
-      "of the same budget." });
+  SCREENS.home = SCREENS.home.replace("STEPS_COUNT", STEPS.length);
   var CHAPTERS = [];
   STEPS.forEach(function (s, k) { if (!k || STEPS[k - 1].chapter !== s.chapter) CHAPTERS.push(k); });
 
-  // ---------------- Tour engine ----------------
+  // ---------------- Tour engine (no timer: visitors move with Next and Back) ----------------
   var app = document.getElementById("app"), main = document.getElementById("app-main"), spot = document.getElementById("spot");
   var cap = document.getElementById("t-caption"), title = document.getElementById("t-title"), body = document.getElementById("t-body");
   var count = document.getElementById("t-count"), chap = document.getElementById("t-chapter"), bar = document.getElementById("t-progress");
-  var playBtn = document.getElementById("t-play"), nextBtn = document.getElementById("t-next"), skipBtn = document.getElementById("t-skip");
+  var nextBtn = document.getElementById("t-next"), skipBtn = document.getElementById("t-skip");
   var againBtn = document.getElementById("t-again"), nav = document.getElementById("chapters");
-  var small = window.matchMedia("(max-width: 860px)");
-  var i = 0, playing = !reduce, elapsed = 0, last = null, basePad = null, followUntil = 0;
+  var small = window.matchMedia("(max-width: 860px)"), wide = window.matchMedia("(min-width: 1200px)"), SIDE = 380;
+  var i = -1, basePad = null;  // i = -1 is the welcome page
 
   Object.keys(SCREENS).forEach(function (k) {
     var div = document.createElement("div");
     div.className = "screen"; div.dataset.screen = k; div.innerHTML = SCREENS[k];
     main.appendChild(div);
   });
-  // Sidebar: one link per chapter, so visitors can jump around.
-  CHAPTERS.forEach(function (k, n) {
-    var b = document.createElement("button");
+  // Sidebar: the welcome page, then one link per chapter.
+  [-1].concat(CHAPTERS).forEach(function (k, n) {
+    var b = document.createElement("button"), name = k < 0 ? "Welcome" : STEPS[k].chapter;
     b.type = "button"; b.className = "chap"; b.dataset.k = k;
-    b.innerHTML = '<span class="n">' + (n + 1) + "</span><span>" + esc(STEPS[k].chapter) + "</span>" +
-      (/GeoX/.test(STEPS[k].chapter) ? '<span class="new">NEW</span>' : "");
+    b.innerHTML = '<span class="n">' + (n + 1) + "</span><span>" + esc(name) + "</span>" +
+      (/GeoX/.test(name) ? '<span class="new">NEW</span>' : "");
     b.addEventListener("click", function () { go(k, true); });
     nav.appendChild(b);
   });
 
-  function stepMs(s) {
-    var words = (s.title + " " + s.body.replace(/<[^>]+>/g, "")).split(/\s+/).length;
-    return Math.max(s.screen === "how" ? 16500 : 6000, Math.min(16500, words * 280));
+  function setSpot(r, a, pad) {
+    spot.style.left = (r.left - a.left - pad) + "px"; spot.style.top = (r.top - a.top - pad) + "px";
+    spot.style.width = (r.width + pad * 2) + "px"; spot.style.height = (r.height + pad * 2) + "px";
   }
-  function place(scrollToo) {
+  function target() {
     var s = STEPS[i], scr = main.querySelector('.screen[data-screen="' + s.screen + '"]');
     var t = scr && scr.querySelector('[data-t="' + s.target + '"]');
-    if (!t || !t.offsetParent) t = scr;
+    return { scr: scr, t: t && t.offsetParent ? t : scr };
+  }
+  // Positions the caption above the part it explains and rings that part. Runs again whenever the layout moves.
+  function place(scrollToo) {
+    if (i < 0) return;
+    var x = target(), scr = x.scr, t = x.t;
+    if (ro && watched !== t) { if (watched) ro.unobserve(watched); ro.observe(t); watched = t; }
     if (basePad === null) basePad = parseFloat(getComputedStyle(main).paddingTop) || 16;
+    [].forEach.call(main.querySelectorAll(".screen > h3"), function (h) { h.style.marginBottom = ""; });
     main.style.paddingTop = basePad + "px";
-    var a = app.getBoundingClientRect(), m = main.getBoundingClientRect(), r = t.getBoundingClientRect(), pad = 6, gap = 12;
-    if (small.matches) {  // phones: the caption is a sheet fixed to the bottom; scroll the part to just under the top bar
-      [].forEach.call(main.querySelectorAll(".screen > h3"), function (h) { h.style.marginBottom = ""; });
+    var pad = 6, gap = 12, a, r;
+    if (small.matches) {  // phones: the caption is a sheet fixed to the bottom
       cap.style.top = cap.style.left = cap.style.width = "";
       main.style.paddingBottom = (cap.offsetHeight + 24) + "px";
-      spot.style.left = (r.left - a.left - pad) + "px"; spot.style.top = (r.top - a.top - pad) + "px";
-      spot.style.width = (r.width + pad * 2) + "px"; spot.style.height = (r.height + pad * 2) + "px";
-      if (scrollToo || Date.now() < followUntil) {
-        var bar0 = document.querySelector(".app-side").getBoundingClientRect().bottom;
-        if (Math.abs(r.top - bar0 - 14) > 4) window.scrollBy({ top: r.top - bar0 - 14, behavior: reduce ? "auto" : "smooth" });
+      a = app.getBoundingClientRect(); r = t.getBoundingClientRect();
+      setSpot(r, a, pad);
+      if (scrollToo) {
+        var barBottom = document.querySelector(".app-side").getBoundingClientRect().bottom;
+        window.scrollBy({ top: r.top - barBottom - 14, behavior: "auto" });
       }
       return;
     }
     main.style.paddingBottom = "";
-    var w = Math.min(620, m.width - 24);
+    if (wide.matches) {  // wide screens: the caption is a column to the right of the part it explains
+      a = app.getBoundingClientRect(); var mm = main.getBoundingClientRect();
+      if (scrollToo) { window.scrollBy({ top: t.getBoundingClientRect().top - 24, behavior: "auto" }); a = app.getBoundingClientRect(); }
+      r = t.getBoundingClientRect();
+      cap.style.width = SIDE + "px";
+      cap.style.left = (mm.right - a.left - SIDE - 28) + "px";
+      cap.style.top = Math.max(r.top - a.top - pad, mm.top - a.top + 16) + "px";
+      setSpot(r, a, pad);
+      return;
+    }
+    var m = main.getBoundingClientRect(), w = Math.min(620, m.width - 24);
     cap.style.width = w + "px";
+    a = app.getBoundingClientRect(); r = t.getBoundingClientRect();
+    var ch = cap.offsetHeight, top = r.top - a.top - pad - gap - ch;
     // The caption sits between the screen's heading and the part it explains; open up room there if needed.
     var hdr = t !== scr && scr.querySelector(":scope > h3");
-    [].forEach.call(main.querySelectorAll(".screen > h3"), function (h) { h.style.marginBottom = ""; });
-    var ch = cap.offsetHeight, top = r.top - a.top - pad - gap - ch;
     var floor = hdr ? hdr.getBoundingClientRect().bottom - a.top + 10 : m.top - a.top + 8;
     if (top < floor) {
       if (hdr) hdr.style.marginBottom = (parseFloat(getComputedStyle(hdr).marginBottom) + floor - top) + "px";
-      else main.style.paddingTop = (basePad + (floor - top)) + "px";
+      else main.style.paddingTop = (basePad + floor - top) + "px";
       a = app.getBoundingClientRect(); r = t.getBoundingClientRect(); top = r.top - a.top - pad - gap - ch;
     }
-    var left = Math.max(m.left - a.left + 12, Math.min(r.left - a.left, m.right - a.left - w - 12));
-    cap.style.top = top + "px"; cap.style.left = left + "px";
-    spot.style.left = (r.left - a.left - pad) + "px"; spot.style.top = (r.top - a.top - pad) + "px";
-    spot.style.width = (r.width + pad * 2) + "px"; spot.style.height = (r.height + pad * 2) + "px";
-    if (scrollToo || Date.now() < followUntil) {
-      var c = cap.getBoundingClientRect();
-      if (c.top < 0 || c.top > window.innerHeight * 0.5) window.scrollBy({ top: c.top - 16, behavior: reduce ? "auto" : "smooth" });
+    cap.style.top = top + "px";
+    cap.style.left = Math.max(m.left - a.left + 12, Math.min(r.left - a.left, m.right - a.left - w - 12)) + "px";
+    setSpot(r, a, pad);
+    if (scrollToo) {
+      var c = top + a.top;  // caption top in the viewport
+      if (c < 0 || c > window.innerHeight * 0.4) window.scrollBy({ top: c - 16, behavior: "auto" });
     }
   }
   function chapterEnd(k) { for (var j = k + 1; j < STEPS.length; j++) if (STEPS[j].chapter !== STEPS[k].chapter) return j; return STEPS.length; }
   function go(j, scrollToo) {
-    i = Math.max(0, Math.min(STEPS.length - 1, j)); elapsed = 0;
-    var s = STEPS[i];
+    i = Math.max(-1, Math.min(STEPS.length - 1, j));
+    var intro = i < 0, s = intro ? { screen: "home" } : STEPS[i];
     [].forEach.call(main.children, function (c) { c.classList.toggle("on", c.dataset.screen === s.screen); });
-    var start = 0; CHAPTERS.forEach(function (k) { if (k <= i) start = k; });
+    cap.hidden = spot.hidden = intro;
+    app.classList.toggle("touring", !intro);
+    var start = -1; CHAPTERS.forEach(function (k) { if (k <= i) start = k; });
     [].forEach.call(nav.children, function (b) {
-      var on = +b.dataset.k === start;
-      b.classList.toggle("on", on); b.classList.toggle("done", +b.dataset.k < start);
-      if (on) { b.setAttribute("aria-current", "step"); nav.scrollTo({ left: b.offsetLeft - 16, behavior: reduce ? "auto" : "smooth" }); }
+      var k = +b.dataset.k, on = k === start;
+      b.classList.toggle("on", on); b.classList.toggle("done", k < start);
+      if (on) { b.setAttribute("aria-current", "step"); nav.scrollTo({ left: b.offsetLeft - 16 }); }
       else b.removeAttribute("aria-current");
     });
+    if (history.replaceState) history.replaceState(null, "", intro ? location.pathname + location.search : "#step-" + (i + 1));
+    if (intro) {
+      main.style.paddingTop = main.style.paddingBottom = "";
+      if (scrollToo) window.scrollTo(0, 0);
+      return;
+    }
     chap.innerHTML = esc(s.chapter) + (/GeoX/.test(s.chapter) ? '<span class="new">NEW</span>' : "");
     count.textContent = "Step " + (i + 1) + " of " + STEPS.length;
     title.textContent = s.title; body.innerHTML = s.body;
     skipBtn.hidden = chapterEnd(i) >= STEPS.length || !!s.last;
-    nextBtn.hidden = !!s.last; againBtn.hidden = !s.last; playBtn.hidden = !!s.last;
-    bar.style.width = (i / STEPS.length * 100) + "%";
-    if (history.replaceState) history.replaceState(null, "", "#step-" + (i + 1));
-    if (scrollToo) followUntil = Date.now() + 1200;  // keep following while images and fades settle
-    requestAnimationFrame(function () { place(scrollToo); });
-    setTimeout(function () { place(false); }, 450);  // again after images and the fade-in settle
+    nextBtn.hidden = !!s.last; againBtn.hidden = !s.last;
+    bar.style.width = ((i + 1) / STEPS.length * 100) + "%";
+    place(scrollToo);
+    // Layout can still shift for a moment (scrollbar appearing, chart sizing), so place again once it settles.
+    var at = i;
+    requestAnimationFrame(function () { if (i === at) place(false); });
+    [120, 400].forEach(function (ms) { setTimeout(function () { if (i === at) place(false); }, ms); });
+    if (scrollToo) cap.focus({ preventScroll: true });
   }
-  function setPlaying(p) { playing = p; playBtn.textContent = p ? "Pause" : "Play"; last = null; }
-  function tick(now) {
-    if (playing && !document.hidden) {
-      if (last !== null) elapsed += now - last;
-      last = now;
-      var ms = stepMs(STEPS[i]);
-      bar.style.width = ((i + Math.min(1, elapsed / ms)) / STEPS.length * 100) + "%";
-      if (elapsed >= ms) { if (i < STEPS.length - 1) go(i + 1, true); else setPlaying(false); }
-    } else { last = null; }
-    requestAnimationFrame(tick);
+  // The motion graphic is same-origin: size its frame to its content so there is no empty band below it.
+  var motion = main.querySelector("iframe.motion");
+  function fitMotion() {
+    try { var d = motion.contentDocument; if (d && d.body) motion.style.height = d.body.scrollHeight + "px"; } catch (e) {}
   }
+  motion.addEventListener("load", function () {
+    fitMotion();
+    try { if ("ResizeObserver" in window) new ResizeObserver(fitMotion).observe(motion.contentDocument.body); } catch (e) {}
+  });
+  document.getElementById("t-start").addEventListener("click", function () { go(0, true); });
   nextBtn.addEventListener("click", function () { go(i + 1, true); });
   document.getElementById("t-back").addEventListener("click", function () { go(i - 1, true); });
   skipBtn.addEventListener("click", function () { go(chapterEnd(i), true); });
-  playBtn.addEventListener("click", function () { setPlaying(!playing); });
-  againBtn.addEventListener("click", function () { go(0, true); setPlaying(true); });
-  main.addEventListener("load", function () { place(false); }, true);  // a lazy chart image finished loading
+  againBtn.addEventListener("click", function () { go(-1, true); });
   document.addEventListener("keydown", function (e) {
     if (e.altKey || e.ctrlKey || e.metaKey) return;
     var tag = (e.target.tagName || "").toLowerCase();
     if (tag === "input" || tag === "textarea") return;
     if (e.key === "ArrowRight") { go(i + 1, true); e.preventDefault(); }
-    else if (e.key === "ArrowLeft") { go(i - 1, true); e.preventDefault(); }
-    else if (e.key === " " && tag !== "button" && tag !== "a") { setPlaying(!playing); e.preventDefault(); }
+    else if (e.key === "ArrowLeft" && i >= 0) { go(i - 1, true); e.preventDefault(); }
   });
+  // Re-place whenever anything moves: images loading, fonts, window size, the caption's own height.
+  var ro = "ResizeObserver" in window ? new ResizeObserver(function () { place(false); }) : null, watched = null;
+  if (ro) { ro.observe(main); ro.observe(cap); ro.observe(document.documentElement); }
   window.addEventListener("resize", function () { place(false); });
+  main.addEventListener("load", function () { place(false); }, true);
   window.addEventListener("hashchange", function () {
     var h = /^#step-(\d+)$/.exec(location.hash);
     if (h && +h[1] - 1 !== i) go(+h[1] - 1, true);
   });
   var m0 = /^#step-(\d+)$/.exec(location.hash);
-  setPlaying(!reduce);
-  go(m0 ? +m0[1] - 1 : 0, !!m0);
-  requestAnimationFrame(tick);
+  go(m0 ? +m0[1] - 1 : -1, !!m0);
 })();

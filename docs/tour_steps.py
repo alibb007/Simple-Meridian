@@ -41,8 +41,8 @@ def steps() -> list[dict]:
 
         dict(chapter="Step 1 · Data & model", page="step1", icon="table_view", title="Your data",
              body="Everything starts with one table, one row per week. It says how much the company spent on each "
-                  "channel (TV, Radio, Search…) and how much it sold that week. Click <b>Preview the table</b> to "
-                  "see the rows.",
+                  "channel (TV, Radio, Search…) and how much it sold that week. In the app, <b>Preview the "
+                  "table</b> opens the rows.",
              anchor="s1-data"),
         dict(chapter="Step 1 · Data & model", page="step1", icon="event", title="Which column is the date, and which is sales",
              body="Here you tell the app which column holds the week and which number you want to grow, such as "
@@ -59,7 +59,7 @@ def steps() -> list[dict]:
                   "the model doesn't give your ads credit for a sale that a discount caused.",
              anchor="s1-controls"),
         dict(chapter="Step 1 · Data & model", page="step1", icon="task_alt", title="Fit the model, then check it",
-             body="Pressing <b>Fit model</b> on the right makes Meridian learn from the table; <b>Quick check</b> "
+             body="In the app, <b>Fit model</b> makes Meridian learn from the table; <b>Quick check</b> "
                   "takes about 30 seconds. The demo is already fitted, so this box shows the result. <b>0.97</b> "
                   "means the model explains 97% of the week-to-week ups and downs. <b>Converged</b> means it "
                   "finished learning properly.",
@@ -76,7 +76,7 @@ def steps() -> list[dict]:
         out.append(dict(chapter="Meridian's own charts", page="report", icon=c["icon"], title=c["title"],
                         body=f"{c['what']} {c['read']}", anchor=f"mr-{c['id']}"))
     out.append(dict(chapter="Step 3 · Budget plan", page="step3", icon="savings", title="A better budget",
-                    body="Press <b>Optimize budget</b>. Meridian keeps the same total and moves money from channels "
+                    body="In the app, <b>Optimize budget</b> keeps the same total and moves money from channels "
                          "that are full to ones that still pay back, never changing a channel by more than ±30%. "
                          "Blue bars mean spend more; red bars mean spend less.",
                     anchor="s3-settings"))
@@ -86,8 +86,8 @@ def steps() -> list[dict]:
     out += [
         dict(chapter="GeoX (Lift test)", page="geox", icon="science", title="New: GeoX (Lift test), a real experiment",
              body="A model learns from the past, so it can be fooled. A <b>lift test</b> is an experiment: run ads in "
-                  "some regions, keep them off in similar ones, and measure the gap. Press <b>Pick test regions</b>, "
-                  "then <b>Run the test and measure</b>. GeoX has to find a number we hid in the data.",
+                  "some regions, keep them off in similar ones, and measure the gap. In the app, you press "
+                  "<b>Pick test regions</b>, then <b>Run the test and measure</b>. GeoX has to find a number we hid in the data.",
              anchor="gx-plan"),
         dict(chapter="Your turn", page="step1", icon="rocket_launch", title="You're ready for your own data",
              body="Click <b>Change data</b>, then upload a spreadsheet with one row per week: a date, your sales and "

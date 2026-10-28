@@ -26,8 +26,8 @@ MODEL_CHARTS = [
          title="Share of sales",
          what="The whole circle is all your sales, split in two: the share your ads brought in (all channels "
               "together) and the baseline that would have happened anyway.",
-         read="The bigger the ads slice, the more your sales depend on marketing. Many businesses have a big "
-              "baseline, because loyal customers buy with or without ads."),
+         read="The bigger the ads slice, the more your sales depend on marketing. A big baseline means many "
+              "customers buy with or without ads."),
     dict(id="spend_outcome", group="Where did sales come from?", icon="balance",
          title="Share of money vs. share of sales",
          what="For each channel, one bar is its share of the ad budget and the other is its share of the sales "
