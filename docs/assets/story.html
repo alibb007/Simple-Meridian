@@ -30,7 +30,7 @@
   .lbl { font-size: 15px; fill: var(--ink); font-weight: 600; }
   .sub { font-size: 13px; fill: #475467; font-weight: 500; }
   .big { font-family: "Red Hat Display", system-ui, sans-serif; font-weight: 800; }
-  @media (max-width: 560px) { .cap { font-size: 15px; } .cap small { font-size: 12.5px; } }
+  @media (max-width: 600px) { .bar { flex-wrap: wrap; } .cap { flex-basis: 100%; font-size: 15px; } .cap small { font-size: 12.5px; } }
 </style>
 </head>
 <body>
@@ -74,7 +74,7 @@
     ["Because of that", "Now they can see what each $1 brought back.", best.c + " returned $" + best.v.toFixed(2) + " for every $1. " + worst.c + " returned $" + worst.v.toFixed(2) + "."],
     ["Until finally", "They move money to the channels that still pay back.", "Same " + BUDGET + " budget, " + M(GAIN) + " more sales from ads in a year (+" + PCT.toFixed(1) + "%)."]
   ];
-  var N = SCENES.length, DUR = 7500;
+  var N = SCENES.length, DUR = 10000;  // each scene holds 10 s
 
   var NS = "http://www.w3.org/2000/svg", stage = document.getElementById("stage");
   function el(name, attrs, parent, text) {
@@ -86,8 +86,6 @@
   }
   var ink = function (a) { a.stroke = INK; a["stroke-width"] = a["stroke-width"] || 3.5; a["stroke-linejoin"] = "round"; return a; };
   var ease = function (t) { t = Math.max(0, Math.min(1, t)); return t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; };
-  var pop = function (t) { t = Math.max(0, Math.min(1, t)); return t === 0 ? 0 : 1 + 2.2 * Math.pow(t - 1, 3) + 1.2 * Math.pow(t - 1, 2); };
-  function popAt(g, cx, cy, t) { var k = pop(t); g.setAttribute("transform", "translate(" + cx + " " + cy + ") scale(" + k + ") translate(" + (-cx) + " " + (-cy) + ")"); g.setAttribute("opacity", t > 0 ? 1 : 0); }
   // A speech bubble: rounded box with a tail, dark ink, light text.
   function bubble(parent, x, y, w, h, tailX, tailY, lines, accent) {
     var g = el("g", { opacity: 0 }, parent);
@@ -163,9 +161,12 @@
   for (var r = 0; r < 7; r++) for (var c = 0; c < 4; c++) el("rect", { x: 18 + c * 46, y: 22 + r * 27, width: 38, height: 15, rx: 4, fill: c === 3 ? "#C9D8FF" : "#E4E7EC" }, sheet);
   el("text", { x: 70, y: 300, class: "lbl" }, g4, "156 weeks of spend and sales");
   var box = el("g", {}, g4);
-  el("rect", ink({ x: 400, y: 70, width: 230, height: 170, rx: 24, fill: "#6D4AE8" }), box);
-  el("text", { x: 515, y: 148, "text-anchor": "middle", class: "big", "font-size": 26, fill: "#fff" }, box, "Google");
-  el("text", { x: 515, y: 180, "text-anchor": "middle", class: "big", "font-size": 26, fill: "#fff" }, box, "Meridian");
+  el("rect", ink({ x: 410, y: 60, width: 210, height: 190, rx: 28, fill: "#fff" }), box);
+  var mark = el("g", { transform: "translate(425 75) scale(0.35)" }, box);
+  var mkLines = [["315", "170", "268", "330", "#AECBFA", 58], ["166", "168", "262", "334", "#4285F4", 96], ["328", "168", "424", "334", "#1967D2", 96]].map(function (l) {
+    return el("line", { x1: l[0], y1: l[1], x2: l[2], y2: l[3], stroke: l[4], "stroke-width": l[5], "stroke-linecap": "round", "stroke-dasharray": 200, "stroke-dashoffset": 200 }, mark);
+  });
+  var mkDot = el("circle", { cx: 87, cy: 331, r: 54, fill: "#174EA6", opacity: 0 }, mark);
   var split = el("g", { opacity: 0 }, g4);
   el("text", { x: 690, y: 94, class: "lbl" }, split, "Would have sold anyway · " + Math.round((1 - SHARE) * 100) + "%");
   var baseBar = el("rect", ink({ x: 690, y: 104, width: 1, height: 48, rx: 10, fill: "#B8C2D6" }), split);
@@ -203,36 +204,46 @@
   var num = el("text", { x: 880, y: 162, "text-anchor": "middle", class: "big", "font-size": 52, fill: INK }, badge, "+0.0%");
   el("text", { x: 880, y: 194, "text-anchor": "middle", class: "lbl" }, badge, "more sales from ads");
 
+  // One curve for everything (ease-out), short staggers, a gentle rise for each entrance, a cross-fade between scenes.
+  var out = function (x) { x = Math.max(0, Math.min(1, x)); return 1 - Math.pow(1 - x, 3); };
+  function rise(g, ms, at, dur) { var k = out((ms - at) / (dur || 450)); g.setAttribute("opacity", k); g.setAttribute("transform", "translate(0 " + ((1 - k) * 14).toFixed(1) + ")"); }
   function render(s, p) {
-    G.forEach(function (g, i) { g.setAttribute("opacity", i === s ? Math.min(1, Math.min(p, 1 - p) * 12 + (reduce || paused ? 1 : 0)) : 0); });
+    var ms = p * DUR, fadeIn = out(ms / 450), fadeOut = 1 - out((ms - (DUR - 450)) / 450), still = reduce || paused;
+    G.forEach(function (g, i) {
+      if (i !== s) { g.setAttribute("opacity", 0); return; }
+      var k = still ? 1 : Math.min(fadeIn, fadeOut);
+      g.setAttribute("opacity", k); g.setAttribute("transform", "translate(0 " + (still ? 0 : ((1 - fadeIn) * 10 - (1 - fadeOut) * 8)).toFixed(1) + ")");
+    });
     if (s === 0) {
-      popAt(b1.g, b1.cx, b1.cy, (p - .06) / .12);
-      signs.forEach(function (x, i) { popAt(x.g, x.cx, x.cy, (p - .22 - i * .07) / .12); });
+      rise(b1.g, ms, 300, 500);
+      signs.forEach(function (x, i) { rise(x.g, ms, 900 + i * 80); });
     } else if (s === 1) {
-      var t = ease(p / .55);
+      var t = ease((ms - 300) / 3500);
       path.setAttribute("stroke-dashoffset", plen * (1 - t));
-      qs.forEach(function (q) { popAt(q.g, q.cx, q.cy, (t - q.at) * 6); });
+      qs.forEach(function (q) { rise(q.g, ms, 300 + q.at * 3500, 400); });
     } else if (s === 2) {
-      popAt(b3.g, b3.cx, b3.cy, (p - .08) / .14);
-      slots.forEach(function (x, i) { popAt(x.g, x.cx, x.cy, (p - .32 - i * .06) / .12); });
+      rise(b3.g, ms, 300, 500);
+      slots.forEach(function (x, i) { rise(x.g, ms, 1100 + i * 80); });
     } else if (s === 3) {
-      var u = ease((p - .08) / .32);
-      sheet.setAttribute("transform", "translate(" + (60 + u * 300) + " " + (40 + u * 40) + ") scale(" + (1 - u * .55) + ")");
-      sheet.setAttribute("opacity", 1 - ease((p - .36) / .06));
-      split.setAttribute("opacity", ease((p - .46) / .08));
-      baseBar.setAttribute("width", Math.max(1, 340 * (1 - SHARE) * ease((p - .5) / .18)));
-      adsBar.setAttribute("width", Math.max(1, 340 * SHARE * ease((p - .6) / .22)));
+      var u = ease((ms - 400) / 1200);
+      sheet.setAttribute("transform", "translate(" + (60 + u * 320) + " " + (40 + u * 50) + ") scale(" + (1 - u * .6) + ")");
+      sheet.setAttribute("opacity", 1 - out((ms - 1450) / 250));
+      mkLines.forEach(function (l, i) { l.setAttribute("stroke-dashoffset", 200 * (1 - out((ms - 1500 - [250, 0, 400][i]) / 600))); });
+      mkDot.setAttribute("opacity", out((ms - 1400) / 300));
+      rise(split, ms, 2300, 450);
+      baseBar.setAttribute("width", Math.max(1, 340 * (1 - SHARE) * ease((ms - 2500) / 800)));
+      adsBar.setAttribute("width", Math.max(1, 340 * SHARE * ease((ms - 2800) / 1000)));
     } else if (s === 4) {
       rbars.forEach(function (x, i) {
-        var h = x.h * ease((p - .08 - i * .07) / .28);
+        var h = x.h * ease((ms - 400 - i * 80) / 900);
         x.b.setAttribute("y", base5 - h); x.b.setAttribute("height", h);
-        x.t.setAttribute("y", base5 - h - 12); x.t.setAttribute("opacity", ease((p - .3 - i * .07) / .1));
+        x.t.setAttribute("y", base5 - h - 12); x.t.setAttribute("opacity", out((ms - 1300 - i * 80) / 300));
       });
     } else if (s === 5) {
-      var t2 = ease((p - .1) / .45);
+      var t2 = ease((ms - 400) / 1800);
       pb.forEach(function (x) { var h = x.from + (x.to - x.from) * t2; x.b.setAttribute("y", x.base - h); x.b.setAttribute("height", h); });
-      popAt(badge, 880, 160, (p - .42) / .16);
-      num.textContent = "+" + (PCT * ease((p - .45) / .25)).toFixed(1) + "%";
+      rise(badge, ms, 2400, 500);
+      num.textContent = "+" + (PCT * out((ms - 2400) / 1200)).toFixed(1) + "%";
     }
   }
 
@@ -264,7 +275,7 @@
   }
   pp.addEventListener("click", function () { setPaused(!paused); });
   // A clicked scene starts just after its fade-in and plays from there.
-  function jump(i) { t = i * DUR + (reduce ? DUR - 1 : DUR * 0.09); setPaused(false); draw(); }
+  function jump(i) { t = i * DUR + (reduce ? DUR - 1 : 0); setPaused(false); draw(); }
   function draw() { var s = Math.floor(t / DUR) % N, p = (t % DUR) / DUR; setCaption(s, p); render(s, p); }
   if (reduce) { pp.hidden = true; jump(0); return; }  // No motion: each scene shows its last frame; the dots switch scenes.
   function tick(now) {

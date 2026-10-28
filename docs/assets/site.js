@@ -186,27 +186,26 @@
 
   var SCREENS = {
     home: '<div class="intro">' +
-      '<section class="hero" aria-labelledby="hero-h">' +
       '<svg class="mark" viewBox="0 0 512 512" role="img" aria-label="Simple Meridian logo">' +
       '<line class="mk-mid" x1="315" y1="170" x2="268" y2="330" stroke="#AECBFA" stroke-width="58" stroke-linecap="round"/>' +
       '<line class="mk-a" x1="166" y1="168" x2="262" y2="334" stroke="#4285F4" stroke-width="96" stroke-linecap="round"/>' +
       '<line class="mk-b" x1="328" y1="168" x2="424" y2="334" stroke="#1967D2" stroke-width="96" stroke-linecap="round"/>' +
       '<circle class="mk-dot" cx="87" cy="331" r="54" fill="#174EA6"/></svg>' +
-      '<div class="kicker">Google Meridian, made simple</div>' +
-      '<p class="pre">Last year, one shop spent</p>' +
-      '<h1 id="hero-h"><span class="big">' + money(T.budget_before) + '</span><span class="q">on ads. Which part worked?</span></h1>' +
-      '<div class="chans">' + D.plan.slice().sort(function (a, b) { return b.current_spend - a.current_spend; }).map(function (r) {
-        return '<span style="--c:' + COLOR[r.channel] + '">' + esc(r.channel) + " " + money(r.current_spend) + "</span>";
-      }).join("") + "</div>" +
-      '<button class="btn btn-gold btn-big" id="t-start" type="button">' +
-      '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>Start the guided tour</button>' +
+      "<h1>Google Meridian,<br>made simple.</h1>" +
+      '<p class="lede">See which ads bring in your sales and where the next dollar should go. A guided tour on a made-up shop, ' +
+      "then run it on your own data.</p>" +
+      '<div class="starts"><button class="btn pill pill-dark" id="t-start" type="button">Start the Simple Meridian guided tour</button>' +
+      '<button class="btn pill pill-light" id="t-story" type="button">' +
+      '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>Start the story</button></div>' +
       '<span class="startnote">STEPS_COUNT steps on made-up data · use Next and Back, or the arrow keys</span>' +
-      '<div class="by"><img src="assets/ali.png" alt="" width="40" height="40"><span>Built by <b>Ali Barfi Bafghi</b></span></div>' +
-      "</section>" +
-      '<iframe class="motion" src="assets/story.html" title="Animated story: a shop works out where its ad budget should go"></iframe>' +
+      '<div class="by"><img src="assets/ali.png" alt="" width="52" height="52"><span>Built by <b>Ali Barfi Bafghi</b></span></div>' +
       '<p class="vnote">Updated 27 Oct 2026. I built the <a href="https://github.com/alibb007/Simple-Meridian/tree/6bde9f5" target="_blank" ' +
       'rel="noopener noreferrer">first release of Simple Meridian</a> in April 2025 on Meridian 1.0.6: upload, fit, charts and a budget ' +
       "optimizer. Today it runs Meridian 2.1.0 and adds GeoX lift tests, this guided tour and a new design.</p></div>",
+    story: '<div class="storypage"><div class="kick">The story · 60 seconds</div>' +
+      '<iframe class="motion" data-src="assets/story.html" title="Animated story: a shop works out where its ad budget should go"></iframe>' +
+      '<div class="starts"><button class="btn pill pill-dark" id="t-start2" type="button">Start the Simple Meridian guided tour</button>' +
+      '<button class="btn pill pill-light" id="t-home" type="button">Back to the start</button></div></div>',
     upload: '<div class="kick">Step 1 of 3</div><h3>Data &amp; model</h3>' +
       '<div class="startcards" data-t="s1-upload">' +
       '<div class="box startcard hot"><span class="hotchip">Start here</span><div class="boxh">Upload your file</div>' +
@@ -521,20 +520,21 @@
   function chapterEnd(k) { for (var j = k + 1; j < STEPS.length; j++) if (STEPS[j].chapter !== STEPS[k].chapter) return j; return STEPS.length; }
   function go(j, scrollToo) {
     var from = i;
-    i = Math.max(-1, Math.min(STEPS.length - 1, j));
-    var intro = i < 0, s = intro ? { screen: "home" } : STEPS[i];
+    i = Math.max(-2, Math.min(STEPS.length - 1, j));
+    var intro = i < 0, s = intro ? { screen: i === -2 ? "story" : "home" } : STEPS[i];
+    if (i === -2) { var fr = main.querySelector(".storypage iframe"); if (!fr.src) fr.src = fr.dataset.src; }
     [].forEach.call(main.children, function (c) { c.classList.toggle("on", c.dataset.screen === s.screen); });
     drawCharts(main.querySelector('.screen[data-screen="' + s.screen + '"]'));
     cap.hidden = spot.hidden = intro;
     app.classList.toggle("touring", !intro);
-    var start = -1; CHAPTERS.forEach(function (k) { if (k <= i) start = k; });
+    var start = -1; CHAPTERS.forEach(function (k) { if (k <= i) start = k; });  // the story counts as Welcome
     [].forEach.call(nav.children, function (b) {
       var k = +b.dataset.k, on = k === start;
       b.classList.toggle("on", on); b.classList.toggle("done", k < start);
       if (on) { b.setAttribute("aria-current", "step"); nav.scrollTo({ left: b.offsetLeft - 16 }); }
       else b.removeAttribute("aria-current");
     });
-    if (history.replaceState) history.replaceState(null, "", intro ? location.pathname + location.search : "#step-" + (i + 1));
+    if (history.replaceState) history.replaceState(null, "", i === -2 ? "#story" : intro ? location.pathname + location.search : "#step-" + (i + 1));
     if (intro) {
       main.style.paddingTop = main.style.paddingBottom = "";
       if (scrollToo) window.scrollTo(0, 0);
@@ -555,7 +555,7 @@
     if (scrollToo) cap.focus({ preventScroll: true });
   }
   // The motion graphic is same-origin: size its frame to its content so there is no empty band below it.
-  var motion = main.querySelector("iframe.motion");
+  var motion = main.querySelector(".storypage iframe.motion");
   function fitMotion() {
     try { var d = motion.contentDocument; if (d && d.body) motion.style.height = d.body.scrollHeight + "px"; } catch (e) {}
   }
@@ -563,7 +563,11 @@
     fitMotion();
     try { if ("ResizeObserver" in window) new ResizeObserver(fitMotion).observe(motion.contentDocument.body); } catch (e) {}
   });
-  document.getElementById("t-start").addEventListener("click", function () { go(0, true); if (!CHART_IMAGES) loadCharts(); });
+  var startTour = function () { go(0, true); if (!CHART_IMAGES) loadCharts(); };
+  document.getElementById("t-start").addEventListener("click", startTour);
+  document.getElementById("t-start2").addEventListener("click", startTour);
+  document.getElementById("t-story").addEventListener("click", function () { go(-2, true); });
+  document.getElementById("t-home").addEventListener("click", function () { go(-1, true); });
   nextBtn.addEventListener("click", function () { go(i + 1, true); });
   document.getElementById("t-back").addEventListener("click", function () { go(i - 1, true); });
   skipBtn.addEventListener("click", function () { go(chapterEnd(i), true); });
@@ -573,7 +577,7 @@
     var tag = (e.target.tagName || "").toLowerCase();
     if (tag === "input" || tag === "textarea") return;
     if (e.key === "ArrowRight") { go(i + 1, true); e.preventDefault(); }
-    else if (e.key === "ArrowLeft" && i >= 0) { go(i - 1, true); e.preventDefault(); }
+    else if (e.key === "ArrowLeft" && i >= 0) { go(i === 0 ? -1 : i - 1, true); e.preventDefault(); }
   });
   // Re-place whenever anything moves: images loading, fonts, window size, the caption's own height.
   var ro = "ResizeObserver" in window ? new ResizeObserver(function () { place(false); }) : null, watched = null;
@@ -585,5 +589,5 @@
     if (h && +h[1] - 1 !== i) go(+h[1] - 1, true);
   });
   var m0 = /^#step-(\d+)$/.exec(location.hash);
-  go(m0 ? +m0[1] - 1 : -1, !!m0);
+  go(location.hash === "#story" ? -2 : m0 ? +m0[1] - 1 : -1, !!m0);
 })();
