@@ -201,7 +201,13 @@ def _use_as_prior(r: dict, default_channel: str):
                 channels = summary[~summary.is_total].channel.tolist()
             except Exception:
                 pass
-        mean, sd = G.prior_from_iroas(roi["mean"], roi["sd"])
+        prior = G.prior_from_iroas(roi["mean"], roi["sd"])
+        if prior is None:
+            ui.callout(f"This test measured <b>${roi['mean']:.2f}</b> back per $1, so there is no positive return "
+                       "to use as a prior. Meridian's ROI prior must be above zero; keep its default for this channel.",
+                       "info")
+            return
+        mean, sd = prior
         c1, c2 = st.columns([1, 2], vertical_alignment="bottom")
         ch = c1.selectbox("Channel this test measured", channels,
                           index=channels.index(default_channel) if default_channel in channels else 0, key="gx_prior_ch")
@@ -234,14 +240,20 @@ def _own_tab():
             st.download_button("Download the sample as CSV", G.sample_geo_data().to_csv(index=False),
                                "geox_sample.csv", "text/csv", icon=":material/download:", on_click="ignore")
         return
-    df = pd.read_csv(file)
-    df.columns = [c.lower() for c in df.columns]
+    try:
+        df = pd.read_csv(file)
+    except Exception as e:
+        st.error(f"Could not read {file.name} as a CSV file: {e}")
+        return
+    df.columns = [str(c).lower() for c in df.columns]
     errors = G.validate_geo_data(df)
     if errors:
         for e in errors:
             st.error(e)
         return
-    df["date"] = pd.to_datetime(df["date"])
+    df["date"] = pd.to_datetime(df["date"], format="mixed")
+    df["conversions"] = pd.to_numeric(df["conversions"])
+    df["spend"] = pd.to_numeric(df["spend"])
     regions = sorted(df["location"].astype(str).unique())
     df["location"] = df["location"].astype(str)
     dates = sorted(df["date"].dt.date.unique())
@@ -260,11 +272,12 @@ def _own_tab():
             try:
                 with M.heavy_job(on_wait=lambda: st.info("Another job is running. Waiting for a free slot…")):
                     design = G.manual_design(df, treatment, start, days)
-                    st.session_state.gx_own = (G.analyze_test(df, design, start, end), start)
+                    st.session_state.gx_own = (G.analyze_test(df, design, start, end), start, file.file_id)
             except Exception as e:
                 st.error(f"GeoX could not analyze this test: {e}")
-    if st.session_state.get("gx_own"):
-        result, start = st.session_state.gx_own
+    own = st.session_state.get("gx_own")
+    if own and own[2] == file.file_id:  # results belong to this file, not one uploaded earlier
+        result, start, _ = own
         _results(result, start)
         _use_as_prior(result, default_channel="")
 

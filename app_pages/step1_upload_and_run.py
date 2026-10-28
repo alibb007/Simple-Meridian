@@ -106,9 +106,9 @@ def _start_panel():
             )
     with c2:
         with st.expander("Already fitted a model? Open the file", icon=":material/folder_open:"):
-            model_loader("loader_step1")
-            if has_model():
-                ui.go_to("step2")
+            # Go to Insights only right after a file loads. Checking has_model() on every render here
+            # would bounce "Change data" (no data, model kept) away from this upload screen.
+            model_loader("loader_step1", then="step2")
 
 
 def _data_card(df: pd.DataFrame):
@@ -286,15 +286,18 @@ def _model_ready():
         st.markdown(f'<div style="display:flex;gap:.7rem;align-items:center">{ui.badge("task_alt", "green", 40)}'
                     '<span style="font-family:var(--display);font-weight:800;font-size:1.25rem">Model ready</span></div>',
                     unsafe_allow_html=True)
-        ok = (rhat or 0) < 1.2
+        checked = rhat is not None and rhat == rhat  # None or NaN: R-hat could not be computed
+        ok = checked and rhat < 1.2
         ui.tiles([
             dict(label="Fit (R²)", value=f"{r2:.2f}" if r2 is not None else "–", icon="target", accent="blue",
                  detail="share of weekly variation explained"),
             dict(label="Error (MAPE)", value=f"{mape * 100:.1f}%" if mape is not None else "–", icon="straighten",
                  accent="violet", detail="average miss per week"),
-            dict(label="Convergence (R-hat)", value=f"{rhat:.2f}" if rhat is not None else "–",
-                 icon="check_circle" if ok else "error", accent="green" if ok else "rose",
-                 chip="Converged" if ok else "Fit again", direction="up" if ok else "down"),
+            dict(label="Convergence (R-hat)", value=f"{rhat:.2f}" if checked else "–",
+                 icon="check_circle" if ok else "help" if not checked else "error",
+                 accent="green" if ok else "amber" if not checked else "rose",
+                 chip="Converged" if ok else "Not checked" if not checked else "Fit again",
+                 direction="up" if ok else "down"),
             dict(label="Fit time", value=f"{elapsed / 60:.1f} min" if elapsed else "Loaded", icon="timer",
                  accent="amber", detail=info.get("preset") or info.get("source", "")),
         ])

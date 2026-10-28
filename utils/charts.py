@@ -10,7 +10,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-from utils.ui import BAD, BORDER, FONT_BODY, FONT_DISPLAY, GRID, INK, MUTED, PALETTE, PRIMARY, SURFACE
+from utils.ui import BAD, BORDER, FONT_BODY, FONT_DISPLAY, GRID, INK, MUTED, PALETTE, PRIMARY, SURFACE, money
 
 BASELINE = "#B8C2D6"
 UP, DOWN = "#2A78D6", "#E34948"  # diverging pair: spend more / spend less
@@ -95,7 +95,7 @@ def contribution_donut(baseline: float, summary: pd.DataFrame, colors: dict) -> 
         hovertemplate="<b>%{label}</b><br>$%{value:,.0f}<br>%{percent}<extra></extra>",
     ))
     total = sum(values)
-    fig.add_annotation(text=f"<b>${total / 1e6:,.0f}M</b><br><span style='font-size:12px;color:{MUTED}'>modeled revenue</span>",
+    fig.add_annotation(text=f"<b>{money(total)}</b><br><span style='font-size:12px;color:{MUTED}'>modeled revenue</span>",
                        showarrow=False, font=dict(family=FONT_DISPLAY, size=22, color=INK))
     _layout(fig, height=380, legend=True)
     fig.update_layout(legend=dict(orientation="v", x=1.02, y=0.5, yanchor="middle"))

@@ -154,8 +154,8 @@ def model_download_button(key: str):
     )
 
 
-def model_loader(key: str):
-    """Upload a saved model file."""
+def model_loader(key: str, then: str | None = None):
+    """Upload a saved model file. `then`: page to open right after a file loads (default: stay here)."""
     file = st.file_uploader(
         "Open a saved model",
         type=["binpb", "pkl"],
@@ -180,6 +180,8 @@ def model_loader(key: str):
                 return
         st.session_state[f"{key}_loaded"] = file.file_id
         set_model(mmm, file.name)
+        if then:
+            ui.go_to(then)
         st.rerun()
 
 

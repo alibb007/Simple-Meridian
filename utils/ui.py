@@ -384,7 +384,7 @@ def step_state(page: str) -> str:
 def sidebar(meridian_version: str | None):
     with st.sidebar:
         st.markdown(f'<div class="sm-brand">{logo(40)}<div><b>Simple Meridian</b>'
-                    f'<span>Google Meridian, made simple</span></div></div>', unsafe_allow_html=True)
+                    f'<span>Google Meridian, in plain words</span></div></div>', unsafe_allow_html=True)
         st.markdown('<div class="sm-label">Workflow</div>', unsafe_allow_html=True)
         for page, label, ic, desc in STEPS:
             state = step_state(page)

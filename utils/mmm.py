@@ -186,11 +186,13 @@ def validate(df: pd.DataFrame, cfg: ModelConfig) -> tuple[list[str], list[str]]:
     else:
         if dates.duplicated().any():
             errors.append(f"`{cfg.date_col}` has repeated dates. This app models national data: one row per period.")
-        gaps = dates.sort_values().diff().dropna().dt.days
-        if len(gaps) and gaps.nunique() > 1:
+        # A regular calendar step (weekly, monthly...) passes even though months differ in length.
+        ordered = pd.DatetimeIndex(dates.sort_values())
+        freq = pd.infer_freq(ordered) if len(ordered) >= 3 else None
+        if len(ordered) >= 3 and freq is None:
             errors.append("Dates are not evenly spaced. Meridian needs one row per week (or other fixed interval) with no gaps.")
-        elif len(gaps) and gaps.iloc[0] != 7:
-            notes.append(f"Rows are {int(gaps.iloc[0])} days apart. Meridian is designed for weekly data.")
+        elif freq and not freq.startswith("W") and freq != "7D":
+            notes.append("Rows are not weekly. Meridian is designed for weekly data.")
         if len(dates) < 52:
             notes.append(f"Only {len(dates)} periods. Two to three years of weekly data gives far more stable results.")
 
@@ -287,6 +289,11 @@ class heavy_job:
         return False
 
 
+def usable_priors(roi_priors: dict, channels: list[str]) -> dict:
+    """Priors for channels in the model with a positive mean and sd (a LogNormal needs both)."""
+    return {c: (m, s) for c, (m, s) in (roi_priors or {}).items() if c in channels and m > 0 and s > 0}
+
+
 def roi_prior(channels: list[str], roi_priors: dict):
     """Meridian's default ROI prior, replaced by LogNormal(mean, sd) for calibrated channels."""
     from meridian import backend, constants
@@ -312,7 +319,7 @@ def fit(input_data, cfg: ModelConfig, on_stage=None):
     stage("Building model")
     spec_args = dict(max_lag=cfg.max_lag)
     channels = [str(c) for c in input_data.get_all_paid_channels()]
-    priors = {c: v for c, v in (cfg.roi_priors or {}).items() if c in channels}
+    priors = usable_priors(cfg.roi_priors, channels)
     if priors:
         stage("Using lift-test ROI priors for " + ", ".join(priors))
         spec_args["prior"] = roi_prior(channels, priors)

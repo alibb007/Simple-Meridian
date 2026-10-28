@@ -40,7 +40,25 @@ def test_pages_with_demo_model():
         assert not at.exception, f"{page}: {at.exception}"
 
 
+def test_change_data_keeps_step1():
+    """With a model but no data ("Change data" after a fit), step 1 shows the upload screen."""
+    at = _app("step1", demo=True)
+    at.session_state["data"] = None
+    at.run()
+    assert not at.exception, at.exception
+    assert at.session_state["page"] == "step1"
+    assert any(b.label == "Load sample data" for b in at.button)
+
+
+def test_unknown_rhat_is_not_called_converged():
+    at = _app("step1", demo=True)  # the demo's model_info has no max_rhat
+    assert not at.exception, at.exception
+    html = " ".join(m.value for m in at.markdown)
+    assert "Not checked" in html and "Converged" not in html
+
+
 if __name__ == "__main__":
-    for t in (test_pages_without_model, test_pages_with_demo_model):
+    for t in (test_pages_without_model, test_pages_with_demo_model, test_change_data_keeps_step1,
+              test_unknown_rhat_is_not_called_converged):
         t()
         print("ok", t.__name__)

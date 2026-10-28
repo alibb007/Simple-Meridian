@@ -71,10 +71,11 @@
   var M = function (x) { var v = x * SCALE; return v >= 1e6 ? "$" + (v / 1e6).toFixed(2) + "M" : "$" + Math.round(v / 1e3) + "K"; };
   var BUDGET = M(T.budget_before), GAIN = T.outcome_after - T.outcome_before, PCT = GAIN / T.outcome_before * 100;
   var best = ROI[0], worst = ROI[ROI.length - 1];
-  // Budget change per channel in the plan, biggest raise first. The plan never moves a channel more than ±30%.
+  // Budget change per channel in the plan, biggest raise first. The caption reads its numbers from here too.
   var CHG = PLAN.map(function (r) { return { c: r.channel, pct: (r.optimized_spend / r.current_spend - 1) * 100 }; })
                 .sort(function (a, b) { return b.pct - a.pct; });
   var UP = CHG[0].c + " and " + CHG[1].c, DOWN = CHG[CHG.length - 1].c + " and " + CHG[CHG.length - 2].c;
+  var RAISES = "+" + Math.round(CHG[0].pct) + "% and +" + Math.round(CHG[1].pct) + "%";
   var INK = "#0B1B3F";
 
   // Pixar story spine: once upon a time, every day, until one day, because of that (twice), until finally.
@@ -84,7 +85,7 @@
     ["Until one day", "The boss asked the question nobody wanted.", "Next year's budget is the same " + BUDGET + ". Where should it go?"],
     ["Because of that", "They stopped guessing and used Google Meridian!", "Another year on gut feel means another " + BUDGET + " spent blind. Meridian turns 156 weeks of numbers into answers."],
     ["Because of that", "For the first time, the answers were clear.", best.c + ", the smallest budget, returned $" + best.v.toFixed(2) + " for every $1. " + worst.c + " returned $" + worst.v.toFixed(2) + "."],
-    ["Until finally", "They moved the money, and sales went up.", UP + " got 30% more, the most the plan allows. " + DOWN + " got less. Same " + BUDGET + " budget, " + M(GAIN) + " more sales a year."],
+    ["Until finally", "They moved the money, and sales went up.", UP + " got the biggest raises (" + RAISES + "). " + DOWN + " got less. Same " + BUDGET + " budget, " + M(GAIN) + " more sales a year."],
     ["And now", "Now it's your turn to try it.", "Take the guided tour, then run Simple Meridian on your own weekly numbers. It's free and runs on your computer."]
   ];
   var N = SCENES.length, DUR = 14000;  // each scene holds 14 s

@@ -136,6 +136,7 @@ def analyze_test(df: pd.DataFrame, design, start, end) -> dict:
 
 
 def validate_geo_data(df: pd.DataFrame) -> list[str]:
+    """Plain-language problems with an uploaded geo test file (lowercase column names expected)."""
     errors = []
     need = {"date", "location", "conversions", "spend"}
     missing = need - set(c.lower() for c in df.columns)
@@ -144,9 +145,21 @@ def validate_geo_data(df: pd.DataFrame) -> list[str]:
         return errors
     if df["location"].nunique() < 10:
         errors.append("GeoX needs at least 10 regions to build matched groups.")
+    bad_dates = int(pd.to_datetime(df["date"], errors="coerce", format="mixed").isna().sum())
+    if bad_dates:
+        errors.append(f"`date` could not be read as dates in {bad_dates} rows. Use a format like 2025-05-01.")
+    for col in ("conversions", "spend"):
+        bad = int(pd.to_numeric(df[col], errors="coerce").isna().sum())
+        if bad:
+            errors.append(f"`{col}` has {bad} cells that are empty or not plain numbers (no currency signs or commas).")
     return errors
 
 
-def prior_from_iroas(mean: float, sd: float) -> tuple[float, float]:
-    """Lift-test estimate -> (mean, sd) for an ROI prior. The sd is floored at 10% of the mean."""
-    return float(mean), float(max(sd, 0.1 * abs(mean)))
+def prior_from_iroas(mean: float, sd: float) -> tuple[float, float] | None:
+    """Lift-test estimate -> (mean, sd) for an ROI prior, or None when the test found no positive return.
+
+    The sd is floored at 10% of the mean. A LogNormal ROI prior needs a mean above zero.
+    """
+    if not mean > 0:
+        return None
+    return float(mean), float(max(sd, 0.1 * mean))

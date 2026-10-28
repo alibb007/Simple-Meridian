@@ -232,7 +232,7 @@ docs/                     the guided tour website (published to GitHub Pages)
 scripts/
   demo/                     build_demo.py (demo model and results), build_geox_demo.py
   site/                     build_site_data.py, tour_steps.py (tour text), stamp_assets.py, publish.sh
-tests/test_pages.py       renders every page headlessly, with and without the demo model
+tests/                    test_pages.py renders every page headlessly; test_logic.py checks the data rules
 start.sh · start.bat · start.ps1 · Dockerfile · docker-compose.yml   run it locally
 ```
 
@@ -245,6 +245,7 @@ After upgrading `google-meridian`, refit the demo model so it matches the new ve
 python scripts/demo/build_demo.py --refit
 python scripts/demo/build_geox_demo.py
 python scripts/site/build_site_data.py
+python tests/test_logic.py
 python tests/test_pages.py
 ```
 

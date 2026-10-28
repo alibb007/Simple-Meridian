@@ -8,6 +8,7 @@ What changed in Simple Meridian, newest first. The [README](README.md#whats-new)
 - **Budget scene shows the change in %.** Each channel's bar is its budget change with the plan (Email +31%, Radio +30%, Display −30%), so a small channel that grows a lot no longer looks like a sliver next to TV.
 - **Files reorganized.** Images moved from `pic/` to `assets/` (screenshots in `assets/screenshots/`). The demo build scripts moved to `scripts/demo/`. The website's build scripts moved out of `docs/` into `scripts/site/`, with a new `publish.sh` that stamps the site's file links and copies `docs/` to the demo repository. `docs/` now holds only the website.
 - **New README** with an animated overview, a before-and-after table and fold-out sections.
+- **Fixes from a code review.** "Change data" after a fit opens the upload screen again instead of jumping to Insights. A lift test with no positive return no longer offers a broken ROI prior. Lift-test files with bad dates or text in number columns now get a plain error message, and old results no longer show under a new file. Monthly data passes the date check. An R-hat that could not be computed shows "Not checked" instead of "Converged". The donut chart shows totals under $1M correctly. New checks live in `tests/test_logic.py`.
 
 ## 27 Oct 2026, Meridian 2.1.0
 
