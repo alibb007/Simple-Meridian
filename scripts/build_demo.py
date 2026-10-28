@@ -50,6 +50,10 @@ def main(refit: bool):
     start, end = periods[max(0, len(periods) - 52)], periods[-1]  # same defaults as the Budget plan page
     res = M.optimize(mmm, start, end, None, 30)
     M.optimization_table(res).to_csv(os.path.join(OUT, "plan.csv"), index=False)
+    with open(os.path.join(OUT, "report_charts.json"), "w") as f:
+        json.dump(M.report_chart_specs(mmm), f)
+    with open(os.path.join(OUT, "plan_charts.json"), "w") as f:
+        json.dump(M.plan_chart_specs(res), f)
     with open(os.path.join(OUT, "plan.json"), "w") as f:
         json.dump(M.optimization_totals(res), f, indent=2)
     with open(os.path.join(OUT, "meta.json"), "w") as f:

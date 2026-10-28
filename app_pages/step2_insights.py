@@ -12,7 +12,7 @@ from utils import ui
 
 
 def show_insights():
-    ui.page_header(2, "Insights", "What each channel returned, how sure the model is, and where spend saturates.",
+    ui.page_header(2, "Insights", "What each channel brought back, how sure the model is, and where extra spend stops helping.",
                    "insights", "violet")
     if not require_model("Insights"):
         return
@@ -65,7 +65,7 @@ def show_insights():
                        "wide whiskers mean the data can't pin that channel down.")
             st.plotly_chart(charts.roi_bars(summary, colors), config=charts.CONFIG)
         st.markdown("### Average return vs. return on the next dollar")
-        st.caption("A channel can have a high average ROI and still be saturated. Bubble size is spend.")
+        st.caption("A channel can have a high average ROI and still be full, so more money there buys little. Bubble size is spend.")
         st.plotly_chart(charts.roi_vs_mroi(summary, colors), config=charts.CONFIG)
         _summary_table(summary)
 
@@ -86,7 +86,7 @@ def show_insights():
 
     with tabs[2]:
         st.markdown("### Response curves")
-        st.caption("Incremental revenue at 0–200% of actual spend. The ringed dot is what you actually spent. "
+        st.caption("Incremental revenue at 0–200% of actual spend. The ringed dot is what you spent. "
                    "Where a curve flattens, more money buys little.")
         show_ci = st.toggle("Show 90% interval", value=True, key="curves_ci")
         with st.spinner("Computing curves…"):

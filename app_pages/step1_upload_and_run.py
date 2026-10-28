@@ -148,20 +148,21 @@ def _channel_cards(df: pd.DataFrame, s: dict, kpi_col: str) -> list[dict]:
     colors = charts.color_map([r["name"] or f"Channel {i + 1}" for i, r in enumerate(rows)])
 
     found = len(s["channels"])
-    with st.container(horizontal=True, vertical_alignment="center"):
+    with st.container(horizontal=True, vertical_alignment="center", horizontal_alignment="distribute"):
         st.markdown(
             f'<span class="sm-pill" style="margin:0">{ui.icon("auto_awesome", 16, "#6941C6")}'
-            f'{found} channel{"s" if found != 1 else ""} detected</span>'
-            '<span style="color:var(--muted);font-size:.9rem;margin-left:.6rem">Rename them, change their columns, '
-            "add or remove channels.</span>",
+            f'{found} channel{"s" if found != 1 else ""} found in your data</span>',
             unsafe_allow_html=True,
         )
-        if st.button("Add channel", icon=":material/add:", key="ch_add"):
+        with st.container(horizontal=True, width="content"):
+            add = st.button("Add channel", icon=":material/add:", key="ch_add")
+            reset = st.button("Reset", icon=":material/restart_alt:", key="ch_reset", type="tertiary")
+        if add:
             used = {r["spend"] for r in rows}
             free = next((c for c in numeric if c not in used), numeric[0] if numeric else None)
             rows.append({"id": next(_ids), "name": f"Channel {len(rows) + 1}", "exposure": free, "spend": free})
             st.rerun()
-        if st.button("Reset", icon=":material/restart_alt:", key="ch_reset", type="tertiary"):
+        if reset:
             st.session_state.cfg_rows = _default_rows(s)
             st.rerun()
 

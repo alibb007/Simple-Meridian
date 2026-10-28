@@ -13,6 +13,7 @@ from app_pages.help import show_help  # noqa: E402
 from app_pages.home import show_home  # noqa: E402
 from app_pages.legal import show_legal  # noqa: E402
 from app_pages.lift_test import show_lift_test  # noqa: E402
+from app_pages.report import show_report  # noqa: E402
 from app_pages.step1_upload_and_run import show_upload_and_run  # noqa: E402
 from app_pages.step2_insights import show_insights  # noqa: E402
 from app_pages.step3_optimization import show_optimization  # noqa: E402
@@ -50,6 +51,7 @@ PAGES = {
     "step1": show_upload_and_run,
     "step2": show_insights,
     "step3": show_optimization,
+    "report": show_report,
     "geox": show_lift_test,
     "help": show_help,
     "legal": show_legal,

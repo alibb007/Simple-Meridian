@@ -49,7 +49,7 @@ SATURATION = _svg(
     '<circle cx="70" cy="62" r="6" fill="#fff" stroke="#1BAF7A" stroke-width="3"/>'
     '<circle cx="190" cy="19" r="6" fill="#fff" stroke="#E34948" stroke-width="3"/>'
     '<text x="78" y="80" font-size="11" fill="#475467" font-family="sans-serif">still steep</text>'
-    '<text x="150" y="40" font-size="11" fill="#475467" font-family="sans-serif">saturated</text>')
+    '<text x="150" y="40" font-size="11" fill="#475467" font-family="sans-serif">full</text>')
 
 BASELINE = _svg(
     '<rect x="30" y="20" width="56" height="84" rx="6" fill="#B8C2D6"/>'
@@ -81,7 +81,7 @@ def show_home():
                 "them, without writing a line of code.</p>",
                 unsafe_allow_html=True,
             )
-            st.markdown(f'<div class="sm-sign">{ui.logo(28)}<span><b style="color:#fff">Ali Barfi Bafghi</b>'
+            st.markdown(f'<div class="sm-sign">{ui.avatar(40)}<span><b style="color:#fff">Ali Barfi Bafghi</b>'
                         f" · creator of Simple Meridian</span></div>", unsafe_allow_html=True)
             with st.container(horizontal=True):
                 if st.button("Take the 2-minute tour", type="primary", icon=":material/tour:", key="home_tour"):
@@ -106,8 +106,8 @@ def show_home():
     # ---- How Meridian thinks -------------------------------------------------
     st.markdown("<div style='height:1.4rem'></div>", unsafe_allow_html=True)
     st.markdown("## How Meridian thinks, in three pictures")
-    st.markdown('<p class="sm-lede" style="margin-top:-.2rem">No statistics needed. These three ideas are the whole '
-                "trick behind a marketing mix model.</p>", unsafe_allow_html=True)
+    st.markdown('<p class="sm-lede" style="margin-top:-.2rem">No statistics needed. These three ideas are how a marketing mix model works.</p>',
+                unsafe_allow_html=True)
     cols = st.columns(3, gap="medium")
     ideas = [
         (CARRYOVER, "Ads keep working after they run",
@@ -143,8 +143,9 @@ def show_home():
     for col, (ic, accent, title, body, page, tag) in zip(cols, features):
         with col:
             with st.container(key=f"start-feat-{page}-{ic}"):
-                badge = f'<span class="sm-new">{tag}</span>' if tag else ""
-                st.markdown(f'{ui.badge(ic, accent, 40)}<h4>{badge}{title}</h4><p>{body}</p>', unsafe_allow_html=True)
+                tagged = f'<span class="sm-new">{tag}</span>' if tag else ""
+                st.markdown(f'<div class="sm-cardtop">{ui.badge(ic, accent, 40)}{tagged}</div>'
+                            f'<h4>{title}</h4><p>{body}</p>', unsafe_allow_html=True)
                 if st.button("Open", key=f"feat_{page}_{ic}", icon=":material/arrow_forward:", type="tertiary"):
                     if page in ("step2", "step3") and st.session_state.get("mmm") is None and demo_available():
                         load_demo()

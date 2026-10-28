@@ -44,19 +44,34 @@ STEPS = [
     ("step3", "Budget plan", ":material/savings:", "Reallocate spend for more return"),
 ]
 EXTRA = [
+    ("report", "Meridian charts", ":material/description:", "Every chart from Meridian's report, explained"),
     ("geox", "GeoX (Lift test)", ":material/science:", "Design and measure a geo experiment with Meridian GeoX"),
     ("help", "Help & glossary", ":material/help:", "Every term in plain words"),
     ("legal", "Privacy & terms", ":material/shield:", "How your data is handled, licenses, disclaimer"),
 ]
 
 
-_LOGO_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "pic", "Logo.png")
+_PIC = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "pic")
+_LOGO_PATH = os.path.join(_PIC, "Logo.png")
+_AVATAR_PATH = os.path.join(_PIC, "ali.png")
 
 
 @functools.lru_cache(maxsize=1)
 def _logo_b64() -> str:
     with open(_LOGO_PATH, "rb") as f:
         return base64.b64encode(f.read()).decode()
+
+
+@functools.lru_cache(maxsize=1)
+def _avatar_b64() -> str:
+    with open(_AVATAR_PATH, "rb") as f:
+        return base64.b64encode(f.read()).decode()
+
+
+def avatar(size: int = 36) -> str:
+    """Ali's photo (from his LinkedIn profile), round."""
+    return (f'<img class="sm-avatar" src="data:image/png;base64,{_avatar_b64()}" alt="Ali Barfi Bafghi" '
+            f'width="{size}" height="{size}">')
 
 
 def logo(size: int = 36) -> str:
@@ -195,12 +210,16 @@ h3 {{ font-weight: 700 !important; font-size: 1.12rem !important; }}
 @keyframes sm-pulse {{ 0%, 100% {{ box-shadow: 0 0 0 0 rgba(109,74,232,.55); }} 50% {{ box-shadow: 0 0 0 7px rgba(109,74,232,0); }} }}
 @media (prefers-reduced-motion: reduce) {{ [data-testid] {{ animation: none !important; }} }}
 .sm-tour-top {{ display:flex; align-items:center; gap:.45rem; font-size:.8rem; font-weight:700; color:#6941C6; }}
-.sm-dots {{ display:inline-flex; gap:.25rem; margin-left:.6rem; }}
-.sm-dots span {{ width: 18px; height: 5px; border-radius: 99px; background: #E9E3FC; }}
-.sm-dots span.on {{ background: #6D4AE8; }}
+.sm-progress {{ display:inline-block; width: 160px; height: 6px; border-radius: 99px; background: #E9E3FC; margin-left:.6rem; overflow:hidden; }}
+.sm-progress i {{ display:block; height: 100%; background: linear-gradient(90deg, #6D4AE8, #2459E8); border-radius: 99px; }}
 .sm-tour-body {{ display:flex; gap: .9rem; align-items:flex-start; margin-top:.55rem; }}
 .sm-tour-body h3 {{ margin: 0 0 .25rem !important; padding: 0 !important; font-size: 1.15rem !important; }}
 .sm-tour-body p {{ margin: 0; color: #344054; font-size: .98rem; line-height: 1.55; }}
+
+.sm-explain {{ display:grid; grid-template-columns: 1fr 1fr; gap: .4rem 1.4rem; margin: .7rem 0 .4rem; }}
+.sm-explain p {{ margin: 0; color: #344054; font-size: .95rem; line-height: 1.5; }}
+@media (max-width: 900px) {{ .sm-explain {{ grid-template-columns: 1fr; }} }}
+[class*="st-key-mr-"] {{ background: var(--surface); margin-bottom: .6rem; }}
 
 /* ---------- Step 1 ---------- */
 .sm-stepbar {{ display:flex; flex-wrap:wrap; gap:.4rem; margin: -.4rem 0 1.2rem; }}
@@ -221,7 +240,18 @@ h3 {{ font-weight: 700 !important; font-size: 1.12rem !important; }}
 [class*="st-key-chcard-"] [data-testid="stTextInput"] input {{ font-weight: 700; font-size: 1rem; }}
 .sm-chfoot {{ display:flex; align-items:center; gap:.45rem; font-size:.82rem; color: var(--muted); }}
 .sm-chfoot i {{ width:10px; height:10px; border-radius:3px; display:inline-block; }}
-[class*="st-key-s1-"], [class*="st-key-s3-"], .st-key-runcard, .st-key-gx-plan {{ background: var(--surface); }}
+[class*="st-key-s1-"]:not(.st-key-s1-channels), [class*="st-key-s3-"], .st-key-runcard, .st-key-gx-plan {{ background: var(--surface); }}
+.st-key-s1-channels {{ padding: .2rem 0 !important; }}
+.sm-avatar {{ border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 2px rgba(255,255,255,.7); flex: none; }}
+
+/* Cards in a row: same height, action at the bottom. */
+[data-testid="stHorizontalBlock"]:has([class*="st-key-start-"]) {{ align-items: stretch !important; }}
+[data-testid="stHorizontalBlock"]:has([class*="st-key-start-"]) > [data-testid="stColumn"] > [data-testid="stVerticalBlock"],
+[data-testid="stLayoutWrapper"]:has(> [class*="st-key-start-"]) {{ height: 100%; }}
+[class*="st-key-start-"] {{ display: flex !important; flex-direction: column; }}
+[class*="st-key-start-"] > [data-testid="stElementContainer"]:last-child,
+[class*="st-key-start-"] > [data-testid="stLayoutWrapper"]:last-child {{ margin-top: auto; }}
+.sm-cardtop {{ display:flex; justify-content: space-between; align-items: flex-start; }}
 
 /* ---------- Hero ---------- */
 .st-key-hero {{

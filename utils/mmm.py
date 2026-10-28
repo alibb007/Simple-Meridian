@@ -6,6 +6,7 @@ internals directly.
 """
 from __future__ import annotations
 
+import json
 import os
 import re
 import tempfile
@@ -514,3 +515,45 @@ def optimization_report_html(res) -> str:
         res.output_optimization_summary("optimization.html", tmp)
         with open(os.path.join(tmp, "optimization.html"), encoding="utf-8") as f:
             return f.read()
+
+
+# --------------------------------------------------------------------------- #
+# Meridian's own report charts (the ones in its HTML summary)
+# --------------------------------------------------------------------------- #
+def _spec(chart) -> dict:
+    """Altair chart -> plain Vega-Lite dict (JSON-safe, renders without the model)."""
+    return json.loads(chart.to_json())
+
+
+def report_chart_specs(mmm) -> dict:
+    """The model-results charts of Meridian's HTML report, keyed by the report's chart ids."""
+    from meridian.analysis import visualizer as V
+
+    fit, diag, summ, eff = V.ModelFit(mmm), V.ModelDiagnostics(mmm), V.MediaSummary(mmm), V.MediaEffects(mmm)
+    makers = {
+        "expected_actual": fit.plot_model_fit,
+        "channel_drivers": summ.plot_contribution_waterfall_chart,
+        "contribution_pie": summ.plot_contribution_pie_chart,
+        "spend_outcome": summ.plot_spend_vs_contribution,
+        "contrib_by_time": summ.plot_channel_contribution_area_chart,
+        "contrib_rank": summ.plot_channel_contribution_bump_chart,
+        "roi_channel": summ.plot_roi_bar_chart,
+        "roi_effectiveness": summ.plot_roi_vs_effectiveness,
+        "roi_marginal": summ.plot_roi_vs_mroi,
+        "cpik_channel": summ.plot_cpik,
+        "response_curves": eff.plot_response_curves,
+    }
+    out = {k: _spec(f()) for k, f in makers.items()}
+    table = diag.predictive_accuracy_table()
+    out["fit_table"] = {"table": json.loads(table.to_json(orient="split"))}
+    return out
+
+
+def plan_chart_specs(res) -> dict:
+    """The charts of Meridian's budget-optimization report."""
+    return {
+        "spend_delta": _spec(res.plot_spend_delta()),
+        "spend_allocation": _spec(res.plot_budget_allocation()),
+        "outcome_delta": _spec(res.plot_incremental_outcome_delta()),
+        "optimized_curves": _spec(res.plot_response_curves()),
+    }

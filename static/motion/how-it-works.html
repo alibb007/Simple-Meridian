@@ -34,7 +34,7 @@
 </style>
 </head>
 <body>
-<div class="mg" role="img" aria-label="Animation: weekly ad spend flows into sales; Meridian splits sales into baseline and each channel; response curves show where spend saturates; budget moves to better channels for 5.2% more revenue.">
+<div class="mg" role="img" aria-label="Animation: weekly ad spend flows into sales; Meridian splits sales into baseline and each channel; response curves show where extra spend stops helping; budget moves to better channels for 5.2% more revenue.">
   <div class="bar">
     <div class="dots" id="dots" aria-label="Scenes"></div>
     <div class="cap" id="cap" aria-live="polite"></div>
@@ -85,7 +85,7 @@
   var SCENES = [
     ["Each week you spend on ads, and sales come in.", "Sales also move with season and price, so the link is not obvious."],
     ["Meridian splits sales into a baseline and what each channel added.", "Baseline is what you'd sell with no ads at all."],
-    ["It learns where more money stops paying back.", "Steep: extra budget still works. Flat: the channel is saturated."],
+    ["It learns where more money stops paying back.", "Steep: extra budget still works. Flat: the channel is full."],
     ["Then it moves budget to where the next dollar earns most.", "Same total budget, more revenue."]
   ];
   var DUR = 4000, N = SCENES.length;
@@ -126,7 +126,7 @@
 
   // ---- Scene 3 setup
   var panels = document.getElementById("s3panels"), curves = [];
-  var CUR = [["TV", .45, null], ["Radio", .22, "still steep"], ["Search", .78, "saturated"], ["Email", .18, "still steep"]];
+  var CUR = [["TV", .45, null], ["Radio", .22, "still steep"], ["Search", .78, "full"], ["Email", .18, "still steep"]];
   CUR.forEach(function (c, i) {
     var ox = 40 + i * 265, oy = 50, w = 220, h = 190, k = 4.2;
     el("rect", { x: ox - 8, y: oy - 34, width: w + 16, height: h + 60, rx: 14, fill: "#F8FAFC", stroke: "#E2E7F0" }, panels);
