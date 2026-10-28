@@ -192,13 +192,13 @@
       '<line class="mk-b" x1="328" y1="168" x2="424" y2="334" stroke="#1967D2" stroke-width="96" stroke-linecap="round"/>' +
       '<circle class="mk-dot" cx="87" cy="331" r="54" fill="#174EA6"/></svg>' +
       "<h1>Google Meridian,<br>made simple.</h1>" +
-      '<p class="lede">See which ads bring in your sales and where the next dollar should go. A guided tour on a made-up shop, ' +
-      "then run it on your own data.</p>" +
+      '<p class="lede">See which ads bring in your sales and where the next dollar should go.<br>' +
+      "A guided tour on a made-up shop, then run it on your own data.</p>" +
       '<div class="starts"><button class="btn pill pill-gold" id="t-start" type="button">Start the Simple Meridian guided tour</button>' +
       '<button class="btn pill pill-story" id="t-story" type="button">' +
       '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>Start the story</button></div>' +
-      '<span class="startnote">Made-up data · use Next and Back, or the arrow keys</span>' +
-      '<div class="by"><img src="assets/ali.png" alt="" width="52" height="52"><span>Built by <b>Ali Barfi Bafghi</b></span></div>' +
+      '<a class="by" href="https://www.linkedin.com/in/alibarfibafghi/" target="_blank" rel="noopener noreferrer">' +
+      '<img src="assets/ali.png" alt="" width="52" height="52"><span><small>Built by</small><b>Ali Barfi Bafghi</b></span></a>' +
       '<p class="vnote">Updated 27 Oct 2026. I built the <a href="https://github.com/alibb007/Simple-Meridian/tree/6bde9f5" target="_blank" ' +
       'rel="noopener noreferrer">first release of Simple Meridian</a> in April 2025 on Meridian 1.0.6: upload, fit, charts and a budget ' +
       "optimizer. Today it runs Meridian 2.1.0 and adds GeoX lift tests, this guided tour and a new design.</p></div>",
@@ -360,15 +360,56 @@
     div.className = "screen"; div.dataset.screen = k; div.innerHTML = SCREENS[k];
     main.appendChild(div);
   });
-  // Sidebar: the welcome page, then one link per chapter.
-  [-1].concat(CHAPTERS).forEach(function (k, n) {
-    var b = document.createElement("button"), name = k < 0 ? "Welcome" : STEPS[k].chapter;
-    b.type = "button"; b.className = "chap"; b.dataset.k = k;
-    b.innerHTML = '<span class="n">' + (n + 1) + "</span><span>" + esc(name) + "</span>" +
-      (/GeoX/.test(name) ? '<span class="new">NEW</span>' : "");
-    b.addEventListener("click", function () { go(k, true); });
-    nav.appendChild(b);
+  // Sidebar: Welcome, four numbered sections whose steps fold open, and Your turn.
+  var SECTIONS = [
+    { name: "Welcome", icon: "home", chapters: [] },
+    { name: "Data & model", num: "1", chapters: ["Step 1 · Data & model"] },
+    { name: "Insights", num: "2", chapters: ["Step 2 · Insights", "Meridian's own charts"] },
+    { name: "Budget plan", num: "3", chapters: ["Step 3 · Budget plan", "Budget plan charts"] },
+    { name: "GeoX (Lift test)", num: "4", badge: true, chapters: ["GeoX (Lift test)"] },
+    { name: "Your turn", icon: "flag", chapters: ["Your turn"] }
+  ];
+  var ICONS = { home: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 4 3 11h2.5v8h5v-5h3v5h5v-8H21z"/></svg>',
+                flag: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 3h2v18H6zM9 4h10l-2.5 4L19 12H9z"/></svg>' };
+  SECTIONS.forEach(function (sec, n) {
+    sec.steps = [];
+    STEPS.forEach(function (st, k) { if (sec.chapters.indexOf(st.chapter) >= 0) sec.steps.push(k); });
+    sec.first = n === 0 ? -1 : sec.steps[0];
+    var wrap = document.createElement("div"), b = document.createElement("button"), many = sec.steps.length > 1;
+    wrap.className = "sec"; b.type = "button"; b.className = "chap"; b.dataset.sec = n;
+    b.innerHTML = '<span class="n">' + (sec.num || ICONS[sec.icon]) + "</span><span>" + esc(sec.name) + "</span>" +
+      (sec.badge ? '<span class="new">NEW</span>' : "") + (many ? '<span class="chev" aria-hidden="true"></span>' : "");
+    if (many) b.setAttribute("aria-expanded", "false");
+    wrap.appendChild(b);
+    var subs = null;
+    if (many) {
+      subs = document.createElement("div"); subs.className = "subs"; subs.hidden = true;  // closed by default
+      sec.steps.forEach(function (k) {
+        var x = document.createElement("button");
+        x.type = "button"; x.className = "sub"; x.dataset.k = k; x.textContent = STEPS[k].title;
+        x.addEventListener("click", function () { go(k, true); });
+        subs.appendChild(x);
+      });
+      wrap.appendChild(subs);
+    }
+    // The section name opens its steps and goes to the first one; the other sections fold away.
+    b.addEventListener("click", function () {
+      if (subs) {
+        var open = subs.hidden;
+        [].forEach.call(nav.querySelectorAll(".subs"), function (o) { o.hidden = true; o.previousSibling.setAttribute("aria-expanded", "false"); });
+        subs.hidden = !open; b.setAttribute("aria-expanded", String(open));
+        if (!open) return;
+      }
+      go(sec.first, true);
+    });
+    sec.el = b;
+    nav.appendChild(wrap);
   });
+  function sectionOf(k) {
+    if (k < 0) return 0;
+    for (var n = 1; n < SECTIONS.length; n++) if (SECTIONS[n].steps.indexOf(k) >= 0) return n;
+    return 0;
+  }
 
   // Vega libraries and Meridian's chart specs load on first use (same origin, no eval: the AST interpreter runs expressions).
   var chartsReady = null;
@@ -527,13 +568,13 @@
     drawCharts(main.querySelector('.screen[data-screen="' + s.screen + '"]'));
     cap.hidden = spot.hidden = intro;
     app.classList.toggle("touring", !intro);
-    var start = -1; CHAPTERS.forEach(function (k) { if (k <= i) start = k; });  // the story counts as Welcome
-    [].forEach.call(nav.children, function (b) {
-      var k = +b.dataset.k, on = k === start;
-      b.classList.toggle("on", on); b.classList.toggle("done", k < start);
-      if (on) { b.setAttribute("aria-current", "step"); nav.scrollTo({ left: b.offsetLeft - 16 }); }
-      else b.removeAttribute("aria-current");
+    var cs = sectionOf(i);  // the story counts as Welcome
+    SECTIONS.forEach(function (sec, n) {
+      sec.el.classList.toggle("on", n === cs); sec.el.classList.toggle("done", n < cs);
+      if (n === cs) { sec.el.setAttribute("aria-current", "step"); nav.scrollTo({ left: sec.el.offsetLeft - 16 }); }
+      else sec.el.removeAttribute("aria-current");
     });
+    [].forEach.call(nav.querySelectorAll(".sub"), function (x) { x.classList.toggle("on", +x.dataset.k === i); });
     if (history.replaceState) history.replaceState(null, "", i === -2 ? "#story" : intro ? location.pathname + location.search : "#step-" + (i + 1));
     if (intro) {
       main.style.paddingTop = main.style.paddingBottom = "";
@@ -586,7 +627,8 @@
   main.addEventListener("load", function () { place(false); }, true);
   window.addEventListener("hashchange", function () {
     var h = /^#step-(\d+)$/.exec(location.hash);
-    if (h && +h[1] - 1 !== i) go(+h[1] - 1, true);
+    if (location.hash === "#story" && i !== -2) go(-2, true);
+    else if (h && +h[1] - 1 !== i) go(+h[1] - 1, true);
   });
   var m0 = /^#step-(\d+)$/.exec(location.hash);
   go(location.hash === "#story" ? -2 : m0 ? +m0[1] - 1 : -1, !!m0);

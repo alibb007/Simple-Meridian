@@ -13,8 +13,8 @@
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; background: transparent; }
   body { font-family: "Red Hat Text", system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); }
-  .mg { width: 100%; max-width: 1180px; margin: 0 auto; background: var(--cream); border: 3px solid var(--ink); border-radius: 22px; overflow: hidden; }
-  .bar { display: flex; align-items: center; gap: 14px; padding: 14px 18px 2px; min-height: 68px; }
+  .mg { width: 100%; max-width: none; margin: 0 auto; background: var(--cream); border: 3px solid var(--ink); border-radius: 22px; overflow: hidden; }
+  .bar { display: flex; align-items: center; gap: 14px; padding: 18px 22px 4px; min-height: 76px; }
   .pp { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--ink); background: #fff; color: var(--ink); display: grid; place-items: center; cursor: pointer; padding: 0; flex: none; }
   .pp svg { width: 14px; height: 14px; }
   .dots { display: flex; gap: 6px; flex: none; }
@@ -22,10 +22,14 @@
   .dots button i { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--ink); }
   .dots button.done { background: var(--gold); }
   .dots button:focus-visible, .pp:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
-  .cap { font-family: "Red Hat Display", system-ui, sans-serif; font-weight: 800; font-size: 19px; line-height: 1.25; }
-  .cap .act { display: block; font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase; color: #B54708; margin-bottom: 2px; }
-  .cap small { display: block; font-family: "Red Hat Text", system-ui, sans-serif; font-weight: 500; font-size: 14px; color: #475467; margin-top: 3px; }
+  .cap { font-family: "Red Hat Display", system-ui, sans-serif; font-weight: 800; font-size: clamp(19px, 2.1vw, 28px); line-height: 1.22; }
+  .cap .act { display: block; font-size: clamp(11.5px, 1vw, 14px); letter-spacing: .1em; text-transform: uppercase; color: #B54708; margin-bottom: 2px; }
+  .cap small { display: block; font-family: "Red Hat Text", system-ui, sans-serif; font-weight: 500; font-size: clamp(14px, 1.35vw, 18px); color: #475467; margin-top: 4px; }
   svg { display: block; width: 100%; height: auto; }
+  .fn { margin: 0; padding: 0 22px 12px; font-size: clamp(11.5px, .95vw, 13px); color: #8A7F6E; text-align: right; }
+  .nav { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--ink); background: #fff; color: var(--ink); display: grid; place-items: center; cursor: pointer; padding: 0; flex: none; font: 800 16px/1 "Red Hat Display", system-ui, sans-serif; }
+  .nav:hover, .pp:hover { background: #FFF1CC; }
+  .nav:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
   svg text { font-family: "Red Hat Text", system-ui, sans-serif; }
   .lbl { font-size: 15px; fill: var(--ink); font-weight: 600; }
   .sub { font-size: 13px; fill: #475467; font-weight: 500; }
@@ -37,10 +41,13 @@
 <div class="mg" id="mg" role="img" aria-label="Story in six scenes: a shop spends on six ad channels, cannot tell which ones work, has to plan next year's budget, stops guessing and asks Google Meridian, sees the return on each channel, and moves money to the channels that still pay back.">
   <div class="bar">
     <button class="pp" id="pp" type="button" aria-label="Pause the story"><svg viewBox="0 0 24 24" aria-hidden="true"><path id="ppicon" fill="currentColor" d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg></button>
+    <button class="nav" id="prev" type="button" aria-label="Previous scene">‹</button>
     <div class="dots" id="dots" aria-label="Scenes"></div>
+    <button class="nav" id="next" type="button" aria-label="Next scene">›</button>
     <div class="cap" id="cap" aria-live="polite"></div>
   </div>
   <svg id="stage" viewBox="0 0 1100 330" aria-hidden="true"></svg>
+  <p class="fn">Story amounts are the demo company's divided by 100, to fit a smaller shop. Returns per $1 and percentages are the demo's.</p>
 </div>
 <script>
 (function () {
@@ -58,7 +65,10 @@
   var WEEKS = D ? D.fit.map(function (r) { return r.actual; }) : null;
   var COLOR = { TV: "#2A78D6", Radio: "#EB6834", Display: "#1BAF7A", Search: "#EDA100", Social: "#E87BA4", Email: "#008300" };
   ROI.sort(function (a, b) { return b.v - a.v; });
-  var M = function (x) { return "$" + (x / 1e6).toFixed(1) + "M"; };
+  // The demo company is large. The story tells it as a smaller shop: every dollar amount is the demo's divided by 100.
+  // Returns per $1 and percentages are the demo's own.
+  var SCALE = 0.01;
+  var M = function (x) { var v = x * SCALE; return v >= 1e6 ? "$" + (v / 1e6).toFixed(2) + "M" : "$" + Math.round(v / 1e3) + "K"; };
   var BUDGET = M(T.budget_before), GAIN = T.outcome_after - T.outcome_before, PCT = GAIN / T.outcome_before * 100;
   var best = ROI[0], worst = ROI[ROI.length - 1];
   var INK = "#0B1B3F";
@@ -97,21 +107,22 @@
     return { g: g, cx: tailX, cy: tailY };
   }
   // Small line icons for each channel, drawn in white; each has one quiet loop of motion.
-  function icon(parent, ch, x, y) {
-    var g = el("g", { transform: "translate(" + x + " " + y + ")", fill: "none", stroke: "#fff", "stroke-width": 3, "stroke-linecap": "round", "stroke-linejoin": "round" }, parent), m = {};
+  function icon(parent, ch, x, y, color, scale) {
+    var C = color || "#fff";
+    var g = el("g", { transform: "translate(" + x + " " + y + ") scale(" + (scale || 1) + ")", fill: "none", stroke: C, "stroke-width": 3, "stroke-linecap": "round", "stroke-linejoin": "round" }, parent), m = {};
     if (ch === "TV") {
       el("rect", { x: 2, y: 4, width: 40, height: 28, rx: 5 }, g); el("path", { d: "M14 40h16M22 32v8" }, g);
-      m.part = el("path", { d: "M18 12 l10 6 l-10 6 Z", fill: "#fff" }, g); m.kind = "blink";
+      m.part = el("path", { d: "M18 12 l10 6 l-10 6 Z", fill: C }, g); m.kind = "blink";
     } else if (ch === "Radio") {
       el("rect", { x: 2, y: 16, width: 34, height: 24, rx: 5 }, g); el("circle", { cx: 13, cy: 28, r: 5 }, g); el("path", { d: "M24 24h8M24 32h8M8 16 L30 4" }, g);
       m.part = el("path", { d: "M38 6 q6 6 0 12 M43 2 q10 10 0 20" }, g); m.kind = "blink";
     } else if (ch === "Display") {
       el("rect", { x: 2, y: 6, width: 40, height: 30, rx: 4 }, g);
-      m.part = el("rect", { x: 7, y: 12, width: 14, height: 18, rx: 2, fill: "#fff" }, g); m.kind = "slide";
+      m.part = el("rect", { x: 7, y: 12, width: 14, height: 18, rx: 2, fill: C }, g); m.kind = "slide";
     } else if (ch === "Search") {
       m.part = el("g", {}, g); el("circle", { cx: 18, cy: 18, r: 12 }, m.part); el("path", { d: "M27 27 L40 40" }, m.part); m.kind = "orbit";
     } else if (ch === "Social") {
-      m.part = el("path", { d: "M22 38 C 6 28, 2 18, 8 10 C 13 4, 20 6, 22 12 C 24 6, 31 4, 36 10 C 42 18, 38 28, 22 38 Z", fill: "#fff" }, g); m.kind = "beat";
+      m.part = el("path", { d: "M22 38 C 6 28, 2 18, 8 10 C 13 4, 20 6, 22 12 C 24 6, 31 4, 36 10 C 42 18, 38 28, 22 38 Z", fill: C }, g); m.kind = "beat";
     } else {
       m.part = el("g", {}, g); el("rect", { x: 2, y: 8, width: 40, height: 28, rx: 4 }, m.part); el("path", { d: "M2 10 L22 24 L42 10" }, m.part); m.kind = "bob";
     }
@@ -181,7 +192,8 @@
   var slots = PLAN.map(function (r, i) {
     var x = 620 + i * 76, g = el("g", { opacity: 0 }, g3);
     el("rect", ink({ x: x, y: 110, width: 62, height: 150, rx: 12, fill: "#fff", "stroke-dasharray": "8 6" }), g);
-    el("text", { x: x + 31, y: 196, "text-anchor": "middle", class: "big", "font-size": 32, fill: COLOR[r.channel] }, g, "?");
+    icon(g, r.channel, x + 13, 124, COLOR[r.channel], 0.82);
+    el("text", { x: x + 31, y: 222, "text-anchor": "middle", class: "big", "font-size": 32, fill: COLOR[r.channel] }, g, "?");
     el("text", { x: x + 31, y: 288, "text-anchor": "middle", class: "lbl", "font-size": 13 }, g, r.channel);
     return { g: g, cx: x + 31, cy: 185 };
   });
@@ -194,7 +206,8 @@
   var guess = el("g", { opacity: 0 }, g4);
   el("rect", ink({ x: 40, y: 30, width: 330, height: 270, rx: 22, fill: "#fff" }), guess);
   el("text", { x: 64, y: 70, class: "big", "font-size": 22, fill: INK }, guess, "Keep guessing");
-  [54, 38, 22].forEach(function (r, i) { el("circle", ink({ cx: 205, cy: 175, r: r, fill: ["#FDECEC", "#fff", "#F04438"][i] }), guess); });
+  var rings = [54, 38, 22].map(function (r, i) { return el("circle", ink({ cx: 205, cy: 175, r: r, fill: ["#FDECEC", "#fff", "#F04438"][i] }), guess); });
+  var bull = rings[2], hitRing = el("circle", { cx: 205, cy: 175, r: 22, fill: "none", stroke: "#12B76A", "stroke-width": 5, opacity: 0 }, guess);
   var darts = [[110, 120], [300, 230], [260, 96], [128, 258]].map(function (p) {
     var d = el("g", { opacity: 0 }, guess);
     el("line", ink({ x1: p[0], y1: p[1], x2: p[0] + 22, y2: p[1] - 22 }), d);
@@ -212,6 +225,11 @@
   });
   var mkDot = el("circle", { cx: 87, cy: 331, r: 54, fill: "#174EA6", opacity: 0 }, mark);
   el("text", { x: 550, y: 282, "text-anchor": "middle", class: "lbl" }, box, "156 weeks of numbers in");
+  // Meridian's dart: flies from the Meridian box in an arc and lands in the bullseye.
+  var mDart = el("g", { opacity: 0 }, g4);
+  el("line", { x1: 0, y1: 0, x2: 34, y2: 0, stroke: "#2459E8", "stroke-width": 5, "stroke-linecap": "round" }, mDart);
+  el("path", { d: "M34 0 l12 -8 l-3 8 l3 8 Z", fill: "#2459E8" }, mDart);
+  el("circle", { cx: 0, cy: 0, r: 5, fill: INK }, mDart);
   var answers = ["What each $1 brought back", "Where extra money is wasted", "A better split of the same budget", "Proof from a real lift test"].map(function (t, i) {
     var g = el("g", { opacity: 0 }, g4), y = 52 + i * 62;
     el("rect", ink({ x: 680, y: y, width: 380, height: 48, rx: 14, fill: ["#EEF3FF", "#FFF4E5", "#ECFDF3", "#F4F0FF"][i] }), g);
@@ -222,16 +240,17 @@
   });
 
   // ---- Scene 5: return per $1, by channel
-  var g5 = G[4], maxRoi = ROI[0].v, base5 = 270, colW = 120;
+  var g5 = G[4], maxRoi = ROI[0].v, base5 = 270, colW = 110;
   el("line", ink({ x1: 90, x2: 1040, y1: base5, y2: base5 }), g5);
   var yOf = function (v) { return base5 - v / maxRoi * 200; };
   el("line", { x1: 90, x2: 1040, y1: yOf(1), y2: yOf(1), stroke: "#B42318", "stroke-width": 2.5, "stroke-dasharray": "7 6" }, g5);
-  el("text", { x: 1040, y: yOf(1) - 8, "text-anchor": "end", class: "sub", fill: "#B42318" }, g5, "$1 back: break-even");
+  el("text", { x: 92, y: yOf(1) - 8, class: "sub", fill: "#B42318" }, g5, "break-even");
   var rbars = ROI.map(function (r, i) {
-    var x = 140 + i * (colW + 34);
+    var x = 196 + i * (colW + 30);
     var b = el("rect", ink({ x: x, y: base5, width: colW, height: 0, rx: 12, fill: COLOR[r.c] }), g5);
     var t = el("text", { x: x + colW / 2, y: base5 - 10, "text-anchor": "middle", class: "big", "font-size": 22, fill: INK, opacity: 0 }, g5, "$" + r.v.toFixed(2));
-    el("text", { x: x + colW / 2, y: base5 + 26, "text-anchor": "middle", class: "lbl" }, g5, r.c);
+    icon(g5, r.c, x + 8, base5 + 10, COLOR[r.c], 0.5);
+    el("text", { x: x + 36, y: base5 + 28, class: "lbl" }, g5, r.c);
     return { b: b, t: t, h: base5 - yOf(r.v) };
   });
 
@@ -239,7 +258,8 @@
   var g6 = G[5], maxB = Math.max.apply(null, PLAN.map(function (r) { return Math.max(r.current_spend, r.optimized_spend); }));
   var pb = PLAN.map(function (r, i) {
     var x = 70 + i * 104, base = 262;
-    el("text", { x: x + 36, y: 290, "text-anchor": "middle", class: "lbl", "font-size": 14 }, g6, r.channel);
+    icon(g6, r.channel, x + 2, 272, COLOR[r.channel], 0.42);
+    el("text", { x: x + 26, y: 289, class: "lbl", "font-size": 13 }, g6, r.channel);
     el("rect", { x: x, y: base - r.current_spend / maxB * 210, width: 32, height: r.current_spend / maxB * 210, rx: 8, fill: COLOR[r.channel], opacity: .3 }, g6);
     var b = el("rect", ink({ x: x + 38, y: base, width: 32, height: 0, rx: 8, fill: COLOR[r.channel], "stroke-width": 3 }), g6);
     return { b: b, from: r.current_spend / maxB * 210, to: r.optimized_spend / maxB * 210, base: base };
@@ -280,7 +300,17 @@
       rise(box, ms, 3400, 500);
       mkLines.forEach(function (l, i) { l.setAttribute("stroke-dashoffset", 200 * (1 - out((ms - 3800 - [250, 0, 400][i]) / 600))); });
       mkDot.setAttribute("opacity", out((ms - 3700) / 300));
-      answers.forEach(function (g, i) { rise(g, ms, 5200 + i * 700, 450); });
+      // the dart: quadratic arc from the box to the bullseye, nose first
+      var f = ease((ms - 4400) / 900), P0 = [470, 150], C = [330, 20], P1 = [205, 175];
+      var bx = (1 - f) * (1 - f) * P0[0] + 2 * (1 - f) * f * C[0] + f * f * P1[0], by = (1 - f) * (1 - f) * P0[1] + 2 * (1 - f) * f * C[1] + f * f * P1[1];
+      var tx = 2 * (1 - f) * (C[0] - P0[0]) + 2 * f * (P1[0] - C[0]), ty = 2 * (1 - f) * (C[1] - P0[1]) + 2 * f * (P1[1] - C[1]);
+      var ang = Math.atan2(ty, tx) * 180 / Math.PI;
+      mDart.setAttribute("opacity", ms < 4400 ? 0 : 1);
+      mDart.setAttribute("transform", "translate(" + bx.toFixed(1) + " " + by.toFixed(1) + ") rotate(" + (ang + 180).toFixed(1) + ")");
+      var hit = out((ms - 5300) / 600);
+      bull.setAttribute("fill", ms >= 5300 ? "#12B76A" : "#F04438");
+      hitRing.setAttribute("r", (22 + hit * 46).toFixed(1)); hitRing.setAttribute("opacity", ms >= 5300 ? (1 - hit).toFixed(2) : 0);
+      answers.forEach(function (g, i) { rise(g, ms, 5900 + i * 650, 450); });
     } else if (s === 4) {
       rbars.forEach(function (x, i) {
         var h = x.h * ease((ms - 400 - i * 80) / 900);
@@ -322,6 +352,9 @@
     pp.setAttribute("aria-label", p ? "Play the story" : "Pause the story");
   }
   pp.addEventListener("click", function () { setPaused(!paused); });
+  var cur = function () { return Math.floor(t / DUR) % N; };
+  document.getElementById("prev").addEventListener("click", function () { jump((cur() + N - 1) % N); });
+  document.getElementById("next").addEventListener("click", function () { jump((cur() + 1) % N); });
   // A clicked scene starts just after its fade-in and plays from there.
   function jump(i) { t = i * DUR + (reduce ? DUR - 1 : 0); setPaused(false); draw(); }
   function draw() { var s = Math.floor(t / DUR) % N, p = (t % DUR) / DUR; setCaption(s, p); render(s, p); }
