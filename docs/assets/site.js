@@ -191,7 +191,7 @@
       '<line class="mk-a" x1="166" y1="168" x2="262" y2="334" stroke="#4285F4" stroke-width="96" stroke-linecap="round"/>' +
       '<line class="mk-b" x1="328" y1="168" x2="424" y2="334" stroke="#1967D2" stroke-width="96" stroke-linecap="round"/>' +
       '<circle class="mk-dot" cx="87" cy="331" r="54" fill="#174EA6"/></svg>' +
-      "<h1>Google Meridian,<br>made simple.</h1>" +
+      "<h1>Google Meridian,<br>in plain words.</h1>" +
       '<p class="lede">See which ads bring in your sales and where the next dollar should go.<br>' +
       "A guided tour on a made-up shop, then run it on your own data.</p>" +
       '<div class="starts"><button class="btn pill pill-gold" id="t-start" type="button">Start the Simple Meridian guided tour</button>' +
@@ -203,7 +203,7 @@
       'rel="noopener noreferrer">first release of Simple Meridian</a> in April 2025 on Meridian 1.0.6: upload, fit, charts and a budget ' +
       "optimizer. Today it runs Meridian 2.1.0 and adds GeoX lift tests, this guided tour and a new design.</p></div>",
     story: '<div class="storypage"><div class="kick">The story</div>' +
-      '<iframe class="motion" data-src="assets/story.html?v=e0e5a36fef" title="Animated story: a shop works out where its ad budget should go"></iframe>' +
+      '<iframe class="motion" data-src="assets/story.html?v=7c9b02950d" title="Animated story: a shop works out where its ad budget should go"></iframe>' +
       '<div class="starts"><button class="btn pill pill-gold" id="t-start2" type="button">Start the Simple Meridian guided tour</button>' +
       '<button class="btn pill pill-light" id="t-home" type="button">Back to the start</button></div></div>',
     upload: '<div class="kick">Step 1 of 3</div><h3>Data &amp; model</h3>' +

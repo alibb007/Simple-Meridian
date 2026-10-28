@@ -38,7 +38,7 @@
 </style>
 </head>
 <body>
-<div class="mg" id="mg" role="img" aria-label="Story in six scenes: a shop spends on six ad channels, cannot tell which ones work, has to plan next year's budget, stops guessing and asks Google Meridian, sees the return on each channel, and moves money to the channels that still pay back.">
+<div class="mg" id="mg" role="img" aria-label="Story in seven scenes: a shop spends on six ad channels, cannot tell which ones work, has to plan next year's budget, stops guessing and uses Google Meridian, sees the return on each channel, moves money to the channels that still pay back, and then it is your turn.">
   <div class="bar">
     <button class="pp" id="pp" type="button" aria-label="Pause the story"><svg viewBox="0 0 24 24" aria-hidden="true"><path id="ppicon" fill="currentColor" d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg></button>
     <button class="nav" id="prev" type="button" aria-label="Previous scene">‹</button>
@@ -78,9 +78,10 @@
     ["Once upon a time", "Meet a made-up online shop with a big ad habit.", "Last year it spent " + BUDGET + " on ads across six channels. Every channel had a fan."],
     ["Every week", "Sales went up and down, and every team took the credit.", "Ads, discounts and the season all push sales, so nobody could say which channel earned what."],
     ["Until one day", "The boss asked the question nobody wanted.", "Next year's budget is the same " + BUDGET + ". Where should it go?"],
-    ["Because of that", "They stopped guessing and asked Google Meridian.", "Another year on gut feel means another " + BUDGET + " spent blind. Meridian turns 156 weeks of numbers into answers."],
-    ["Because of that", "The answers were a little embarrassing.", best.c + ", the smallest budget, returned $" + best.v.toFixed(2) + " for every $1. " + worst.c + " returned $" + worst.v.toFixed(2) + "."],
-    ["Until finally", "They moved the money and kept the budget.", "Same " + BUDGET + ", " + M(GAIN) + " more sales from ads in a year (+" + PCT.toFixed(1) + "%). Everyone took the credit again."]
+    ["Because of that", "They stopped guessing and used Google Meridian!", "Another year on gut feel means another " + BUDGET + " spent blind. Meridian turns 156 weeks of numbers into answers."],
+    ["Because of that", "For the first time, the answers were clear.", best.c + ", the smallest budget, returned $" + best.v.toFixed(2) + " for every $1. " + worst.c + " returned $" + worst.v.toFixed(2) + "."],
+    ["Until finally", "They moved the money, and sales went up.", "Same " + BUDGET + " budget, " + M(GAIN) + " more sales from ads in a year (+" + PCT.toFixed(1) + "%). Everyone took the credit again."],
+    ["And now", "Now it's your turn to try it.", "Take the guided tour, then run Simple Meridian on your own weekly numbers. It's free and runs on your computer."]
   ];
   var N = SCENES.length, DUR = 14000;  // each scene holds 14 s
 
@@ -230,7 +231,7 @@
   el("line", { x1: 0, y1: 0, x2: 34, y2: 0, stroke: "#2459E8", "stroke-width": 5, "stroke-linecap": "round" }, mDart);
   el("path", { d: "M34 0 l12 -8 l-3 8 l3 8 Z", fill: "#2459E8" }, mDart);
   el("circle", { cx: 0, cy: 0, r: 5, fill: INK }, mDart);
-  var answers = ["What each $1 brought back", "Where extra money is wasted", "A better split of the same budget", "Proof from a real lift test"].map(function (t, i) {
+  var answers = ["What did each $1 bring back?", "Where is extra money wasted?", "How should we split the budget?", "Can a real test prove it?"].map(function (t, i) {
     var g = el("g", { opacity: 0 }, g4), y = 52 + i * 62;
     el("rect", ink({ x: 680, y: y, width: 380, height: 48, rx: 14, fill: ["#EEF3FF", "#FFF4E5", "#ECFDF3", "#F4F0FF"][i] }), g);
     el("circle", ink({ cx: 706, cy: y + 24, r: 11, fill: "#067647" }), g);
@@ -275,6 +276,33 @@
   // One curve for everything (ease-out), short staggers, a gentle rise for each entrance, a cross-fade between scenes.
   var out = function (x) { x = Math.max(0, Math.min(1, x)); return 1 - Math.pow(1 - x, 3); };
   function rise(g, ms, at, dur) { var k = out((ms - at) / (dur || 450)); g.setAttribute("opacity", k); g.setAttribute("transform", "translate(0 " + ((1 - k) * 14).toFixed(1) + ")"); }
+  // ---- Scene 7: your turn
+  var g7 = G[6];
+  var steps7 = [["Upload your weekly numbers", "sheet"], ["Press Run model", "mark"], ["Read the answers", "chart"]].map(function (st, i) {
+    var x = 70 + i * 340, g = el("g", { opacity: 0 }, g7);
+    el("rect", ink({ x: x, y: 50, width: 280, height: 200, rx: 22, fill: ["#EEF3FF", "#FFFFFF", "#ECFDF3"][i] }), g);
+    el("circle", ink({ cx: x + 34, cy: 84, r: 18, fill: "#FFD166" }), g);
+    el("text", { x: x + 34, y: 91, "text-anchor": "middle", class: "big", "font-size": 18, fill: INK }, g, String(i + 1));
+    var ix = x + 110, iy = 90;
+    if (st[1] === "sheet") {
+      el("rect", ink({ x: ix, y: iy, width: 70, height: 84, rx: 8, fill: "#fff" }), g);
+      for (var r = 0; r < 4; r++) el("rect", { x: ix + 12, y: iy + 14 + r * 16, width: 46, height: 8, rx: 3, fill: r === 0 ? "#9DB7F5" : "#E4E7EC" }, g);
+    } else if (st[1] === "mark") {
+      var mk = el("g", { transform: "translate(" + (ix - 10) + " " + (iy - 10) + ") scale(0.2)" }, g);
+      [["315", "170", "268", "330", "#AECBFA", 58], ["166", "168", "262", "334", "#4285F4", 96], ["328", "168", "424", "334", "#1967D2", 96]].forEach(function (l) {
+        el("line", { x1: l[0], y1: l[1], x2: l[2], y2: l[3], stroke: l[4], "stroke-width": l[5], "stroke-linecap": "round" }, mk);
+      });
+      el("circle", { cx: 87, cy: 331, r: 54, fill: "#174EA6" }, mk);
+    } else {
+      [36, 60, 22, 48].forEach(function (h, k) { el("rect", ink({ x: ix + k * 20, y: iy + 84 - h, width: 14, height: h, rx: 4, fill: ["#008300", "#EB6834", "#E87BA4", "#2A78D6"][k], "stroke-width": 2.5 }), g); });
+    }
+    el("text", { x: x + 140, y: 224, "text-anchor": "middle", class: "lbl", "font-size": 17 }, g, st[0]);
+    return g;
+  });
+  var arrows7 = [0, 1].map(function (i) { return el("path", ink({ d: "M" + (360 + i * 340) + " 150 h32 m-10 -10 l10 10 l-10 10", fill: "none", "stroke-width": 4, "stroke-linecap": "round", opacity: 0 }), g7); });
+  var cta7 = el("g", { opacity: 0 }, g7);
+  el("text", { x: 550, y: 300, "text-anchor": "middle", class: "big", "font-size": 20, fill: INK }, cta7, "Start the guided tour below ↓");
+
   function render(s, p) {
     var ms = p * DUR, fadeIn = out(ms / 450), fadeOut = 1 - out((ms - (DUR - 450)) / 450), still = reduce || paused;
     G.forEach(function (g, i) {
@@ -322,6 +350,10 @@
       pb.forEach(function (x) { var h = x.from + (x.to - x.from) * t2; x.b.setAttribute("y", x.base - h); x.b.setAttribute("height", h); });
       rise(badge, ms, 2400, 500);
       num.textContent = "+" + (PCT * out((ms - 2400) / 1200)).toFixed(1) + "%";
+    } else if (s === 6) {
+      steps7.forEach(function (g, i) { rise(g, ms, 400 + i * 700, 500); });
+      arrows7.forEach(function (a, i) { a.setAttribute("opacity", out((ms - 900 - i * 700) / 300)); });
+      rise(cta7, ms, 2800, 500);
     }
   }
 
