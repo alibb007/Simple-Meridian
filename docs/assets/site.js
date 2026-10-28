@@ -617,6 +617,12 @@
     if (e.altKey || e.ctrlKey || e.metaKey) return;
     var tag = (e.target.tagName || "").toLowerCase();
     if (tag === "input" || tag === "textarea") return;
+    if (i === -2) {  // on the story page the arrow keys move the story, not the tour
+      var sw = null; try { sw = main.querySelector(".storypage iframe").contentWindow; } catch (err) {}
+      if (sw && sw.storyStep && (e.key === "ArrowRight" || e.key === "ArrowLeft")) { sw.storyStep(e.key === "ArrowRight" ? 1 : -1); e.preventDefault(); }
+      else if (sw && sw.storyPause && e.key === " " && tag !== "button" && tag !== "a") { sw.storyPause(); e.preventDefault(); }
+      return;
+    }
     if (e.key === "ArrowRight") { go(i + 1, true); e.preventDefault(); }
     else if (e.key === "ArrowLeft" && i >= 0) { go(i === 0 ? -1 : i - 1, true); e.preventDefault(); }
   });

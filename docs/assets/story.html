@@ -355,6 +355,15 @@
   var cur = function () { return Math.floor(t / DUR) % N; };
   document.getElementById("prev").addEventListener("click", function () { jump((cur() + N - 1) % N); });
   document.getElementById("next").addEventListener("click", function () { jump((cur() + 1) % N); });
+  // Arrow keys move between scenes, here and from the page that embeds the story; space pauses.
+  window.storyStep = function (d) { jump((cur() + d + N) % N); };
+  window.storyPause = function () { setPaused(!paused); };
+  document.addEventListener("keydown", function (e) {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.key === "ArrowRight") { window.storyStep(1); e.preventDefault(); }
+    else if (e.key === "ArrowLeft") { window.storyStep(-1); e.preventDefault(); }
+    else if (e.key === " " && (e.target.tagName || "").toLowerCase() !== "button") { window.storyPause(); e.preventDefault(); }
+  });
   // A clicked scene starts just after its fade-in and plays from there.
   function jump(i) { t = i * DUR + (reduce ? DUR - 1 : 0); setPaused(false); draw(); }
   function draw() { var s = Math.floor(t / DUR) % N, p = (t % DUR) / DUR; setCaption(s, p); render(s, p); }
