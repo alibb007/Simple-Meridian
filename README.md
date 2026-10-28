@@ -160,6 +160,7 @@ app_pages/
   step2_insights.py            ROI, contribution, response curves, fit, report
   step3_optimization.py        budget optimizer and exports
   lift_test.py                 Meridian GeoX: design, measure, use as prior
+  report.py                    Meridian's own report charts, each explained
   help.py                      glossary and FAQ
   legal.py                     privacy, terms, licenses
   common.py                    shared state, caching, model upload/download
@@ -167,6 +168,7 @@ utils/
   mmm.py                       all Meridian calls; returns plain pandas tables
   geox.py                      all GeoX calls, plus the sample geo data
   tour.py                      the guided tour
+  report_charts.py             plain-words text for every Meridian report chart
   charts.py                    Plotly charts
   ui.py                        theme, CSS, sidebar navigation, small components
 static/motion/how-it-works.html  16-second motion graphic on the home page
@@ -194,7 +196,8 @@ After upgrading `google-meridian`, run `python scripts/build_demo.py --refit` so
 - Added **lift tests with Meridian GeoX 1.0.1**: design a geo experiment, measure it, and use the result as an ROI prior.
 - Added a demo: a pre-fitted model with precomputed charts, so you can see the results without fitting anything.
 - New home page: what the app is for, the demo's real results, a 16-second motion graphic, and three pictures of how Meridian reasons.
-- Guided tour spotlights each part it explains and dims the rest; its card sits right above that part.
+- Guided tour spotlights each part it explains and dims the rest; its card sits right above that part. It has 26 steps: step 1 section by section, then every chart from Meridian's own report.
+- New **Meridian charts** page: the 12 model charts and 4 budget-plan charts from Meridian's HTML report, drawn by Meridian, each with "what it shows" and "how to read it" in plain words.
 - Step 1 now runs in order (data, time and outcome, channels, controls, fit), with channel cards you can rename, re-map, add and remove.
 - Budget plan period: latest 52 weeks, last full calendar year, full history, or custom dates from an in-app calendar.
 - Privacy & terms page, SECURITY.md and THIRD_PARTY_NOTICES.md; pickle model files are off by default; uploads capped at 50 MB.
