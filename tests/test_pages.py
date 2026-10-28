@@ -40,17 +40,19 @@ def test_pages_with_demo_model():
         assert not at.exception, f"{page}: {at.exception}"
 
 
-def test_tour_renders_on_every_step():
+def test_tour_card_shows_on_every_step():
+    """Every step must render its card (its anchor exists on its page) with the demo loaded."""
     from utils import tour
     for i, step in enumerate(tour.steps()):
-        at = AppTest.from_file(os.path.join(ROOT, "app.py"), default_timeout=180)
-        at.session_state["page"] = step["page"]
+        at = _app(step["page"], demo=True)
         at.session_state["tour"] = i
         at.run()
         assert not at.exception, f"tour step {i}: {at.exception}"
+        text = " ".join(m.value for m in at.markdown)
+        assert step["title"] in text, f"tour step {i} ({step['anchor']}): card not rendered"
 
 
 if __name__ == "__main__":
-    for t in (test_pages_without_model, test_pages_with_demo_model, test_tour_renders_on_every_step):
+    for t in (test_pages_without_model, test_pages_with_demo_model, test_tour_card_shows_on_every_step):
         t()
         print("ok", t.__name__)

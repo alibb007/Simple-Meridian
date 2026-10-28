@@ -213,6 +213,7 @@ def _configure(df: pd.DataFrame):
     left, right = st.columns([2.2, 1], gap="large")
     with left:
         _section(2, "event", "Time and outcome", "Which column holds the week, and what you want to grow.")
+        tour.here("s1-time")
         with st.container(border=True, key="s1-time"):
             c1, c2, c3 = st.columns(3)
             date_col = c1.selectbox("Date column", s["date_options"], key="cfg_date",
@@ -229,12 +230,14 @@ def _configure(df: pd.DataFrame):
             _outcome_chart(df, date_col, kpi_col)
 
         _section(3, "campaign", "Paid channels", "Each channel needs its spend and, if you have it, its impressions.")
+        tour.here("s1-channels")
         with st.container(key="s1-channels"):
             channels = _channel_cards(df, s, kpi_col)
         used = {kpi_col, *(r["Exposure column"] for r in channels), *(r["Spend column"] for r in channels)}
 
         _section(4, "tune", "Controls (optional)",
                  "Things that move sales but aren't paid media: price, discounts, seasonality, market trends.")
+        tour.here("s1-controls")
         with st.container(border=True, key="s1-controls"):
             control_opts = [c for c in numeric if c not in used]
             controls = st.multiselect("Control columns", control_opts,
@@ -283,6 +286,7 @@ def _model_ready():
     info = st.session_state.model_info or {}
     r2, rhat, mape, elapsed = info.get("r2"), info.get("max_rhat"), info.get("mape"), info.get("elapsed")
     st.markdown("<div style='height:.6rem'></div>", unsafe_allow_html=True)
+    tour.here("s1-ready")
     with st.container(border=True, key="s1-ready"):
         st.markdown(f'<div style="display:flex;gap:.7rem;align-items:center">{ui.badge("task_alt", "green", 40)}'
                     '<span style="font-family:var(--display);font-weight:800;font-size:1.25rem">Model ready</span></div>',
