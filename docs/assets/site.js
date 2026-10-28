@@ -185,10 +185,7 @@
   var sel = function (label, value) { return '<div class="field"><span>' + label + "</span><em>" + value + " ▾</em></div>"; };
 
   var SCREENS = {
-    home: '<div class="version"><span class="tag">Updated 27 Oct 2026</span>' +
-      "<span>First release <b>April 2025</b> on Google Meridian 1.0.6</span>" +
-      '<span>Now on <b>Meridian 2.1.0</b>, with <b>GeoX (Lift test)</b><span class="new">NEW</span></span></div>' +
-      '<div class="intro">' +
+    home: '<div class="intro">' +
       '<div class="kicker">Guided tour · Google Meridian, made simple</div>' +
       "<h1>Find out which ads really bring in your sales</h1>" +
       '<p class="lede">Meridian is Google\'s free tool for working out what each ad channel earns and where the next dollar ' +
@@ -199,8 +196,10 @@
       '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>Start the guided tour</button>' +
       '<span class="startnote">STEPS_COUNT steps · use Next and Back, or the arrow keys</span></div>' +
       '<div class="sign"><img class="avatar" src="assets/ali.png" alt="" width="36" height="36">' +
-      "<span>Built by <b>Ali Barfi Bafghi</b> so anyone can try Meridian without writing code. First release April 2025 on " +
-      "Meridian 1.0.6, updated 27 Oct 2026 to Meridian 2.1.0.</span></div></div>",
+      "<span>Built by <b>Ali Barfi Bafghi</b> so anyone can try Meridian without writing code.</span></div>" +
+      '<p class="vnote">Updated 27 Oct 2026. I built the <a href="https://github.com/alibb007/Simple-Meridian/tree/6bde9f5" target="_blank" ' +
+      'rel="noopener noreferrer">first release of Simple Meridian</a> in April 2025 on Meridian 1.0.6: upload, fit, charts and a budget ' +
+      "optimizer. Today it runs Meridian 2.1.0 and adds GeoX lift tests, this guided tour and a new design.</p></div>",
     upload: '<div class="kick">Step 1 of 3</div><h3>Data &amp; model</h3>' +
       '<div class="startcards" data-t="s1-upload">' +
       '<div class="box startcard hot"><span class="hotchip">Start here</span><div class="boxh">Upload your file</div>' +
@@ -249,7 +248,7 @@
       '<div class="tile"><div class="k">Incremental revenue</div><div class="v">' + money(T.outcome_after) + '</div><div class="d up">+' + gainPct.toFixed(1) + "% · +" + money(gain) + "</div></div>" +
       '<div class="tile"><div class="k">ROI</div><div class="v">' + T.roi_after.toFixed(2) + '×</div><div class="d">was ' + T.roi_before.toFixed(2) + "×</div></div></div>" +
       '<div class="chart">' + planChart() + "</div>",
-    geox: '<div class="kick">Meridian GeoX <span class="new">NEW</span></div><h3>GeoX (Lift test)</h3>' +
+    geox: '<div class="kick">Meridian GeoX</div><h3>GeoX (Lift test)</h3>' +
       '<div class="box" data-t="gx-why"><div class="boxh">Why a test?</div><div class="why">' +
       '<div><b>A model looks back</b><p>It sees that sales rose in weeks with more TV, but it cannot be sure TV caused it.</p></div>' +
       '<div class="arrow" aria-hidden="true">→</div>' +
@@ -274,18 +273,28 @@
       '<div class="safe"><b>Your data stays on your computer.</b> The app runs in Docker on your own machine at ' +
       '<code>localhost</code>. Your file is never uploaded anywhere, Meridian runs on your computer, usage statistics are off, ' +
       "and the app's fonts and icons come with it, so the page makes no requests to other sites.</div>" +
-      '<p class="lede">The full app fits Meridian on your own weekly data, runs budget plans and GeoX (Lift test)<span class="new">NEW</span> ' +
-      'experiments. It runs in <a href="https://www.docker.com/products/docker-desktop/" target="_blank" rel="noopener noreferrer">Docker Desktop</a> ' +
-      "on a Mac or a Windows PC. Tested so far on Apple silicon; the Intel/Windows build passed a full model fit under emulation.</p>" +
       '<div class="runs">' +
-      '<div class="box"><div class="boxh">1. Get the code</div>' + code("git clone https://github.com/alibb007/Simple-Meridian.git\ncd Simple-Meridian") +
-      '<p>No git? Download the ZIP from <a href="https://github.com/alibb007/Simple-Meridian" target="_blank" rel="noopener noreferrer">GitHub</a> and unzip it.</p></div>' +
-      '<div class="box"><div class="boxh">2. Start it</div>' + code("./start.sh") +
-      "<p>That's on a Mac. On Windows, double-click <code>start.bat</code>. The first build takes a few minutes.</p></div>" +
+      '<div class="box"><div class="boxh">1. Install Docker Desktop and open it</div><p>Get it free from ' +
+      '<a href="https://www.docker.com/products/docker-desktop/" target="_blank" rel="noopener noreferrer">docker.com</a>, then start it ' +
+      "and wait until it says it is running. Tested so far on Apple silicon Macs; the Intel/Windows build passed a full model fit under emulation.</p></div>" +
+      '<div class="box"><div class="boxh">2. Paste these lines, then press Enter</div>' +
+      '<div class="ostabs" role="tablist"><button type="button" role="tab" class="on" data-os="mac" aria-selected="true">Mac</button>' +
+      '<button type="button" role="tab" data-os="win" aria-selected="false">Windows</button></div>' +
+      '<div class="os" data-os="mac"><p>Open <b>Terminal</b> (press ⌘ Space, type Terminal, press Enter) and paste:</p>' +
+      code("git clone https://github.com/alibb007/Simple-Meridian.git\ncd Simple-Meridian\n./start.sh") + "</div>" +
+      '<div class="os" data-os="win" hidden><p>Open <b>PowerShell</b> (Start menu, type PowerShell, press Enter) and paste:</p>' +
+      code("git clone https://github.com/alibb007/Simple-Meridian.git\ncd Simple-Meridian\n.\\start.bat") + "</div>" +
+      '<p>The first build takes a few minutes, then the app opens in your browser. No git? Download the ZIP from ' +
+      '<a href="https://github.com/alibb007/Simple-Meridian" target="_blank" rel="noopener noreferrer">GitHub</a>, unzip it, and double-click ' +
+      "<code>start.bat</code> (Windows) or run <code>./start.sh</code> in that folder (Mac).</p></div>" +
       '<div class="box"><div class="boxh">3. Upload your file</div><p>Open <b>http://localhost:8501</b> and upload a CSV or Excel file ' +
       'with one row per week, or load the sample data to try it first. <a href="https://github.com/alibb007/Simple-Meridian#quick-start" ' +
       'target="_blank" rel="noopener noreferrer">Full instructions in the README</a></p></div>' +
-      "</div></div>",
+      "</div>" +
+      '<div class="more"><b>This is the simple path through Meridian.</b> Google Meridian has many more tools than this tour shows, ' +
+      "such as models per region, reach and frequency, custom priors and more settings and charts. Simple Meridian keeps the common " +
+      'steps easy. For everything else, see the <a href="https://developers.google.com/meridian" target="_blank" rel="noopener noreferrer">Meridian documentation</a>.</div>' +
+      "</div>",
   };
 
   // true = show the PNG screenshots in assets/charts/ instead of the interactive charts.
@@ -336,6 +345,10 @@
   fold.addEventListener("click", function () { setFolded(!app.classList.contains("folded")); });
   try { if (localStorage.getItem("sm-folded") === "1") setFolded(true); } catch (e) {}
 
+  if (/Win/.test(navigator.platform || navigator.userAgent)) SCREENS.run = SCREENS.run
+    .replace('class="on" data-os="mac" aria-selected="true"', 'data-os="mac" aria-selected="false"')
+    .replace('data-os="win" aria-selected="false"', 'class="on" data-os="win" aria-selected="true"')
+    .replace('<div class="os" data-os="mac">', '<div class="os" data-os="mac" hidden>').replace('<div class="os" data-os="win" hidden>', '<div class="os" data-os="win">');
   Object.keys(SCREENS).forEach(function (k) {
     var div = document.createElement("div");
     div.className = "screen"; div.dataset.screen = k; div.innerHTML = SCREENS[k];
@@ -476,6 +489,13 @@
     })();
   }
   main.addEventListener("click", function (e) {
+    var tab = e.target.closest && e.target.closest(".ostabs button");
+    if (tab) {
+      var box = tab.closest(".box");
+      [].forEach.call(box.querySelectorAll(".ostabs button"), function (t) { t.classList.toggle("on", t === tab); t.setAttribute("aria-selected", String(t === tab)); });
+      [].forEach.call(box.querySelectorAll(".os"), function (o) { o.hidden = o.dataset.os !== tab.dataset.os; });
+      place(false); return;
+    }
     var b = e.target.closest && e.target.closest(".copy");
     if (!b) return;
     var done = function () { b.textContent = "Copied"; setTimeout(function () { b.textContent = "Copy"; }, 1500); };
@@ -513,7 +533,7 @@
       if (scrollToo) window.scrollTo(0, 0);
       return;
     }
-    chap.innerHTML = esc(s.chapter) + (/GeoX/.test(s.chapter) ? '<span class="new">NEW</span>' : "");
+    chap.textContent = s.chapter;
     count.textContent = "Step " + (i + 1) + " of " + STEPS.length;
     title.textContent = s.title; body.innerHTML = s.body;
     skipBtn.hidden = chapterEnd(i) >= STEPS.length || !!s.last;

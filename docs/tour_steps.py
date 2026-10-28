@@ -110,7 +110,7 @@ def steps() -> list[dict]:
         out.append(dict(chapter="Budget plan charts", page="report", icon=c["icon"], title=c["title"],
                         body=f"{c['what']} {c['read']}", anchor=f"mr-{c['id']}"))
     out += [
-        dict(chapter="GeoX (Lift test)", page="geox", icon="science", title="New: why run a lift test?",
+        dict(chapter="GeoX (Lift test)", page="geox", icon="science", title="Why run a lift test?",
              body="Meridian learns from the past, so it can mix up cause and effect. If TV spend went up in the same "
                   "weeks that sales rose for another reason, TV gets the credit. A <b>lift test</b> settles it with a "
                   "real experiment: run the ads in some regions, keep them off in similar ones, and compare.",

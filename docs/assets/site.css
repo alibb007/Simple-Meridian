@@ -124,6 +124,17 @@ table.fit td:nth-child(2) { font-weight: 700; font-family: var(--display); }
 .rbar span { position: absolute; top: 0; bottom: 0; border-radius: 99px; }
 
 /* Last screen: how to run it */
+.ostabs { display: inline-flex; gap: .25rem; background: #F2F4F7; border-radius: 10px; padding: .2rem; margin-bottom: .6rem; }
+.ostabs button { border: 0; background: none; padding: .35rem .9rem; border-radius: 8px; font: 600 .88rem var(--body); color: var(--muted); cursor: pointer; }
+.ostabs button.on { background: #fff; color: var(--ink); box-shadow: var(--shadow); }
+.more { margin-top: .9rem; background: #F4F0FF; border: 1px solid #DDD3FE; color: #3E1C96; border-radius: 12px; padding: .8rem 1rem; font-size: .93rem; }
+.more b { display: block; font-family: var(--display); font-size: 1.02rem; margin-bottom: .15rem; }
+.vnote { margin: 1.4rem auto 0; max-width: 720px; font-size: .78rem; color: #98A2B3; }
+.vnote a { color: inherit; }
+.me { display: flex !important; align-items: center; gap: .6rem; margin-top: .8rem; padding: .5rem .6rem !important; border-top: 1px solid rgba(255,255,255,.1); border-radius: 0 !important; }
+.me img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 2px rgba(255,255,255,.6); flex: none; }
+.me b { display: block; color: #fff; font-size: .88rem; }
+.me small { color: #93A3C4; font-size: .74rem; }
 .safe { background: #ECFDF3; border: 1px solid #ABEFC6; color: #054F31; border-radius: 12px; padding: .8rem 1rem; margin-bottom: .9rem; font-size: .95rem; }
 .safe b { display: block; font-family: var(--display); font-size: 1.05rem; margin-bottom: .15rem; }
 .code { position: relative; }

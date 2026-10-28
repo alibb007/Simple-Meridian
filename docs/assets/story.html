@@ -51,9 +51,9 @@
   var D = null;
   try { D = window.parent && window.parent.SM_DEMO; } catch (e) {}
   var PLAN = D ? D.plan : [
-    { channel: "TV", current_spend: 46.5e6, optimized_spend: 51.9e6 }, { channel: "Radio", current_spend: 12.2e6, optimized_spend: 15.9e6 },
-    { channel: "Display", current_spend: 24.9e6, optimized_spend: 17.4e6 }, { channel: "Search", current_spend: 17.8e6, optimized_spend: 12.4e6 },
-    { channel: "Social", current_spend: 8.8e6, optimized_spend: 10.2e6 }, { channel: "Email", current_spend: 5.9e6, optimized_spend: 7.6e6 }];
+    { channel: "TV", current_spend: 46.5e6, optimized_spend: 52.0e6 }, { channel: "Radio", current_spend: 12.2e6, optimized_spend: 15.9e6 },
+    { channel: "Display", current_spend: 24.9e6, optimized_spend: 17.4e6 }, { channel: "Search", current_spend: 17.8e6, optimized_spend: 12.9e6 },
+    { channel: "Social", current_spend: 8.8e6, optimized_spend: 10.2e6 }, { channel: "Email", current_spend: 5.9e6, optimized_spend: 7.7e6 }];
   var ROI = D ? D.summary.filter(function (r) { return !r.is_total; }).map(function (r) { return { c: r.channel, v: r.roi }; })
               : [{ c: "Email", v: 10.62 }, { c: "Radio", v: 6.81 }, { c: "Social", v: 3.36 }, { c: "TV", v: 2.60 }, { c: "Search", v: 2.29 }, { c: "Display", v: 1.61 }];
   var T = D ? D.plan_totals : { budget_before: 116.1e6, outcome_before: 359.6e6, outcome_after: 378.3e6 };
