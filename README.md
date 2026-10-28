@@ -75,7 +75,7 @@ Tested so far: the image builds and runs natively on Apple silicon (arm64). The 
 
 ### Live demo
 
-The `docs/` folder is a static site with the demo results, the motion graphic and the auto-playing tour. To publish it for free, turn on **Settings → Pages → Deploy from a branch → `main` / `docs`** in the GitHub repository. It will be served at `https://alibb007.github.io/Simple-Meridian/`. GitHub Pages is free for public repositories, with a 1 GB site limit and a soft limit of 100 GB of traffic per month; the demo is about 170 KB.
+**https://alibb007.github.io/simple-meridian-demo/** shows the demo results, the motion graphic and the auto-playing tour. It is built from this repository's `docs/` folder and published from the [simple-meridian-demo](https://github.com/alibb007/simple-meridian-demo) repository with GitHub Pages. GitHub Pages is free for public repositories, with a 1 GB site limit and a soft limit of 100 GB of traffic per month; the demo is about 170 KB.
 
 ### Run with Python
 
