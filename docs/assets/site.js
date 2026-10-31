@@ -442,10 +442,11 @@
     s.config = s.config || {};
     s.config.legend = Object.assign({}, s.config.legend, { orient: "bottom", direction: "horizontal", columns: 2,
                                                            layout: { bottom: { anchor: "start", direction: "vertical", margin: 4 } } });
-    // Some charts set their own legend columns (6 across); two fit a phone.
+    // Some charts set their own legend columns (6 across) or 8 date ticks; two columns and 4 ticks fit a phone.
     (function walk(o) {
       if (!o || typeof o !== "object") return;
       if (o.legend && typeof o.legend === "object") { o.legend.columns = 2; o.legend.orient = "bottom"; }
+      if (o.axis && typeof o.axis === "object") { if (o.axis.tickCount > 4) o.axis.tickCount = 4; o.axis.labelOverlap = true; }
       for (var k in o) if (k !== "datasets" && k !== "data") walk(o[k]);
     })(s);
     // Vega never wraps a title, so a long one would set the chart's width: break it into lines.
