@@ -342,6 +342,10 @@
   var small = window.matchMedia("(max-width: 860px)"), wide = window.matchMedia("(min-width: 1200px)"), SIDE = 380;
   var i = -1, basePad = null;  // i = -1 is the welcome page
   var fold = document.getElementById("fold");
+  // Phones hide the sidebar footer, so the links and the privacy note get a copy under the page.
+  var foot = document.querySelector(".side-foot").cloneNode(true);
+  foot.className = "side-foot m-foot";
+  app.appendChild(foot);
   function setFolded(f) {
     app.classList.toggle("folded", f);
     fold.setAttribute("aria-expanded", String(!f));
@@ -428,6 +432,43 @@
     }
     return chartsReady;
   }
+  // Meridian sizes its charts for a desktop report (400-1,200 px wide). Shrunk onto a phone, their 12 px
+  // labels end up 4-5 px tall, so where the column is narrow (phones, or next to the caption on a laptop)
+  // redraw them at the width there is: one plot width,
+  // curve grids one panel per row, legends underneath.
+  function fitSpec(spec, plot) {
+    var s = JSON.parse(JSON.stringify(spec));
+    plot = Math.max(110, plot);
+    s.config = s.config || {};
+    s.config.legend = Object.assign({}, s.config.legend, { orient: "bottom", direction: "horizontal", columns: 2,
+                                                           layout: { bottom: { anchor: "start", direction: "vertical", margin: 4 } } });
+    // Some charts set their own legend columns (6 across); two fit a phone.
+    (function walk(o) {
+      if (!o || typeof o !== "object") return;
+      if (o.legend && typeof o.legend === "object") { o.legend.columns = 2; o.legend.orient = "bottom"; }
+      for (var k in o) if (k !== "datasets" && k !== "data") walk(o[k]);
+    })(s);
+    // Vega never wraps a title, so a long one would set the chart's width: break it into lines.
+    var wrap = function (t) {
+      if (typeof t !== "string") return t;
+      return t.split(" ").reduce(function (ls, w) {
+        if (ls.length && (ls[ls.length - 1] + " " + w).length <= Math.floor(plot / 8)) ls[ls.length - 1] += " " + w; else ls.push(w);
+        return ls;
+      }, []);
+    };
+    if (s.title && s.title.text) s.title.text = wrap(s.title.text); else if (s.title) s.title = wrap(s.title);
+    if (s.facet && s.columns) {
+      s.columns = 1; s.spec.width = plot; s.spec.height = 170;
+    } else if (s.facet && s.facet.column) {
+      var f = s.facet.column.field, seen = {};
+      (s.datasets[s.data.name] || []).forEach(function (r) { seen[r[f]] = 1; });
+      s.spec.width = Math.max(28, Math.floor(plot / Math.max(1, Object.keys(seen).length)) - 4);
+    } else if (s.width != null) {
+      s.width = plot;
+    }
+    if (s.height > 280) s.height = 260;
+    return s;
+  }
   function drawCharts(scr) {
     var boxes = scr ? scr.querySelectorAll(".vchart:not(.drawn)") : [];
     if (!boxes.length) return;
@@ -443,8 +484,15 @@
             "</tbody></table>";
           place(false); return;
         }
-        vegaEmbed(box, spec, { actions: false, renderer: "svg", ast: true, expr: vegaInterpreter.expressionInterpreter })
-          .then(function () { place(false); })
+        var avail = box.parentElement.clientWidth - 16, embed = function (sp) {
+          return vegaEmbed(box, sp, { actions: false, renderer: "svg", ast: true, expr: vegaInterpreter.expressionInterpreter });
+        };
+        var drawn = avail >= 640 ? embed(spec) : embed(fitSpec(spec, avail - 80)).then(function () {
+          // Axis labels and legends add width the plot setting doesn't cover; take it off the plot and draw once more.
+          var svg = box.querySelector("svg"), extra = svg ? +svg.getAttribute("width") - avail : 0;
+          if (extra > 2) return embed(fitSpec(spec, avail - 80 - extra));
+        });
+        drawn.then(function () { place(false); })
           .catch(function () { box.innerHTML = '<div class="vload">This chart could not be drawn.</div>'; });
       });
     }).catch(function () { [].forEach.call(boxes, function (b) { b.innerHTML = '<div class="vload">This chart could not be loaded.</div>'; }); });
@@ -474,7 +522,8 @@
       a = app.getBoundingClientRect(); r = t.getBoundingClientRect();
       setSpot(r, a, pad);
       if (scrollToo) {
-        var barBottom = document.querySelector(".app-side").getBoundingClientRect().bottom;
+        var side = document.querySelector(".app-side");  // not sticky on short screens (phone held sideways)
+        var barBottom = getComputedStyle(side).position === "sticky" ? side.getBoundingClientRect().bottom : 0;
         window.scrollBy({ top: r.top - barBottom - 14, behavior: "auto" });
       }
       return;

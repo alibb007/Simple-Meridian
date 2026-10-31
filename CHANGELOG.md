@@ -2,6 +2,10 @@
 
 What changed in Simple Meridian, newest first. The [README](README.md#whats-new) has the short version.
 
+## 31 Oct 2026
+
+- **Guided tour site on phones.** Meridian's charts are now redrawn to fit the space they have instead of being shrunk, so their labels stay at full size (on a 375 px phone they used to shrink to 40%, about 5 px). Curve grids show one channel per row, and legends sit under the chart. The links, the privacy note and the author card now appear at the bottom of the page on phones. With the phone held sideways, the header scrolls away and the caption takes less of the screen.
+
 ## 28 Oct 2026
 
 - **Guided tour story, rewritten.** Seven scenes on a made-up shop: the team guesses, the boss asks where next year's budget should go, they run Google Meridian, the answers come back, they move the money, and it ends with "Now it's your turn to try it." Meridian's answers are shown as the questions it can answer.
