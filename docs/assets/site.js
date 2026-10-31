@@ -203,7 +203,7 @@
       'rel="noopener noreferrer">first release of Simple Meridian</a> in April 2025 on Meridian 1.0.6: upload, fit, charts and a budget ' +
       "optimizer. Today it runs Meridian 2.1.0 and adds GeoX lift tests, this guided tour and a new design.</p></div>",
     story: '<div class="storypage"><div class="kick">The story</div>' +
-      '<iframe class="motion" data-src="assets/story.html?v=6a50bbd49f" title="Animated story: a shop works out where its ad budget should go"></iframe>' +
+      '<iframe class="motion" data-src="assets/story.html?v=9fc57e1992" title="Animated story: a shop works out where its ad budget should go"></iframe>' +
       '<div class="starts"><button class="btn pill pill-gold" id="t-start2" type="button">Start the Simple Meridian guided tour</button>' +
       '<button class="btn pill pill-light" id="t-home" type="button">Back to the start</button></div></div>',
     upload: '<div class="kick">Step 1 of 3</div><h3>Data &amp; model</h3>' +
@@ -452,13 +452,15 @@
     var wrap = function (t) {
       if (typeof t !== "string") return t;
       return t.split(" ").reduce(function (ls, w) {
-        if (ls.length && (ls[ls.length - 1] + " " + w).length <= Math.floor(plot / 8)) ls[ls.length - 1] += " " + w; else ls.push(w);
+        if (ls.length && (ls[ls.length - 1] + " " + w).length <= Math.floor(plot / 7.5)) ls[ls.length - 1] += " " + w; else ls.push(w);
         return ls;
       }, []);
     };
-    if (s.title && s.title.text) s.title.text = wrap(s.title.text); else if (s.title) s.title = wrap(s.title);
+    if (s.title && typeof s.title !== "object") s.title = { text: s.title };
+    if (s.title) { s.title.text = wrap(s.title.text); s.title.fontSize = 15; s.title.subtitleFontSize = 12; }
+    s.config.axis = Object.assign({}, s.config.axis, { labelFontSize: 11, titleFontSize: 11 });
     if (s.facet && s.columns) {
-      s.columns = 1; s.spec.width = plot; s.spec.height = 170;
+      s.columns = 1; s.spec.width = plot;
     } else if (s.facet && s.facet.column) {
       var f = s.facet.column.field, seen = {};
       (s.datasets[s.data.name] || []).forEach(function (r) { seen[r[f]] = 1; });
@@ -466,7 +468,11 @@
     } else if (s.width != null) {
       s.width = plot;
     }
-    if (s.height > 280) s.height = 260;
+    // Shorter plots too, so a chart and its caption fit on one phone screen together.
+    var tall = Math.round(Math.max(150, Math.min(240, plot * 0.62)));
+    if (s.facet && s.columns) s.spec.height = Math.round(tall * 0.7);
+    else if (s.facet) { if (!(s.spec.height <= tall)) s.spec.height = tall; }
+    else if (!(s.height <= tall)) s.height = tall;
     return s;
   }
   function drawCharts(scr) {
@@ -516,18 +522,6 @@
     [].forEach.call(main.querySelectorAll(".screen > h3"), function (h) { h.style.marginBottom = ""; });
     main.style.paddingTop = basePad + "px";
     var pad = 6, gap = 12, a, r;
-    if (small.matches) {  // phones: the caption is a sheet fixed to the bottom
-      cap.style.top = cap.style.left = cap.style.width = "";
-      main.style.paddingBottom = (cap.offsetHeight + 24) + "px";
-      a = app.getBoundingClientRect(); r = t.getBoundingClientRect();
-      setSpot(r, a, pad);
-      if (scrollToo) {
-        var side = document.querySelector(".app-side");  // not sticky on short screens (phone held sideways)
-        var barBottom = getComputedStyle(side).position === "sticky" ? side.getBoundingClientRect().bottom : 0;
-        window.scrollBy({ top: r.top - barBottom - 14, behavior: "auto" });
-      }
-      return;
-    }
     main.style.paddingBottom = "";
     if (wide.matches) {  // wide screens: the caption is a column to the right of the part it explains
       a = app.getBoundingClientRect(); var mm = main.getBoundingClientRect();
@@ -557,8 +551,10 @@
     cap.style.left = Math.max(m.left - a.left + 12, Math.min(r.left - a.left, m.right - a.left - w - 12)) + "px";
     setSpot(r, a, pad);
     if (scrollToo) {
-      var c = top + a.top;  // caption top in the viewport
-      if (c < 0 || c > window.innerHeight * 0.4) window.scrollBy({ top: c - 16, behavior: "auto" });
+      // Caption top in the viewport. On phones it sits right above the part it explains, below the sticky chapter bar.
+      var c = top + a.top, side = document.querySelector(".app-side");
+      var bar = small.matches && getComputedStyle(side).position === "sticky" ? side.getBoundingClientRect().bottom : 0;
+      if (c < bar || c > window.innerHeight * 0.4) window.scrollBy({ top: c - bar - 16, behavior: "auto" });
     }
   }
   // After "Run the model": a short build animation, then the scores.
