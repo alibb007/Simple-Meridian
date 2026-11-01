@@ -432,6 +432,19 @@
     }
     return chartsReady;
   }
+  // Meridian's charts name Google's fonts, which most visitors don't have, so labels fell back to a serif.
+  // Keep those fonts first and fall back to the site's own.
+  var fonted = {};
+  function withFonts(o) {
+    if (!o || typeof o !== "object") return o;
+    for (var k in o) {
+      if (k === "datasets" || k === "data") continue;
+      if (/font$/i.test(k) && typeof o[k] === "string" && o[k].indexOf(",") < 0)
+        o[k] = '"' + o[k] + '", ' + (/display/i.test(o[k]) ? '"Red Hat Display"' : '"Red Hat Text"') + ", sans-serif";
+      else withFonts(o[k]);
+    }
+    return o;
+  }
   // Meridian sizes its charts for a desktop report (400-1,200 px wide). Shrunk onto a phone, their 12 px
   // labels end up 4-5 px tall, so where the column is narrow (phones, or next to the caption on a laptop)
   // redraw them at the width there is: one plot width,
@@ -442,13 +455,34 @@
     s.config = s.config || {};
     s.config.legend = Object.assign({}, s.config.legend, { orient: "bottom", direction: "horizontal", columns: 2,
                                                            layout: { bottom: { anchor: "start", direction: "vertical", margin: 4 } } });
+    // Pies and donuts get a square view; their radii are set in desktop pixels, so scale them to it.
+    var arc = false, arcR = 0, tf = plot < 210 ? 9 : plot < 240 ? 10 : 11;
     // Some charts set their own legend columns (6 across) or 8 date ticks; two columns and 4 ticks fit a phone.
+    // Channel-name axes keep every label.
+    // Bar thickness and label sizes are desktop pixels too: let bars take their band, keep labels small.
     (function walk(o) {
       if (!o || typeof o !== "object") return;
       if (o.legend && typeof o.legend === "object") { o.legend.columns = 2; o.legend.orient = "bottom"; }
-      if (o.axis && typeof o.axis === "object") { if (o.axis.tickCount > 4) o.axis.tickCount = 4; o.axis.labelOverlap = true; }
+      if (o.axis && typeof o.axis === "object" && (o.type === "temporal" || o.type === "quantitative")) { if (o.axis.tickCount > 4) o.axis.tickCount = 4; o.axis.labelOverlap = true; o.axis.labelSeparation = 8; }
+      var m = o.mark && typeof o.mark === "object" ? o.mark : null;
+      if (m && m.type === "bar") delete m.size;
+      if (m && m.type === "text") { if (m.size > 13) m.size = 13; if (m.fontSize > tf) m.fontSize = tf; if (m.dy < -14) m.dy = -14; }
+      if (m && m.type === "arc") arc = true;
+      // Bar value labels: two significant digits (6M, not 6.01M) so each fits over its bar.
+      if (typeof o.calculate === "string") o.calculate = o.calculate.replace(/'\.3~s'/g, "'.2~s'");
+      if (m) ["outerRadius", "radius"].forEach(function (k) { if (m[k] > arcR) arcR = m[k]; });
       for (var k in o) if (k !== "datasets" && k !== "data") walk(o[k]);
     })(s);
+    if (arc) {
+      plot = Math.min(plot + 40, arcR ? 2 * arcR + 8 : 340);  // no axes to leave room for; no bigger than on desktop
+      s.width = s.height = plot;
+      var f = arcR ? Math.min(1, (plot / 2 - 4) / arcR) : 1;
+      (function scale(o) {
+        if (!o || typeof o !== "object") return;
+        if (o.mark && typeof o.mark === "object") ["innerRadius", "outerRadius", "radius"].forEach(function (k) { if (o.mark[k]) o.mark[k] = Math.round(o.mark[k] * f); });
+        for (var k in o) if (k !== "datasets" && k !== "data") scale(o[k]);
+      })(s);
+    }
     // Vega never wraps a title, so a long one would set the chart's width: break it into lines.
     var wrap = function (t) {
       if (typeof t !== "string") return t;
@@ -473,7 +507,7 @@
     var tall = Math.round(Math.max(150, Math.min(240, plot * 0.62)));
     if (s.facet && s.columns) s.spec.height = Math.round(tall * 0.7);
     else if (s.facet) { if (!(s.spec.height <= tall)) s.spec.height = tall; }
-    else if (!(s.height <= tall)) s.height = tall;
+    else if (!arc && !(s.height <= tall)) s.height = tall;
     return s;
   }
   function drawCharts(scr) {
@@ -484,6 +518,7 @@
         if (box.classList.contains("drawn")) return;
         box.classList.add("drawn");
         var spec = window.SM_CHARTS[box.dataset.chart];
+        if (spec && !spec.table && !fonted[box.dataset.chart]) fonted[box.dataset.chart] = withFonts(spec);
         if (spec && spec.table) {  // the fit-score table
           var t = spec.table;
           box.innerHTML = "<table><thead><tr>" + t.columns.map(function (c) { return "<th>" + esc(c) + "</th>"; }).join("") + "</tr></thead><tbody>" +

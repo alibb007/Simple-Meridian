@@ -4,6 +4,7 @@ What changed in Simple Meridian, newest first. The [README](README.md#whats-new)
 
 ## 31 Oct 2026
 
+- **Charts on phones, second pass.** In "What made up total sales" and "Extra sales from the plan" the bars kept their desktop thickness, so on a phone they ran into each other and their labels. Bars now fit the space they have, and the plan chart shows every channel name (four were hidden) with shorter numbers (6M, not 6.01M). The "Share of sales" donut now fits its card, with the legend under it instead of on top of it. Chart text uses the site's font where Google's fonts aren't installed, instead of a serif.
 - **Tour caption on phones.** The caption now sits right above the part it explains instead of in a panel pinned to the bottom of the screen. Text is a little smaller on phones and charts are shorter, so a chart and its caption fit on one screen. The story no longer shows the note that its amounts are the demo's divided by 100.
 - **Guided tour site on phones.** Meridian's charts are now redrawn to fit the space they have instead of being shrunk, so their labels stay at full size (on a 375 px phone they used to shrink to 40%, about 5 px). Curve grids show one channel per row, and legends sit under the chart. The links, the privacy note and the author card now appear at the bottom of the page on phones. With the phone held sideways, the header scrolls away and the caption takes less of the screen.
 
