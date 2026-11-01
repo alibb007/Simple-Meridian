@@ -53,7 +53,7 @@ EXTRA = [
 
 
 _PIC = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "assets")
-_LOGO_PATH = os.path.join(_PIC, "logo.png")
+_LOGO_PATH = os.path.join(_PIC, "logo.svg")  # vector, from google/meridian
 _AVATAR_PATH = os.path.join(_PIC, "ali.png")
 
 
@@ -78,7 +78,7 @@ def avatar(size: int = 36) -> str:
 def logo(size: int = 36) -> str:
     """Simple Meridian logo on a white tile (reads on the navy sidebar too)."""
     return (f'<span class="sm-logo" style="width:{size}px;height:{size}px">'
-            f'<img src="data:image/png;base64,{_logo_b64()}" alt="Simple Meridian logo"></span>')
+            f'<img src="data:image/svg+xml;base64,{_logo_b64()}" alt="Simple Meridian logo"></span>')
 
 
 def icon(name: str, size: int = 20, color: str | None = None) -> str:

@@ -24,6 +24,7 @@ Simple Meridian is MIT-licensed (see `LICENSE`). It depends on the open-source c
 | pandera | 0.35.0 | MIT | https://github.com/unionai-oss/pandera |
 | openpyxl | 3.1.5 | MIT | https://foss.heptapod.net/openpyxl/openpyxl |
 | XlsxWriter | 3.3.0 | BSD-2-Clause | https://github.com/jmcnamara/XlsxWriter |
+| Meridian logo (`assets/logo.svg`, `docs/assets/logo.svg`, and the PNGs rendered from it) | 2.1.0 | Apache-2.0 | https://github.com/google/meridian/blob/main/meridian/templates/logo.html |
 | Material Symbols (icons, loaded by Streamlit) | | Apache-2.0 | https://github.com/google/material-design-icons |
 | Red Hat Display / Text / Mono (fonts, served from `static/fonts/`, via @fontsource) | 5.3.0 | SIL Open Font License 1.1 | https://github.com/RedHatOfficial/RedHatFont |
 | Vega (live demo site, `docs/assets/vendor/`) | 6.2.0 | BSD-3-Clause | https://github.com/vega/vega |

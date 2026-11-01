@@ -186,11 +186,13 @@
 
   var SCREENS = {
     home: '<div class="intro">' +
-      '<svg class="mark" viewBox="0 0 512 512" role="img" aria-label="Simple Meridian logo">' +
-      '<line class="mk-mid" x1="315" y1="170" x2="268" y2="330" stroke="#AECBFA" stroke-width="58" stroke-linecap="round"/>' +
-      '<line class="mk-a" x1="166" y1="168" x2="262" y2="334" stroke="#4285F4" stroke-width="96" stroke-linecap="round"/>' +
-      '<line class="mk-b" x1="328" y1="168" x2="424" y2="334" stroke="#1967D2" stroke-width="96" stroke-linecap="round"/>' +
-      '<circle class="mk-dot" cx="87" cy="331" r="54" fill="#174EA6"/></svg>' +
+      // Meridian's own logo (google/meridian, logo.html): its bars are 25-wide round-capped strokes between
+      // these points, so they can draw themselves in.
+      '<svg class="mark" viewBox="35.3 35 122 122" role="img" aria-label="Simple Meridian logo">' +
+      '<line class="mk-mid" x1="115.66" y1="74.2" x2="99.38" y2="117.82" pathLength="190" stroke="#AECBFA" stroke-width="25" stroke-linecap="round"/>' +
+      '<line class="mk-a" x1="74.11" y1="74.2" x2="99.38" y2="117.82" pathLength="190" stroke="#4285F4" stroke-width="25" stroke-linecap="round"/>' +
+      '<line class="mk-b" x1="115.66" y1="74.2" x2="140.93" y2="117.82" pathLength="190" stroke="#1967D2" stroke-width="25" stroke-linecap="round"/>' +
+      '<circle class="mk-dot" cx="53.2" cy="116.32" r="14" fill="#174EA6"/></svg>' +
       "<h1>Google Meridian,<br>in plain words.</h1>" +
       '<p class="lede">See which ads bring in your sales and where the next dollar should go.<br>' +
       "A guided tour on a made-up shop, then run it on your own data.</p>" +

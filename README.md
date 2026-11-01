@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/logo.png" alt="Simple Meridian logo" width="84">
+<img src="assets/logo.svg" alt="Simple Meridian logo" width="84">
 
 # Simple Meridian
 
