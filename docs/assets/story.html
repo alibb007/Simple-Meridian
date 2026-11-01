@@ -416,6 +416,15 @@
   draw();  // the first frame right away, before the first animation frame arrives
   requestAnimationFrame(tick);
 })();
+// Tell the page that embeds this story how tall it is, so the frame can fit it. A message works even when
+// the page is opened from disk, where the browser lets it read nothing inside the frame.
+(function () {
+  var box = document.getElementById("mg");  // the story itself; the document is never shorter than the frame, so it cannot say when to shrink
+  var tell = function () { try { parent.postMessage({ smStory: "height", h: Math.ceil(box.getBoundingClientRect().height) }, "*"); } catch (e) {} };
+  window.addEventListener("load", tell); window.addEventListener("resize", tell);
+  if ("ResizeObserver" in window) new ResizeObserver(tell).observe(document.body);
+  tell();
+})();
 </script>
 </body>
 </html>

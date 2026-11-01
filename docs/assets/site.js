@@ -205,7 +205,7 @@
       'rel="noopener noreferrer">first release of Simple Meridian</a> in April 2025 on Meridian 1.0.6: upload, fit, charts and a budget ' +
       "optimizer. Today it runs Meridian 2.1.0 and adds GeoX lift tests, this guided tour and a new design.</p></div>",
     story: '<div class="storypage"><div class="kick">The story</div>' +
-      '<iframe class="motion" data-src="assets/story.html?v=862591a387" title="Animated story: a shop works out where its ad budget should go"></iframe>' +
+      '<iframe class="motion" data-src="assets/story.html?v=71cb45957a" title="Animated story: a shop works out where its ad budget should go"></iframe>' +
       '<div class="starts"><button class="btn pill pill-gold" id="t-start2" type="button">Start the Simple Meridian guided tour</button>' +
       '<button class="btn pill pill-light" id="t-home" type="button">Back to the start</button></div></div>',
     upload: '<div class="kick">Step 1 of 3</div><h3>Data &amp; model</h3>' +
@@ -708,6 +708,11 @@
     try { var w = motion.contentWindow; if (w && "ResizeObserver" in w) new w.ResizeObserver(fitMotion).observe(motion.contentDocument.body); } catch (e) {}
   });
   window.addEventListener("resize", fitMotion);
+  // Opened from disk, the browser hides the frame's document from this page, so the story sends its height instead.
+  window.addEventListener("message", function (e) {
+    var d = e.data;
+    if (d && d.smStory === "height" && e.source === motion.contentWindow && d.h > 0) motion.style.height = d.h + "px";
+  });
   var startTour = function () { go(0, true); if (!CHART_IMAGES) loadCharts(); };
   document.getElementById("t-start").addEventListener("click", startTour);
   document.getElementById("t-start2").addEventListener("click", startTour);
