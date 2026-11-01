@@ -201,11 +201,11 @@
       '<button class="btn pill pill-gold" id="t-start" type="button">Start the Simple Meridian guided tour</button></div>' +
       '<a class="by" href="https://www.linkedin.com/in/alibarfibafghi/" target="_blank" rel="noopener noreferrer">' +
       '<img src="assets/ali.png" alt="" width="52" height="52"><span><small>Built by</small><b>Ali Barfi Bafghi</b></span></a>' +
-      '<p class="vnote">Updated 27 Oct 2026. I built the <a href="https://github.com/alibb007/Simple-Meridian/tree/5438c16" target="_blank" ' +
+      '<p class="vnote">Updated 1 Nov 2026. I built the <a href="https://github.com/alibb007/Simple-Meridian/tree/5438c16" target="_blank" ' +
       'rel="noopener noreferrer">first release of Simple Meridian</a> in April 2025 on Meridian 1.0.6: upload, fit, charts and a budget ' +
       "optimizer. Today it runs Meridian 2.1.0 and adds GeoX lift tests, this guided tour and a new design.</p></div>",
     story: '<div class="storypage"><div class="kick">The story</div>' +
-      '<iframe class="motion" data-src="assets/story.html?v=9fc57e1992" title="Animated story: a shop works out where its ad budget should go"></iframe>' +
+      '<iframe class="motion" data-src="assets/story.html?v=862591a387" title="Animated story: a shop works out where its ad budget should go"></iframe>' +
       '<div class="starts"><button class="btn pill pill-gold" id="t-start2" type="button">Start the Simple Meridian guided tour</button>' +
       '<button class="btn pill pill-light" id="t-home" type="button">Back to the start</button></div></div>',
     upload: '<div class="kick">Step 1 of 3</div><h3>Data &amp; model</h3>' +
@@ -497,7 +497,9 @@
     if (s.title) { s.title.text = wrap(s.title.text); s.title.fontSize = 15; s.title.subtitleFontSize = 12; }
     s.config.axis = Object.assign({}, s.config.axis, { labelFontSize: 11, titleFontSize: 11 });
     if (s.facet && s.columns) {
-      s.columns = 1; s.spec.width = plot;
+      // Phones: one panel per row. Wider columns: two across, each panel its own axes (about 70 px of them).
+      var cols = plot >= 560 ? 2 : 1;
+      s.columns = cols; s.spec.width = cols === 1 ? plot : Math.floor(plot / 2) - 70;
     } else if (s.facet && s.facet.column) {
       var f = s.facet.column.field, seen = {};
       (s.datasets[s.data.name] || []).forEach(function (r) { seen[r[f]] = 1; });
@@ -531,11 +533,14 @@
         var avail = box.parentElement.clientWidth - 16, embed = function (sp) {
           return vegaEmbed(box, sp, { actions: false, renderer: "svg", ast: true, expr: vegaInterpreter.expressionInterpreter });
         };
-        var drawn = avail >= 640 ? embed(spec) : embed(fitSpec(spec, avail - 80)).then(function () {
-          // Axis labels and legends add width the plot setting doesn't cover; take it off the plot and draw once more.
-          var svg = box.querySelector("svg"), extra = svg ? +svg.getAttribute("width") - avail : 0;
-          if (extra > 2) return embed(fitSpec(spec, avail - 80 - extra));
-        });
+        // Axis labels and legends add width the plot setting doesn't cover; take it off the plot and draw once more.
+        var overflow = function () { var svg = box.querySelector("svg"); return svg ? +svg.getAttribute("width") - avail : 0; };
+        var refit = function () { var extra = overflow(); if (extra > 2) return embed(fitSpec(spec, avail - 80 - extra)); };
+        // Wide column: draw as Meridian made it, but a chart wider than the column (the 6-panel curve grids are
+        // 1,500 px) would be shrunk by CSS to unreadable labels, so refit those to the column too.
+        var drawn = avail >= 640
+          ? embed(spec).then(function () { if (overflow() > 2) return embed(fitSpec(spec, avail - 80)).then(refit); })
+          : embed(fitSpec(spec, avail - 80)).then(refit);
         drawn.then(function () { place(false); })
           .catch(function () { box.innerHTML = '<div class="vload">This chart could not be drawn.</div>'; });
       });
@@ -698,8 +703,11 @@
   }
   motion.addEventListener("load", function () {
     fitMotion();
-    try { if ("ResizeObserver" in window) new ResizeObserver(fitMotion).observe(motion.contentDocument.body); } catch (e) {}
+    // The observer must come from the frame's own window: one made here never fires for the frame's body,
+    // so a window that got wider after the story loaded kept a frame too short for it.
+    try { var w = motion.contentWindow; if (w && "ResizeObserver" in w) new w.ResizeObserver(fitMotion).observe(motion.contentDocument.body); } catch (e) {}
   });
+  window.addEventListener("resize", fitMotion);
   var startTour = function () { go(0, true); if (!CHART_IMAGES) loadCharts(); };
   document.getElementById("t-start").addEventListener("click", startTour);
   document.getElementById("t-start2").addEventListener("click", startTour);

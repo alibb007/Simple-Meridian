@@ -63,10 +63,8 @@
   var WEEKS = D ? D.fit.map(function (r) { return r.actual; }) : null;
   var COLOR = { TV: "#2A78D6", Radio: "#EB6834", Display: "#1BAF7A", Search: "#EDA100", Social: "#E87BA4", Email: "#008300" };
   ROI.sort(function (a, b) { return b.v - a.v; });
-  // The demo company is large. The story tells it as a smaller shop: every dollar amount is the demo's divided by 100.
-  // Returns per $1 and percentages are the demo's own.
-  var SCALE = 0.01;
-  var M = function (x) { var v = x * SCALE; return v >= 1e6 ? "$" + (v / 1e6).toFixed(2) + "M" : "$" + Math.round(v / 1e3) + "K"; };
+  // Dollar amounts are the demo model's own, so the story and the guided tour tell the same numbers.
+  var M = function (v) { return v >= 1e6 ? "$" + (v / 1e6).toFixed(1) + "M" : "$" + Math.round(v / 1e3) + "K"; };
   var BUDGET = M(T.budget_before), GAIN = T.outcome_after - T.outcome_before, PCT = GAIN / T.outcome_before * 100;
   var best = ROI[0], worst = ROI[ROI.length - 1];
   // Budget change per channel in the plan, biggest raise first. The caption reads its numbers from here too.
